@@ -1,0 +1,3 @@
+django
+django_plotly_dash
+django-bootstrap-v5
