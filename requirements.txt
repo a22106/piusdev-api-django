@@ -1,3 +1,17 @@
+# Core
 django
+python-dotenv
+str2bool
+
+# UI
+django-admin-berry
 django_plotly_dash
 django-bootstrap-v5
+
+# Deployment
+whitenoise
+gunicorn
+
+# DB Layer
+# psycopg2-binary
+# mysqlclient
