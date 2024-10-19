@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,9 +15,25 @@
         <button type="submit">Generate QR Code</button>
     </form>
 
-    {% load qr_code %}
     {% if qr_text %}
-    {% qr_from_text qr_text size="T" %}
+    <h2>Generated QR Code:</h2>
+    <img id="qr-code" alt="QR Code">
+    <p>QR Code for: {{ qr_text }}</p>
+    <script>
+        fetch("{% url 'qr_image' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: "text={{ qr_text|urlencode }}"
+        })
+        .then(response => response.blob())
+        .then(blob => {
+            const img = document.getElementById("qr-code");
+            img.src = URL.createObjectURL(blob);
+        });
+    </script>
     {% endif %}
 
 </body>
