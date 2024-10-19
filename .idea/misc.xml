@@ -6,5 +6,5 @@
     <option name="pathToExecutable" value="C:\Users\bk221\anaconda3\Scripts\black.exe" />
     <option name="sdkName" value="py312" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="py312" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.12 (investment_calculator)" project-jdk-type="Python SDK" />
 </project>

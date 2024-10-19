@@ -14,3 +14,4 @@ def index(request):
         logger.info(f"POST request: {request.POST}")
         qr_text = request.POST.get("url")
     return render(request, "qr/index.html", {"qr_text": qr_text})
+
