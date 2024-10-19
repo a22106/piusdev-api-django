@@ -18,7 +18,7 @@ if not SECRET_KEY:
     SECRET_KEY = "".join(random.choice(string.ascii_lowercase) for i in range(32))
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = str2bool(os.environ.get("DEBUG"))
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
