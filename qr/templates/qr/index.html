@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h1>QR Code Generator</h1>
+    <form action="/" method="post">
+        <label>
+            {% csrf_token %}
+            <input type="text" name="url" placeholder="Enter URL" required>
+        </label>
+        <button type="submit">Generate QR Code</button>
+    </form>
+
+    {% load qr_code %}
+    {% if qr_text %}
+    {% qr_from_text qr_text size="T" %}
+    {% endif %}
+
+</body>
+</html>

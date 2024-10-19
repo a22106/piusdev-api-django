@@ -7,10 +7,15 @@ str2bool
 django-admin-berry
 django_plotly_dash
 django-bootstrap-v5
+django-qr-code
 
 # Deployment
 whitenoise
 gunicorn
+
+# packages
+qrcode[pil]
+Pillow
 
 # DB Layer
 # psycopg2-binary
