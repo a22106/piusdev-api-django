@@ -9,6 +9,8 @@ django-admin-berry
 django_plotly_dash
 django-bootstrap-v5
 django-qr-code
+djangorestframework
+django-debug-toolbar
 
 # Deployment
 whitenoise
