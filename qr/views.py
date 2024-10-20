@@ -11,6 +11,8 @@ import logging
 import qrcode
 from io import BytesIO
 
+from rest_framework.views import APIView
+
 logger = logging.getLogger(__name__)
 
 
@@ -39,16 +41,6 @@ class QrImageView(View):
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
-    @swagger_auto_schema(
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            required=["text"],
-            properties={
-                "text": openapi.Schema(type=openapi.TYPE_STRING, description="QR Text")
-            },
-        ),
-        responses={200: openapi.Response("QR Code Image (PNG)")},
-    )
     def post(self, request, *args, **kwargs):
         qr_text = request.POST.get("text", "Hello World")
         logger.info(f"QR Text: {qr_text}")
@@ -68,3 +60,54 @@ class QrImageView(View):
         buffer.seek(0)
 
         return HttpResponse(buffer.getvalue(), content_type="image/png")
+
+
+class QrApiView(APIView):
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["text"],
+            properties={
+                "text": openapi.Schema(type=openapi.TYPE_STRING, description="QR Text")
+            },
+        ),
+        responses={200: openapi.Response("QR Code Image (PNG)")},
+    )
+    def post(self, request):
+        qr_text = request.data.get("text", "Hello World")
+        logger.info(f"QR Text: {qr_text}")
+
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(qr_text)
+        qr.make(fit=True)
+        img = qr.make_image(fill="black", back_color="white")
+
+        buffer = BytesIO()
+        img.save(buffer, "PNG")
+        buffer.seek(0)
+
+        return HttpResponse(buffer.getvalue(), content_type="image/png")
+
+
+# swagger endpoint response {"detail": "Hello World"}
+class HelloWorldView(APIView):
+    @swagger_auto_schema(
+        operation_description="This is a test view",
+        responses={200: openapi.Response("Hello World")},
+    )
+    def get(self, request):
+        return HttpResponse("Hello World")
+
+
+class HelloDjangoView(APIView):
+    @swagger_auto_schema(
+        operation_description="This is a test view",
+        responses={200: openapi.Response("Hello Django")},
+    )
+    def post(self, request):
+        return HttpResponse("Hello Django")
