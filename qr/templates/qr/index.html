@@ -1,11 +1,31 @@
-
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>QR Code Generator</title>
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    <link rel="icon" type="image/x-icon"  href="{% static 'images/favicon.ico' %}">
 </head>
 <body>
+{# navbar #}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'index' %}">QR Code Generator</a>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="{% url 'index' %}">Home</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+{# content #}
+<div class="container">
     <h1>QR Code Generator</h1>
     <form action="/" method="post">
         <label>
@@ -16,25 +36,25 @@
     </form>
 
     {% if qr_text %}
-    <h2>Generated QR Code:</h2>
-    <img id="qr-code" alt="QR Code">
-    <p>QR Code for: {{ qr_text }}</p>
-    <script>
-        fetch("{% url 'qr_image' %}", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-                "X-CSRFToken": "{{ csrf_token }}"
-            },
-            body: "text={{ qr_text|urlencode }}"
-        })
-        .then(response => response.blob())
-        .then(blob => {
-            const img = document.getElementById("qr-code");
-            img.src = URL.createObjectURL(blob);
-        });
-    </script>
+        <h2>Generated QR Code:</h2>
+        <img id="qr-code" alt="QR Code" src="">
+        <p>QR Code for: {{ qr_text }}</p>
+        <script>
+            fetch("{% url 'qr_image' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: "text={{ qr_text|urlencode }}"
+            })
+                .then(response => response.blob())
+                .then(blob => {
+                    const img = document.getElementById("qr-code");
+                    img.src = URL.createObjectURL(blob);
+                });
+        </script>
     {% endif %}
-
+</div>
 </body>
 </html>
