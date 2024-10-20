@@ -21,7 +21,7 @@ if not SECRET_KEY:
 DEBUG = os.environ.get("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = [
-    "safe-ocean-38167-50605bade16a.herokuapp.com",
+    "piusdev-qrcode-9f0c9f745f56.herokuapp.com/",
     "qrcode.piusdev.com",
     "localhost",
     "127.0.0.1",
