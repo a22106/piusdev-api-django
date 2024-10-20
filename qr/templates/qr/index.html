@@ -15,11 +15,11 @@
 {# navbar #}
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container">
-        <a class="navbar-brand" href="{% url 'index' %}">QR Code Generator</a>
+        <a class="navbar-brand" href="{% url 'qr:index' %}">QR Code Generator</a>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item active">
-                    <a class="nav-link" href="{% url 'index' %}">Home</a>
+                    <a class="nav-link" href="{% url 'qr:index' %}">Home</a>
                 </li>
             </ul>
         </div>
@@ -42,7 +42,7 @@
         <img id="qr-code" alt="QR Code" src="">
         <p>QR Code for: {{ qr_text }}</p>
         <script>
-            fetch("{% url 'qr_image' %}", {
+            fetch("{% url 'qr:qr_image' %}", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded",

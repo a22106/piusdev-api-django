@@ -1,9 +1,11 @@
 from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include, re_path
+from django.views.generic import RedirectView
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -16,21 +18,23 @@ schema_view = get_schema_view(
     ),
     public=True,
     permission_classes=[permissions.AllowAny],
-    patterns=[path("qr/", include("qr.urls"))],
+    patterns=[
+        path("", include("qr.urls")),
+    ],
 )
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path("pius_hwang/", admin.site.urls),
     path("", include("qr.urls")),
 ]
 
 if settings.DEBUG:
     import debug_toolbar
 
-    # Debug Toolbar 추가
+    # Debug Toolbar addition
     urlpatterns += [path("__debug__/", include(debug_toolbar.urls))]
 
-    # DRF-YASG(Swagger, ReDoc) 추가
+    # DRF-YASG (Swagger, ReDoc) addition
     urlpatterns += [
         re_path(
             r"^swagger(?P<format>\.json|\.yaml)$",
