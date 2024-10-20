@@ -52,7 +52,9 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "bootstrap5",
     "qr",
-    "qr_code",
+    "drf_yasg",
+    "rest_framework",
+    "debug_toolbar",
 ]
 
 MIDDLEWARE = [
@@ -64,6 +66,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 # STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
