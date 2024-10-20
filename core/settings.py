@@ -22,6 +22,7 @@ DEBUG = os.environ.get("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = [
     "safe-ocean-38167-50605bade16a.herokuapp.com",
+    "qrcode.piusdev.com",
     "localhost",
     "127.0.0.1",
 ]
