@@ -52,7 +52,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "bootstrap5",
     "qr",
-    "qr_code",
+    "rest_framework",
+    "drf_yasg",
 ]
 
 MIDDLEWARE = [
