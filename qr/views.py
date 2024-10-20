@@ -1,6 +1,5 @@
 from django.views import View
 from django.views.generic import TemplateView
-from django.shortcuts import render
 from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_http_methods
@@ -8,8 +7,6 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
 import logging
-import qrcode
-from io import BytesIO
 
 from rest_framework.views import APIView
 
