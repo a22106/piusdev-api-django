@@ -2,14 +2,16 @@
 django
 python-dotenv
 str2bool
+
+# Swagger
 drf-yasg
+djangorestframework
 
 # UI
 django-admin-berry
 django_plotly_dash
 django-bootstrap-v5
 django-qr-code
-djangorestframework
 django-debug-toolbar
 
 # Deployment
@@ -19,6 +21,10 @@ gunicorn
 # packages
 qrcode[pil]
 Pillow
+
+# Database
+dj-database-url
+psycopg2-binary
 
 # DB Layer
 # psycopg2-binary
