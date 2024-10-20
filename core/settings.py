@@ -1,6 +1,7 @@
 import os, random, string
 from pathlib import Path
 
+import dj_database_url
 from dotenv import load_dotenv
 from str2bool import str2bool
 
@@ -17,7 +18,6 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 if not SECRET_KEY:
     SECRET_KEY = "".join(random.choice(string.ascii_lowercase) for i in range(32))
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = [
@@ -97,31 +97,13 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DB_ENGINE = os.getenv("DB_ENGINE", None)
-DB_USERNAME = os.getenv("DB_USERNAME", None)
-DB_PASS = os.getenv("DB_PASS", None)
-DB_HOST = os.getenv("DB_HOST", None)
-DB_PORT = os.getenv("DB_PORT", None)
-DB_NAME = os.getenv("DB_NAME", None)
-
-if DB_ENGINE and DB_NAME and DB_USERNAME:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends." + DB_ENGINE,
-            "NAME": DB_NAME,
-            "USER": DB_USERNAME,
-            "PASSWORD": DB_PASS,
-            "HOST": DB_HOST,
-            "PORT": DB_PORT,
-        },
-    }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": "db.sqlite3",
-        }
-    }
+DATABASES = {
+    "default": dj_database_url.config(
+        default=os.environ.get("DATABASE_URL"),
+        conn_max_age=600,
+        ssl_require=True,
+    )
+}
 
 
 # Password validation
