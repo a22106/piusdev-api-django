@@ -1,7 +1,8 @@
 from django.urls import path
-from . import views
+from .views import IndexView, QrImageView
 
 urlpatterns = [
-    path("", views.index, name="index"),
-    path("qr_image/", views.qr_image, name="qr_image"),
+    path("", IndexView.as_view(), name="index"),
+    path("qr_image/", QrImageView.as_view(), name="qr_image"),
+    path("v1/qr_image/", QrImageView.as_view(), name="qr_image_v1"),
 ]
