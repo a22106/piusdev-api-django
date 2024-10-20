@@ -13,6 +13,8 @@ from io import BytesIO
 
 from rest_framework.views import APIView
 
+from qr.utils.qr_utils import generate_qr_image
+
 logger = logging.getLogger(__name__)
 
 
@@ -43,23 +45,7 @@ class QrImageView(View):
 
     def post(self, request, *args, **kwargs):
         qr_text = request.POST.get("text", "Hello World")
-        logger.info(f"QR Text: {qr_text}")
-
-        qr = qrcode.QRCode(
-            version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_L,
-            box_size=10,
-            border=4,
-        )
-        qr.add_data(qr_text)
-        qr.make(fit=True)
-        img = qr.make_image(fill="black", back_color="white")
-
-        buffer = BytesIO()
-        img.save(buffer, "PNG")
-        buffer.seek(0)
-
-        return HttpResponse(buffer.getvalue(), content_type="image/png")
+        return generate_qr_image(qr_text)  # Utilized the utility function
 
 
 class QrApiView(APIView):
@@ -75,23 +61,7 @@ class QrApiView(APIView):
     )
     def post(self, request):
         qr_text = request.data.get("text", "Hello World")
-        logger.info(f"QR Text: {qr_text}")
-
-        qr = qrcode.QRCode(
-            version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_L,
-            box_size=10,
-            border=4,
-        )
-        qr.add_data(qr_text)
-        qr.make(fit=True)
-        img = qr.make_image(fill="black", back_color="white")
-
-        buffer = BytesIO()
-        img.save(buffer, "PNG")
-        buffer.seek(0)
-
-        return HttpResponse(buffer.getvalue(), content_type="image/png")
+        return generate_qr_image(qr_text)  # Utilized the utility function
 
 
 # swagger endpoint response {"detail": "Hello World"}
