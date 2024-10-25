@@ -11,7 +11,7 @@ app_name = "qr"
 schema_view = get_schema_view(
     openapi.Info(
         title="QR Code API",
-        default_version='v1',
+        default_version="v1",
         description="API documentation for QR Code generator",
         terms_of_service="https://www.google.com/policies/terms/",
         contact=openapi.Contact(email="contact@qr.local"),
@@ -24,6 +24,7 @@ schema_view = get_schema_view(
 urlpatterns = [
     path("", IndexView.as_view(), name="index"),
     path("qr_image/", QrImageView.as_view(), name="qr_image"),
+    path("api/qr/", QrApiView.as_view(), name="qr_api"),
     path("v1/qr_image/", QrApiView.as_view(), name="qr_image_v1"),
     path("api/", schema_view.with_ui("redoc", cache_timeout=0), name="api"),
 ]
