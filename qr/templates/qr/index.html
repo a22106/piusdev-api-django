@@ -1,37 +1,10 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ title }}</title>
-    <meta name="description" content="{{ description }}">
-    <meta name="keywords" content="{{ keywords }}">
-    {% load bootstrap5 %}
-    {% bootstrap_css %}
-    {% bootstrap_javascript %}
-    <link rel="icon" type="image/x-icon"  href="{% static 'images/favicon.ico' %}">
-</head>
-<body>
-{# navbar #}
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="container">
-        <a class="navbar-brand" href="{% url 'qr:index' %}">QR Code Generator</a>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
-                    <a class="nav-link" href="{% url 'qr:index' %}">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'qr:api' %}">API Documentation</a> <!-- Updated Link -->
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
+{% extends 'base.html' %}
 
-{# content #}
-<div class="container">
-    <!-- Segmented Button Group for QR Code Type -->
+{% block title %}{{ title }}{% endblock %}
+{% block description %}{{ description }}{% endblock %}
+{% block keywords %}{{ keywords }}{% endblock %}
+
+{% block content %}
     <div class="mb-3">
         <label class="form-label d-block">Select QR Code Type:</label>
         <div class="btn-group" role="group" aria-label="QR Code Type">
@@ -56,34 +29,203 @@
     </div>
 
     <h1>QR Code Generator</h1>
-    <form action="/" method="post">
-        <label>
-            {% csrf_token %}
-            <input type="text" name="url" placeholder="Enter URL" required>
-        </label>
+    <form action="{% url 'qr:index' %}" method="post" id="qr-form">
+        {% csrf_token %}
+
+        <!-- URL Input Section -->
+        <div id="input-url" class="input-section">
+            <label>
+                <input type="text" name="url" placeholder="Enter URL" required>
+            </label>
+        </div>
+
+        <!-- Email Input Section -->
+        <div id="input-email" class="input-section" style="display: none;">
+            <label>
+                Email: <input type="email" name="email" placeholder="Enter Email" required>
+            </label><br>
+            <label>
+                Subject: <input type="text" name="subject" placeholder="Enter Subject">
+            </label><br>
+            <label>
+                Body: <input type="text" name="body" placeholder="Enter Body">
+            </label>
+        </div>
+
+        <!-- Text Input Section -->
+        <div id="input-text" class="input-section" style="display: none;">
+            <label>
+                Text: <input type="text" name="text" placeholder="Enter Text" required>
+            </label>
+        </div>
+
+        <!-- Phone Number Input Section -->
+        <div id="input-phone" class="input-section" style="display: none;">
+            <label>
+                Phone Number: <input type="text" name="phone" placeholder="Enter Phone Number" required>
+            </label>
+        </div>
+
+        <!-- VCard Input Section -->
+        <div id="input-vcard" class="input-section" style="display: none;">
+            <label>
+                First Name: <input type="text" name="first_name" placeholder="First Name" required>
+            </label><br>
+            <label>
+                Last Name: <input type="text" name="last_name" placeholder="Last Name" required>
+            </label><br>
+            <label>
+                Email: <input type="email" name="vcard_email" placeholder="Email" required>
+            </label><br>
+            <label>
+                Phone (Mobile): <input type="text" name="vcard_mobile" placeholder="Mobile Phone">
+            </label><br>
+            <label>
+                Organization: <input type="text" name="organization" placeholder="Organization">
+            </label><br>
+            <label>
+                Title: <input type="text" name="title" placeholder="Title">
+            </label><br>
+            <label>
+                Address: <input type="text" name="address" placeholder="Address">
+            </label><br>
+            <label>
+                Label: <input type="text" name="label" placeholder="Label">
+            </label><br>
+            <label>
+                URL: <input type="url" name="vcard_url" placeholder="URL">
+            </label><br>
+            <label>
+                Note: <input type="text" name="note" placeholder="Note">
+            </label>
+        </div>
+
+        <!-- WiFi Input Section -->
+        <div id="input-wifi" class="input-section" style="display: none;">
+            <label>
+                SSID: <input type="text" name="ssid" placeholder="WiFi SSID" required>
+            </label><br>
+            <label>
+                Password: <input type="password" name="password" placeholder="WiFi Password" required>
+            </label><br>
+            <label>
+                Encryption Type:
+                <select name="encryption" required>
+                    <option value="WPA">WPA</option>
+                    <option value="WEP">WEP</option>
+                    <option value="nopass">None</option>
+                </select>
+            </label>
+        </div>
+
         <button type="submit">Generate QR Code</button>
     </form>
 
-    {% if qr_text %}
+    <div id="qr-result" style="display: none;">
         <h2>Generated QR Code:</h2>
         <img id="qr-code" alt="QR Code" src="">
-        <p>QR Code for: {{ qr_text }}</p>
-        <script>
-            fetch("{% url 'qr:qr_image' %}", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                    "X-CSRFToken": "{{ csrf_token }}"
-                },
-                body: "text={{ qr_text|urlencode }}"
-            })
-                .then(response => response.blob())
-                .then(blob => {
-                    const img = document.getElementById("qr-code");
-                    img.src = URL.createObjectURL(blob);
+        <p id="qr-text">QR Code for:</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const qrTypeRadios = document.querySelectorAll('input[name="qr_type"]');
+            const inputSections = document.querySelectorAll('.input-section');
+            const form = document.getElementById("qr-form");
+            const qrCodeImg = document.getElementById("qr-code");
+            const qrTextP = document.getElementById("qr-text");
+            const qrResult = document.getElementById("qr-result");
+
+            function showRelevantInput() {
+                const selectedType = document.querySelector('input[name="qr_type"]:checked').value;
+
+                inputSections.forEach(section => {
+                    section.style.display = 'none';
                 });
-        </script>
-    {% endif %}
-</div>
-</body>
-</html>
+
+                const activeSection = document.getElementById(`input-${selectedType}`);
+                if (activeSection) {
+                    activeSection.style.display = 'block';
+
+                    // Set required attributes based on selected type
+                    const inputs = activeSection.querySelectorAll('input, select');
+                    inputs.forEach(input => {
+                        if (selectedType === 'url') {
+                            input.required = true;
+                        } else if (selectedType === 'vcard') {
+                            if (['first_name', 'last_name', 'vcard_email'].includes(input.name)) {
+                                input.required = true;
+                            } else {
+                                input.required = false;
+                            }
+                        } else {
+                            input.required = true;
+                        }
+                    });
+                }
+            }
+
+            qrTypeRadios.forEach(radio => {
+                radio.addEventListener('change', showRelevantInput);
+            });
+
+            // Initialize the form to show the default selected input
+            showRelevantInput();
+
+            // Handle form submission
+            form.addEventListener("submit", function(event) {
+                event.preventDefault();
+                const formData = new FormData(form);
+                fetch("{% url 'qr:qr_image' %}", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: formData
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.text().then(text => { throw new Error(text) });
+                        }
+                        return response.blob();
+                    })
+                    .then(blob => {
+                        qrCodeImg.src = URL.createObjectURL(blob);
+                        qrResult.style.display = 'block';
+
+                        // Display appropriate text based on QR type
+                        const selectedType = formData.get("qr_type");
+                        let displayText = "";
+
+                        switch(selectedType) {
+                            case "url":
+                                displayText = formData.get("url");
+                                break;
+                            case "email":
+                                displayText = formData.get("email");
+                                break;
+                            case "text":
+                                displayText = formData.get("text");
+                                break;
+                            case "phone":
+                                displayText = formData.get("phone");
+                                break;
+                            case "vcard":
+                                displayText = `${formData.get("first_name")} ${formData.get("last_name")}`;
+                                break;
+                            case "wifi":
+                                displayText = formData.get("ssid");
+                                break;
+                            default:
+                                displayText = "Unknown";
+                        }
+                        qrTextP.textContent = `QR Code for: ${displayText}`;
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert(`Error generating QR Code: ${error.message}`);
+                    });
+            });
+        });
+    </script>
+{% endblock %}
