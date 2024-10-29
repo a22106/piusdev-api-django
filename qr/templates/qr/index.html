@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}{{ title }}{% endblock %}
 {% block description %}{{ description }}{% endblock %}
@@ -126,8 +127,13 @@
         <img id="qr-code" alt="QR Code" src="">
         <p id="qr-text">QR Code for:</p>
     </div>
+    
+{#    <script src="{% static 'js/index.js' %}"></script>#}
 
     <script>
+    // selected type enum class url, email, text, phone, vcard, wifi
+
+    
         $(document).ready(function() {
             const $qrTypeRadios = $('input[name="qr_type"]');
             const $inputSections = $('.input-section');
@@ -152,7 +158,11 @@
                 const $activeSection = $(`#input-${selectedType}`);
                 if ($activeSection.length) {
                     $activeSection.show();
-                    $activeSection.find('input, select').prop('required', true);
+                    if (selectedType === "url" || selectedType === "text") {
+                        $activeSection.find('input').prop('required', true);
+                    } else if (selectedType === "email") {
+                        $activeSection.find('input[name="email"]').prop('required', true);
+                    }
                 }
             }
 
@@ -177,12 +187,30 @@
                             responseType: 'blob'
                         },
                         success: function(blob) {
-                            console.log('QR Code Blob:', blob);
-                            const imageUrl = URL.createObjectURL(blob); // error occurs
-                            console.log('QR Code Image URL:', imageUrl);
+                            const imageUrl = URL.createObjectURL(blob);
                             $qrCodeImg.attr('src', imageUrl);
                             $qrResult.show();
                             $qrTextP.text(`QR Code for: ${url}`);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error:', error);
+                            alert(`Error generating QR Code: ${error}`);
+                        }
+                    });
+                } else if (selectedType === "text") {
+                    const text = formData.get("text");
+                    $.ajax({
+                        url: "{% url 'qr:qr_text_v1' %}",
+                        type: "GET",
+                        data: {text: text},
+                        xhrFields: {
+                            responseType: 'blob'
+                        },
+                        success: function(blob) {
+                            const imageUrl = URL.createObjectURL(blob); 
+                            $qrCodeImg.attr('src', imageUrl);
+                            $qrResult.show();
+                            $qrTextP.text(`QR Code for: ${text}`);
                         },
                         error: function(xhr, status, error) {
                             console.error('Error:', error);
