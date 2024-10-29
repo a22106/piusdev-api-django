@@ -33,11 +33,6 @@ class IndexView(TemplateView):
         context["keywords"] = "QR Code, Generator"
         return context
 
-    # POST 메서드를 제거하여 폼 제출이 AJAX로만 처리되도록 함
-    # def post(self, request, *args, **kwargs):
-    #     pass
-
-
 class QrImageView(View):
     @method_decorator(require_http_methods(["POST"]))
     def dispatch(self, request, *args, **kwargs):
@@ -99,6 +94,7 @@ class QrImageView(View):
 
 class QrUrlView(APIView):
     @swagger_auto_schema(
+        operation_id="URL QR Code",
         manual_parameters=[
             openapi.Parameter(
                 "url",
@@ -128,6 +124,7 @@ class QrUrlView(APIView):
 
 class QrEmailView(APIView):
     @swagger_auto_schema(
+        operation_id="Email QR Code",
         manual_parameters=[
             openapi.Parameter(
                 "email",
@@ -173,6 +170,7 @@ class QrEmailView(APIView):
 
 class QrTextView(APIView):
     @swagger_auto_schema(
+        operation_id="Text QR Code",
         manual_parameters=[
             openapi.Parameter(
                 "text",
@@ -204,6 +202,7 @@ class QrTextView(APIView):
 
 class QrPhoneNumberView(APIView):
     @swagger_auto_schema(
+        operation_id="Phone Number QR Code",
         manual_parameters=[
             openapi.Parameter(
                 "phone",
@@ -235,6 +234,7 @@ class QrPhoneNumberView(APIView):
 
 class QrVCardView(APIView):
     @swagger_auto_schema(
+        operation_id="VCard QR Code",
         manual_parameters=[
             openapi.Parameter(
                 "first_name",
@@ -327,6 +327,7 @@ class QrVCardView(APIView):
 
 class QrWifiView(APIView):
     @swagger_auto_schema(
+        operation_id="WiFi QR Code",
         manual_parameters=[
             openapi.Parameter(
                 "ssid",  # Network name
@@ -368,135 +369,6 @@ class QrWifiView(APIView):
             return JsonResponse(
                 {"detail": "Error generating WiFi QR Code."}, status=500
             )
-
-
-class QrApiView(APIView):
-    @swagger_auto_schema(
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            required=["qr_type"],
-            properties={
-                "qr_type": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="Type of QR Code"
-                ),
-                "url": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="URL for URL QR Code"
-                ),
-                "email": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="Email for Email QR Code"
-                ),
-                "subject": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="Subject for Email QR Code"
-                ),
-                "body": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="Body for Email QR Code"
-                ),
-                "text": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="Text for Text QR Code"
-                ),
-                "phone": openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description="Phone number for Phone QR Code",
-                ),
-                "first_name": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="First name for VCard QR Code"
-                ),
-                "last_name": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="Last name for VCard QR Code"
-                ),
-                "vcard_email": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="Email for VCard QR Code"
-                ),
-                "vcard_mobile": openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description="Mobile phone for VCard QR Code",
-                ),
-                "organization": openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description="Organization for VCard QR Code",
-                ),
-                "title": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="Title for VCard QR Code"
-                ),
-                "address": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="Address for VCard QR Code"
-                ),
-                "label": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="Label for VCard QR Code"
-                ),
-                "vcard_url": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="URL for VCard QR Code"
-                ),
-                "note": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="Note for VCard QR Code"
-                ),
-                "ssid": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="SSID for WiFi QR Code"
-                ),
-                "password": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="Password for WiFi QR Code"
-                ),
-                "encryption": openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description="Encryption type for WiFi QR Code",
-                ),
-            },
-        ),
-        responses={200: openapi.Response("QR Code Image (PNG)")},
-    )
-    def post(self, request):
-        qr_type = request.data.get("qr_type", "text")
-        logger.info(f"API Request to generate QR Code of type: {qr_type}")
-
-        try:
-            if qr_type == "url":
-                url = request.data.get("url", "")
-                qr_image = generate_url_qr(url)
-                display_text = url
-            elif qr_type == "email":
-                email = request.data.get("email", "")
-                subject = request.data.get("subject", "")
-                body = request.data.get("body", "")
-                qr_image = generate_email_qr(email, subject, body)
-                display_text = email
-            elif qr_type == "text":
-                text = request.data.get("text", "")
-                qr_image = generate_text_qr(text)
-                display_text = text
-            elif qr_type == "phone":
-                phone = request.data.get("phone", "")
-                qr_image = generate_phone_qr(phone)
-                display_text = phone
-            elif qr_type == "vcard":
-                vcard_data = {
-                    "first_name": request.data.get("first_name", ""),
-                    "last_name": request.data.get("last_name", ""),
-                    "vcard_email": request.data.get("vcard_email", ""),
-                    "vcard_mobile": request.data.get("vcard_mobile", ""),
-                    "organization": request.data.get("organization", ""),
-                    "title": request.data.get("title", ""),
-                    "address": request.data.get("address", ""),
-                    "label": request.data.get("label", ""),
-                    "vcard_url": request.data.get("vcard_url", ""),
-                    "note": request.data.get("note", ""),
-                }
-                qr_image = generate_vcard_qr(vcard_data)
-                display_text = f"{vcard_data.get('first_name', '')} {vcard_data.get('last_name', '')}"
-            elif qr_type == "wifi":
-                ssid = request.data.get("ssid", "")
-                password = request.data.get("password", "")
-                encryption = request.data.get("encryption", "WPA")
-                qr_image = generate_wifi_qr(ssid, password, encryption)
-                display_text = ssid
-            else:
-                return JsonResponse({"detail": "Invalid QR type."}, status=400)
-
-            return HttpResponse(qr_image, content_type="image/png")
-
-        except Exception as e:
-            logger.error(f"Error generating QR Code via API: {e}")
-            return JsonResponse({"detail": "Error generating QR Code."}, status=500)
-
 
 # Swagger endpoint response {"detail": "Hello World"}
 class HelloWorldView(APIView):
