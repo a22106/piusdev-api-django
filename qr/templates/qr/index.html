@@ -20,8 +20,8 @@
             <input type="radio" class="btn-check" name="qr_type" id="typePhone" value="phone" autocomplete="off">
             <label class="btn btn-outline-primary" for="typePhone">Phone Number</label>
 
-            <input type="radio" class="btn-check" name="qr_type" id="typeVcard" value="vcard" autocomplete="off">
-            <label class="btn btn-outline-primary" for="typeVcard">V Card</label>
+{#            <input type="radio" class="btn-check" name="qr_type" id="typeVcard" value="vcard" autocomplete="off">#}
+{#            <label class="btn btn-outline-primary" for="typeVcard">V Card</label>#}
 
             <input type="radio" class="btn-check" name="qr_type" id="typeWifi" value="wifi" autocomplete="off">
             <label class="btn btn-outline-primary" for="typeWifi">WiFi</label>
@@ -35,14 +35,14 @@
         <!-- URL Input Section -->
         <div id="input-url" class="input-section">
             <label>
-                <input type="text" name="url" placeholder="Enter URL" required>
+                <input type="text" name="url" placeholder="Enter URL">
             </label>
         </div>
 
         <!-- Email Input Section -->
         <div id="input-email" class="input-section" style="display: none;">
             <label>
-                Email: <input type="email" name="email" placeholder="Enter Email" required>
+                Email: <input type="email" name="email" placeholder="Enter Email">
             </label><br>
             <label>
                 Subject: <input type="text" name="subject" placeholder="Enter Subject">
@@ -55,27 +55,27 @@
         <!-- Text Input Section -->
         <div id="input-text" class="input-section" style="display: none;">
             <label>
-                Text: <input type="text" name="text" placeholder="Enter Text" required>
+                Text: <input type="text" name="text" placeholder="Enter Text">
             </label>
         </div>
 
         <!-- Phone Number Input Section -->
         <div id="input-phone" class="input-section" style="display: none;">
             <label>
-                Phone Number: <input type="text" name="phone" placeholder="Enter Phone Number" required>
+                Phone Number: <input type="text" name="phone" placeholder="Enter Phone Number">
             </label>
         </div>
 
         <!-- VCard Input Section -->
         <div id="input-vcard" class="input-section" style="display: none;">
             <label>
-                First Name: <input type="text" name="first_name" placeholder="First Name" required>
+                First Name: <input type="text" name="first_name" placeholder="First Name">
             </label><br>
             <label>
-                Last Name: <input type="text" name="last_name" placeholder="Last Name" required>
+                Last Name: <input type="text" name="last_name" placeholder="Last Name">
             </label><br>
             <label>
-                Email: <input type="email" name="vcard_email" placeholder="Email" required>
+                Email: <input type="email" name="vcard_email" placeholder="Email">
             </label><br>
             <label>
                 Phone (Mobile): <input type="text" name="vcard_mobile" placeholder="Mobile Phone">
@@ -103,14 +103,14 @@
         <!-- WiFi Input Section -->
         <div id="input-wifi" class="input-section" style="display: none;">
             <label>
-                SSID: <input type="text" name="ssid" placeholder="WiFi SSID" required>
+                SSID: <input type="text" name="ssid" placeholder="WiFi SSID">
             </label><br>
             <label>
-                Password: <input type="password" name="password" placeholder="WiFi Password" required>
+                Password: <input type="password" name="password" placeholder="WiFi Password">
             </label><br>
             <label>
                 Encryption Type:
-                <select name="encryption" required>
+                <select name="encryption">
                     <option value="WPA">WPA</option>
                     <option value="WEP">WEP</option>
                     <option value="nopass">None</option>
@@ -128,103 +128,68 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const qrTypeRadios = document.querySelectorAll('input[name="qr_type"]');
-            const inputSections = document.querySelectorAll('.input-section');
-            const form = document.getElementById("qr-form");
-            const qrCodeImg = document.getElementById("qr-code");
-            const qrTextP = document.getElementById("qr-text");
-            const qrResult = document.getElementById("qr-result");
+        $(document).ready(function() {
+            const $qrTypeRadios = $('input[name="qr_type"]');
+            const $inputSections = $('.input-section');
+            const $form = $("#qr-form");
+            const $qrCodeImg = $("#qr-code");
+            const $qrTextP = $("#qr-text");
+            const $qrResult = $("#qr-result");
 
+            /**
+             * Show the relevant input section based on the selected QR code type.
+             * Hide all other input sections.
+             */
             function showRelevantInput() {
-                const selectedType = document.querySelector('input[name="qr_type"]:checked').value;
+                const selectedType = $('input[name="qr_type"]:checked').val();
+                console.log('Selected Type:', selectedType);
 
-                inputSections.forEach(section => {
-                    section.style.display = 'none';
-                });
+                // Hide all input sections
+                $inputSections.hide();
+                $inputSections.find('input, select').prop('required', false);
 
-                const activeSection = document.getElementById(`input-${selectedType}`);
-                if (activeSection) {
-                    activeSection.style.display = 'block';
-
-                    // Set required attributes based on selected type
-                    const inputs = activeSection.querySelectorAll('input, select');
-                    inputs.forEach(input => {
-                        if (selectedType === 'url') {
-                            input.required = true;
-                        } else if (selectedType === 'vcard') {
-                            if (['first_name', 'last_name', 'vcard_email'].includes(input.name)) {
-                                input.required = true;
-                            } else {
-                                input.required = false;
-                            }
-                        } else {
-                            input.required = true;
-                        }
-                    });
+                // Show the input section corresponding to the selected QR code type
+                const $activeSection = $(`#input-${selectedType}`);
+                if ($activeSection.length) {
+                    $activeSection.show();
+                    $activeSection.find('input, select').prop('required', true);
                 }
             }
 
-            qrTypeRadios.forEach(radio => {
-                radio.addEventListener('change', showRelevantInput);
-            });
-
-            // Initialize the form to show the default selected input
+            $qrTypeRadios.change(showRelevantInput);
             showRelevantInput();
 
             // Handle form submission
-            form.addEventListener("submit", function(event) {
+            $form.submit(function(event) {
                 event.preventDefault();
-                const formData = new FormData(form);
-                fetch("{% url 'qr:qr_image' %}", {
-                    method: "POST",
-                    headers: {
-                        "X-CSRFToken": "{{ csrf_token }}"
-                    },
-                    body: formData
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            return response.text().then(text => { throw new Error(text) });
-                        }
-                        return response.blob();
-                    })
-                    .then(blob => {
-                        qrCodeImg.src = URL.createObjectURL(blob);
-                        qrResult.style.display = 'block';
+                const selectedType = $('input[name="qr_type"]:checked').val();
+                console.log('QR Type:', selectedType);
 
-                        // Display appropriate text based on QR type
-                        const selectedType = formData.get("qr_type");
-                        let displayText = "";
+                const formData = new FormData(this);
 
-                        switch(selectedType) {
-                            case "url":
-                                displayText = formData.get("url");
-                                break;
-                            case "email":
-                                displayText = formData.get("email");
-                                break;
-                            case "text":
-                                displayText = formData.get("text");
-                                break;
-                            case "phone":
-                                displayText = formData.get("phone");
-                                break;
-                            case "vcard":
-                                displayText = `${formData.get("first_name")} ${formData.get("last_name")}`;
-                                break;
-                            case "wifi":
-                                displayText = formData.get("ssid");
-                                break;
-                            default:
-                                displayText = "Unknown";
+                if (selectedType === "url"){
+                    const url = formData.get("url");
+                    $.ajax({
+                        url: "{% url 'qr:qr_url_v1' %}",
+                        type: "GET",
+                        data: {url: url},
+                        xhrFields: {
+                            responseType: 'blob'
+                        },
+                        success: function(blob) {
+                            console.log('QR Code Blob:', blob);
+                            const imageUrl = URL.createObjectURL(blob); // error occurs
+                            console.log('QR Code Image URL:', imageUrl);
+                            $qrCodeImg.attr('src', imageUrl);
+                            $qrResult.show();
+                            $qrTextP.text(`QR Code for: ${url}`);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error:', error);
+                            alert(`Error generating QR Code: ${error}`);
                         }
-                        qrTextP.textContent = `QR Code for: ${displayText}`;
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert(`Error generating QR Code: ${error.message}`);
                     });
+                }
             });
         });
     </script>
