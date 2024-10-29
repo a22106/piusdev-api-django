@@ -197,6 +197,28 @@
                             alert(`Error generating QR Code: ${error}`);
                         }
                     });
+                } else if (selectedType === "email") {
+                    const email = formData.get("email");
+                    const subject = formData.get("subject");
+                    const body = formData.get("body");
+                    $.ajax({
+                        url: "{% url 'qr:qr_email_v1' %}",
+                        type: "GET",
+                        data: {email: email, subject: subject, body: body},
+                        xhrFields: {
+                            responseType: 'blob'
+                        },
+                        success: function(blob) {
+                            const imageUrl = URL.createObjectURL(blob);
+                            $qrCodeImg.attr('src', imageUrl);
+                            $qrResult.show();
+                            $qrTextP.text(`QR Code for: ${email}`);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error:', error);
+                            alert(`Error generating QR Code: ${error}`);
+                        }
+                    });
                 } else if (selectedType === "text") {
                     const text = formData.get("text");
                     $.ajax({
