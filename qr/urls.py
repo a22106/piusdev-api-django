@@ -1,6 +1,18 @@
 from django.conf import settings
 from django.urls import path, reverse
-from .views import IndexView, QrImageView, HelloWorldView, HelloDjangoView, QrApiView
+from .views import (
+    IndexView,
+    QrImageView,
+    HelloWorldView,
+    HelloDjangoView,
+    QrApiView,
+    QrUrlView,
+    QrEmailView,
+    QrTextView,
+    QrPhoneNumberView,
+    QrVCardView,
+    QrWifiView,
+)
 
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
@@ -25,8 +37,15 @@ urlpatterns = [
     path("", IndexView.as_view(), name="index"),
     path("qr_image/", QrImageView.as_view(), name="qr_image"),
     path("api/qr/", QrApiView.as_view(), name="qr_api"),
-    path("v1/qr_image/", QrApiView.as_view(), name="qr_image_v1"),
     path("api/", schema_view.with_ui("redoc", cache_timeout=0), name="api"),
+    # API v1
+    path("v1/qr/url/", QrUrlView.as_view(), name="qr_url_v1"),
+    path("v1/qr/email/", QrEmailView.as_view(), name="qr_email_v1"),
+    path("v1/qr/text/", QrTextView.as_view(), name="qr_text_v1"),
+    path("v1/qr/phonenumber/", QrPhoneNumberView.as_view(), name="qr_phone_number_v1"),
+    # path("v1/qr/vcard/", QrVCardView.as_view(), name="qr_vcard_v1"),
+    path("v1/qr/wifi/", QrWifiView.as_view(), name="qr_wifi_v1"),
+    path("v1/qr_image/", QrApiView.as_view(), name="qr_image_v1"),
 ]
 
 if settings.DEBUG:

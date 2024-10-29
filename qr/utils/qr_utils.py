@@ -153,13 +153,13 @@ def generate_wifi_qr(ssid: str, password: str, encryption: str = "WPA") -> bytes
     Args:
         ssid (str): The WiFi SSID.
         password (str): The WiFi password.
-        encryption (str, optional): The encryption type ('WPA', 'WEP', 'nopass'). Defaults to "WPA".
+        encryption (str, optional): The encryption type ('WPA', 'WEP', 'none'). Defaults to "WPA".
 
     Returns:
         bytes: The generated QR code image in PNG format.
     """
     try:
-        if encryption.lower() == "nopass":
+        if encryption.lower() == "none":
             wifi = f"WIFI:T:;S:{ssid};P:{password};;"
         else:
             wifi = f"WIFI:T:{encryption};S:{ssid};P:{password};;"
