@@ -33,6 +33,7 @@ class IndexView(TemplateView):
         context["keywords"] = "QR Code, Generator"
         return context
 
+
 class QrImageView(View):
     @method_decorator(require_http_methods(["POST"]))
     def dispatch(self, request, *args, **kwargs):
@@ -92,6 +93,105 @@ class QrImageView(View):
             return HttpResponse("Error generating QR Code.", status=500)
 
 
+class QrVcardView(APIView):
+    @swagger_auto_schema(
+        operation_id="VCard QR Code",
+        manual_parameters=[
+            openapi.Parameter(
+                "first_name",
+                openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                required=True,
+            ),
+            openapi.Parameter(
+                "last_name",
+                openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                required=True,
+            ),
+            openapi.Parameter(
+                "phone",
+                openapi.IN_QUERY,
+                description="Phone number",
+                type=openapi.TYPE_STRING,
+                required=True,
+            ),
+            openapi.Parameter(
+                "mobile",
+                openapi.IN_QUERY,
+                description="Mobile phone number",
+                type=openapi.TYPE_STRING,
+                required=True,
+            ),
+            openapi.Parameter(
+                "email",
+                openapi.IN_QUERY,
+                description="Email address",
+                type=openapi.TYPE_STRING,
+                required=True,
+            ),
+            openapi.Parameter(
+                "website",
+                openapi.IN_QUERY,
+                description="Website URL",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "organization",
+                openapi.IN_QUERY,
+                description="Organization",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "job_title",
+                openapi.IN_QUERY,
+                description="Job title",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "fax",
+                openapi.IN_QUERY,
+                description="Fax number",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "address",
+                openapi.IN_QUERY,
+                description="Address",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "zip",
+                openapi.IN_QUERY,
+                description="Zip code",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "country",
+                openapi.IN_QUERY,
+                description="Country",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "note",
+                openapi.IN_QUERY,
+                description="Note",
+                type=openapi.TYPE_STRING,
+            ),
+        ],
+        responses={200: openapi.Response("QR Code Image (PNG)")},
+    )
+    def get(self, request):
+        try:
+            qr_image = generate_vcard_qr(request.query_params)
+            return HttpResponse(qr_image, content_type="image/png")
+        except Exception as e:
+            logger.error(f"Error generating VCard QR Code via API: {e}")
+            return JsonResponse(
+                {"detail": "Error generating VCard QR Code."}, status=500
+            )
+
+
 class QrUrlView(APIView):
     @swagger_auto_schema(
         operation_id="URL QR Code",
@@ -131,6 +231,7 @@ class QrEmailView(APIView):
                 openapi.IN_QUERY,
                 description="Email address to encode in the QR Code",
                 type=openapi.TYPE_STRING,
+                required=True,
             ),
             openapi.Parameter(
                 "subject",
@@ -177,6 +278,7 @@ class QrTextView(APIView):
                 openapi.IN_QUERY,
                 description="Text to encode in the QR Code",
                 type=openapi.TYPE_STRING,
+                required=True,
             )
         ],
         responses={200: openapi.Response("QR Code Image (PNG)")},
@@ -232,68 +334,77 @@ class QrPhoneNumberView(APIView):
             )
 
 
-class QrVCardView(APIView):
+class QrVcardView(APIView):
     @swagger_auto_schema(
         operation_id="VCard QR Code",
         manual_parameters=[
             openapi.Parameter(
                 "first_name",
                 openapi.IN_QUERY,
-                description="First name to encode in the QR Code",
+                description="First name",
                 type=openapi.TYPE_STRING,
+                required=True,
             ),
             openapi.Parameter(
                 "last_name",
                 openapi.IN_QUERY,
-                description="Last name to encode in the QR Code",
+                description="Last name",
+                type=openapi.TYPE_STRING,
+                required=True,
+            ),
+            openapi.Parameter(
+                "email",
+                openapi.IN_QUERY,
+                description="Email",
+                type=openapi.TYPE_STRING,
+                required=True,
+            ),
+            openapi.Parameter(
+                "phone",
+                openapi.IN_QUERY,
+                description="Phone number",
                 type=openapi.TYPE_STRING,
             ),
             openapi.Parameter(
-                "vcard_email",
+                "mobile",
                 openapi.IN_QUERY,
-                description="Email to encode in the QR Code",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "vcard_mobile",
-                openapi.IN_QUERY,
-                description="Mobile phone to encode in the QR Code",
+                description="Mobile phone",
                 type=openapi.TYPE_STRING,
             ),
             openapi.Parameter(
                 "organization",
                 openapi.IN_QUERY,
-                description="Organization to encode in the QR Code",
+                description="Organization",
                 type=openapi.TYPE_STRING,
             ),
             openapi.Parameter(
                 "title",
                 openapi.IN_QUERY,
-                description="Title to encode in the QR Code",
+                description="Title",
                 type=openapi.TYPE_STRING,
             ),
             openapi.Parameter(
                 "address",
                 openapi.IN_QUERY,
-                description="Address to encode in the QR Code",
+                description="Address",
                 type=openapi.TYPE_STRING,
             ),
             openapi.Parameter(
                 "label",
                 openapi.IN_QUERY,
-                description="Label to encode in the QR Code",
+                description="Label",
                 type=openapi.TYPE_STRING,
             ),
             openapi.Parameter(
-                "vcard_url",
+                "url",
                 openapi.IN_QUERY,
-                description="URL to encode in the QR Code",
+                description="URL",
                 type=openapi.TYPE_STRING,
             ),
             openapi.Parameter(
                 "note",
                 openapi.IN_QUERY,
-                description="Note to encode in the QR Code",
+                description="Note",
                 type=openapi.TYPE_STRING,
             ),
         ],
@@ -334,6 +445,7 @@ class QrWifiView(APIView):
                 openapi.IN_QUERY,
                 description="SSID to encode in the QR Code",
                 type=openapi.TYPE_STRING,
+                required=True,
             ),
             openapi.Parameter(
                 "password",
@@ -369,6 +481,7 @@ class QrWifiView(APIView):
             return JsonResponse(
                 {"detail": "Error generating WiFi QR Code."}, status=500
             )
+
 
 # Swagger endpoint response {"detail": "Hello World"}
 class HelloWorldView(APIView):
