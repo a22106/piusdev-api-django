@@ -71,13 +71,13 @@ class QrApiTestCase(unittest.TestCase):
         query_params = {
             "first_name": "John",
             "last_name": "Doe",
-            "vcard_email": "john@example.com",
-            "vcard_mobile": "1234567890",
+            "email": "john@example.com",
+            "mobile": "1234567890",
             "organization": "Test Corp",
             "title": "Developer",
             "address": "123 Test St",
             "label": "Work",
-            "vcard_url": "http://example.com",
+            "url": "http://example.com",
             "note": "Test note",
         }
         url = reverse("qr:qr_vcard_v1")
