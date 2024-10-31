@@ -106,8 +106,8 @@ def generate_vcard_qr(vcard_data: Dict[str, str]) -> bytes:
 
     Args:
         vcard_data (Dict[str, str]): A dictionary containing VCard information.
-            Expected keys: first_name, last_name, vcard_email, vcard_mobile,
-                           organization, title, address, label, vcard_url, note
+            Expected keys: first_name, last_name, email, mobile,
+                           organization, title, address, label, url, note
 
     Returns:
         bytes: The generated QR code image in PNG format.
@@ -120,10 +120,14 @@ def generate_vcard_qr(vcard_data: Dict[str, str]) -> bytes:
         vcard += (
             f"FN:{vcard_data.get('first_name', '')} {vcard_data.get('last_name', '')}\n"
         )
-        if vcard_data.get("vcard_email"):
-            vcard += f"EMAIL:{vcard_data.get('vcard_email')}\n"
-        if vcard_data.get("vcard_mobile"):
-            vcard += f"TEL;TYPE=CELL:{vcard_data.get('vcard_mobile')}\n"
+        if vcard_data.get("birthday"):
+            vcard += f"BDAY:{vcard_data.get('birthday')}\n"
+        if vcard_data.get("email"):
+            vcard += f"EMAIL:{vcard_data.get('email')}\n"
+        if vcard_data.get("phone"):
+            vcard += f"TEL;TYPE=VOICE:{vcard_data.get('phone')}\n"
+        if vcard_data.get("mobile"):
+            vcard += f"TEL;TYPE=CELL:{vcard_data.get('mobile')}\n"
         if vcard_data.get("organization"):
             vcard += f"ORG:{vcard_data.get('organization')}\n"
         if vcard_data.get("title"):
@@ -132,8 +136,8 @@ def generate_vcard_qr(vcard_data: Dict[str, str]) -> bytes:
             vcard += f"ADR;TYPE=HOME:;;{vcard_data.get('address')};;;;\n"
         if vcard_data.get("label"):
             vcard += f"LABEL;TYPE=HOME:{vcard_data.get('label')}\n"
-        if vcard_data.get("vcard_url"):
-            vcard += f"URL:{vcard_data.get('vcard_url')}\n"
+        if vcard_data.get("url"):
+            vcard += f"URL:{vcard_data.get('url')}\n"
         if vcard_data.get("note"):
             vcard += f"NOTE:{vcard_data.get('note')}\n"
         vcard += "END:VCARD"

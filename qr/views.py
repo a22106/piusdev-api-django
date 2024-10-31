@@ -34,65 +34,7 @@ class IndexView(TemplateView):
         return context
 
 
-class QrImageView(View):
-    @method_decorator(require_http_methods(["POST"]))
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        qr_type = request.POST.get("qr_type", "text")
-        logger.info(f"Generating QR Code of type: {qr_type}")
-
-        try:
-            if qr_type == "url":
-                url = request.POST.get("url", "")
-                qr_image = generate_url_qr(url)
-                display_text = url
-            elif qr_type == "email":
-                email = request.POST.get("email", "")
-                subject = request.POST.get("subject", "")
-                body = request.POST.get("body", "")
-                qr_image = generate_email_qr(email, subject, body)
-                display_text = email
-            elif qr_type == "text":
-                text = request.POST.get("text", "")
-                qr_image = generate_text_qr(text)
-                display_text = text
-            elif qr_type == "phone":
-                phone = request.POST.get("phone", "")
-                qr_image = generate_phone_qr(phone)
-                display_text = phone
-            elif qr_type == "vcard":
-                vcard_data = {
-                    "first_name": request.POST.get("first_name", ""),
-                    "last_name": request.POST.get("last_name", ""),
-                    "vcard_email": request.POST.get("vcard_email", ""),
-                    "vcard_mobile": request.POST.get("vcard_mobile", ""),
-                    "organization": request.POST.get("organization", ""),
-                    "title": request.POST.get("title", ""),
-                    "address": request.POST.get("address", ""),
-                    "label": request.POST.get("label", ""),
-                    "vcard_url": request.POST.get("vcard_url", ""),
-                    "note": request.POST.get("note", ""),
-                }
-                qr_image = generate_vcard_qr(vcard_data)
-                display_text = f"{vcard_data.get('first_name', '')} {vcard_data.get('last_name', '')}"
-            elif qr_type == "wifi":
-                ssid = request.POST.get("ssid", "")
-                password = request.POST.get("password", "")
-                encryption = request.POST.get("encryption", "WPA")
-                qr_image = generate_wifi_qr(ssid, password, encryption)
-                display_text = ssid
-            else:
-                return HttpResponse("Invalid QR type.", status=400)
-
-            return HttpResponse(qr_image, content_type="image/png")
-
-        except Exception as e:
-            logger.error(f"Error generating QR Code: {e}")
-            return HttpResponse("Error generating QR Code.", status=500)
-
-
+# TODO: vcard Email 입력이 안되는 문제 있음
 class QrVcardView(APIView):
     @swagger_auto_schema(
         operation_id="VCard QR Code",
@@ -114,7 +56,6 @@ class QrVcardView(APIView):
                 openapi.IN_QUERY,
                 description="Phone number",
                 type=openapi.TYPE_STRING,
-                required=True,
             ),
             openapi.Parameter(
                 "mobile",
@@ -331,108 +272,6 @@ class QrPhoneNumberView(APIView):
             logger.error(f"Error generating Phone QR Code via API: {e}")
             return JsonResponse(
                 {"detail": "Error generating Phone QR Code."}, status=500
-            )
-
-
-class QrVcardView(APIView):
-    @swagger_auto_schema(
-        operation_id="VCard QR Code",
-        manual_parameters=[
-            openapi.Parameter(
-                "first_name",
-                openapi.IN_QUERY,
-                description="First name",
-                type=openapi.TYPE_STRING,
-                required=True,
-            ),
-            openapi.Parameter(
-                "last_name",
-                openapi.IN_QUERY,
-                description="Last name",
-                type=openapi.TYPE_STRING,
-                required=True,
-            ),
-            openapi.Parameter(
-                "email",
-                openapi.IN_QUERY,
-                description="Email",
-                type=openapi.TYPE_STRING,
-                required=True,
-            ),
-            openapi.Parameter(
-                "phone",
-                openapi.IN_QUERY,
-                description="Phone number",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "mobile",
-                openapi.IN_QUERY,
-                description="Mobile phone",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "organization",
-                openapi.IN_QUERY,
-                description="Organization",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "title",
-                openapi.IN_QUERY,
-                description="Title",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "address",
-                openapi.IN_QUERY,
-                description="Address",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "label",
-                openapi.IN_QUERY,
-                description="Label",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "url",
-                openapi.IN_QUERY,
-                description="URL",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "note",
-                openapi.IN_QUERY,
-                description="Note",
-                type=openapi.TYPE_STRING,
-            ),
-        ],
-        responses={200: openapi.Response("QR Code Image (PNG)")},
-    )
-    def get(self, request):
-        logger.info("API Request to generate VCard QR Code")
-
-        try:
-            vcard_data = {
-                "first_name": request.query_params.get("first_name", ""),
-                "last_name": request.query_params.get("last_name", ""),
-                "vcard_email": request.query_params.get("vcard_email", ""),
-                "vcard_mobile": request.query_params.get("vcard_mobile", ""),
-                "organization": request.query_params.get("organization", ""),
-                "title": request.query_params.get("title", ""),
-                "address": request.query_params.get("address", ""),
-                "label": request.query_params.get("label", ""),
-                "vcard_url": request.query_params.get("vcard_url", ""),
-                "note": request.query_params.get("note", ""),
-            }
-
-            qr_image = generate_vcard_qr(vcard_data)
-            return HttpResponse(qr_image, content_type="image/png")
-        except Exception as e:
-            logger.error(f"Error generating VCard QR Code via API: {e}")
-            return JsonResponse(
-                {"detail": "Error generating VCard QR Code."}, status=500
             )
 
 
