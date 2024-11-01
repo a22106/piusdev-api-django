@@ -8,7 +8,7 @@ from .views import (
     QrEmailView,
     QrTextView,
     QrPhoneNumberView,
-    QrVCardView,
+    QrVcardView,
     QrWifiView,
 )
 
@@ -39,7 +39,7 @@ urlpatterns = [
     path("v1/qr/email/", QrEmailView.as_view(), name="qr_email_v1"),
     path("v1/qr/text/", QrTextView.as_view(), name="qr_text_v1"),
     path("v1/qr/phonenumber/", QrPhoneNumberView.as_view(), name="qr_phone_number_v1"),
-    # path("v1/qr/vcard/", QrVCardView.as_view(), name="qr_vcard_v1"),
+    path("v1/qr/vcard/", QrVcardView.as_view(), name="qr_vcard_v1"),
     path("v1/qr/wifi/", QrWifiView.as_view(), name="qr_wifi_v1"),
 ]
 
