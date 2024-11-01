@@ -122,22 +122,22 @@ def generate_vcard_qr(vcard_data: Dict[str, str]) -> bytes:
         )
         if vcard_data.get("birthday"):
             vcard += f"BDAY:{vcard_data.get('birthday')}\n"
-        if vcard_data.get("email"):
-            vcard += f"EMAIL:{vcard_data.get('email')}\n"
-        if vcard_data.get("phone"):
-            vcard += f"TEL;TYPE=VOICE:{vcard_data.get('phone')}\n"
-        if vcard_data.get("mobile"):
-            vcard += f"TEL;TYPE=CELL:{vcard_data.get('mobile')}\n"
+        if vcard_data.get("vcard_email"):
+            vcard += f"EMAIL:{vcard_data.get('vcard_email')}\n"
+        if vcard_data.get("vcard_phone"):
+            vcard += f"TEL;TYPE=VOICE:{vcard_data.get('vcard_phone')}\n"
+        if vcard_data.get("vcard_mobile"):
+            vcard += f"TEL;TYPE=CELL:{vcard_data.get('vcard_mobile')}\n"
         if vcard_data.get("organization"):
             vcard += f"ORG:{vcard_data.get('organization')}\n"
-        if vcard_data.get("title"):
-            vcard += f"TITLE:{vcard_data.get('title')}\n"
+        if vcard_data.get("job_title"):
+            vcard += f"TITLE:{vcard_data.get('job_title')}\n"
         if vcard_data.get("address"):
             vcard += f"ADR;TYPE=HOME:;;{vcard_data.get('address')};;;;\n"
         if vcard_data.get("label"):
             vcard += f"LABEL;TYPE=HOME:{vcard_data.get('label')}\n"
-        if vcard_data.get("url"):
-            vcard += f"URL:{vcard_data.get('url')}\n"
+        if vcard_data.get("vcard_url"):
+            vcard += f"URL:{vcard_data.get('vcard_url')}\n"
         if vcard_data.get("note"):
             vcard += f"NOTE:{vcard_data.get('note')}\n"
         vcard += "END:VCARD"

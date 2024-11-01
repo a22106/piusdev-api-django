@@ -76,20 +76,20 @@
                             <label class="form-label mb-3">
                                 First Name: <input type="text" name="first_name" placeholder="First Name" class="form-control">
                             </label>
-                            <label class="form-label mb-3">
+                            <label clfiass="form-label mb-3">
                                 Last Name: <input type="text" name="last_name" placeholder="Last Name" class="form-control">
                             </label><br>
                             <label class="form-label mb-3">
-                                Email: <input type="email" name="email" placeholder="Email" class="form-control">
+                                Email: <input type="email" name="vcard_email" placeholder="Email" class="form-control">
                             </label><br>
                             <label class="form-label mb-3">
-                                Phone (Mobile): <input type="text" name="mobile" placeholder="Mobile Phone" class="form-control">
+                                Phone (Mobile): <input type="text" name="vcard_mobile" placeholder="Mobile Phone" class="form-control">
                             </label><br>
                             <label class="form-label mb-3">
                                 Organization: <input type="text" name="organization" placeholder="Organization" class="form-control">
                             </label>
                             <label class="form-label mb-3">
-                                Title: <input type="text" name="title" placeholder="Title" class="form-control">
+                                Job Title: <input type="text" name="job_title" placeholder="Title" class="form-control">
                             </label><br>
                             <label class="form-label mb-3 w-100">
                                 Address: <input type="text" name="address" placeholder="Address" class="form-control w-100">
@@ -98,7 +98,7 @@
                                 Label: <input type="text" name="label" placeholder="Label" class="form-control">
                             </label><br>
                             <label class="form-label mb-3">
-                                URL: <input type="url" name="url" placeholder="URL" class="form-control">
+                                URL: <input type="url" name="vcard_url" placeholder="URL" class="form-control">
                             </label><br>
                             <label class="form-label mb-3 w-100">
                                 Note: <textarea name="note" placeholder="Note" class="form-control w-100" rows="4"></textarea>
@@ -276,13 +276,13 @@
                     const vcardData = {
                         first_name: formData.get("first_name"),
                         last_name: formData.get("last_name"),
-                        email: formData.get("email"),
-                        mobile: formData.get("mobile"),
+                        vcard_email: formData.get("vcard_email"),
+                        vcard_mobile: formData.get("vcard_mobile"),
+                        job_title: formData.get("job_title"),
                         organization: formData.get("organization"),
-                        title: formData.get("title"),
                         address: formData.get("address"),
                         label: formData.get("label"),
-                        url: formData.get("url"),
+                        vcard_url: formData.get("vcard_url"),
                         note: formData.get("note"),
                     };
                     $.ajax({
