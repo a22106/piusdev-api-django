@@ -26,9 +26,8 @@
                             <input type="radio" class="btn-check" name="qr_type" id="typePhone" value="phone" autocomplete="off">
                             <label class="btn btn-outline-primary" for="typePhone">Phone Number</label>
 
-                            {% comment %} vcard 항목 숨김 {% endcomment %}
-                            {% comment %} <input type="radio" class="btn-check" name="qr_type" id="typeVcard" value="vcard" autocomplete="off">
-                            <label class="btn btn-outline-primary" for="typeVcard">V Card</label> {% endcomment %}
+                            <input type="radio" class="btn-check" name="qr_type" id="typeVcard" value="vcard" autocomplete="off">
+                            <label class="btn btn-outline-primary" for="typeVcard">V Card</label>
 
                             <input type="radio" class="btn-check" name="qr_type" id="typeWifi" value="wifi" autocomplete="off">
                             <label class="btn btn-outline-primary" for="typeWifi">WiFi</label>
@@ -76,24 +75,24 @@
                         <div id="input-vcard" class="input-section" style="display: none;">
                             <label class="form-label mb-3">
                                 First Name: <input type="text" name="first_name" placeholder="First Name" class="form-control">
-                            </label><br>
-                            <label class="form-label mb-3">
+                            </label>
+                            <label clfiass="form-label mb-3">
                                 Last Name: <input type="text" name="last_name" placeholder="Last Name" class="form-control">
                             </label><br>
                             <label class="form-label mb-3">
-                                Email: <input type="email" name="vcard_email" placeholder="Email">
+                                Email: <input type="email" name="vcard_email" placeholder="Email" class="form-control">
                             </label><br>
                             <label class="form-label mb-3">
-                                Phone (Mobile): <input type="text" name="vcard_mobile" placeholder="Mobile Phone">
+                                Phone (Mobile): <input type="text" name="vcard_mobile" placeholder="Mobile Phone" class="form-control">
                             </label><br>
                             <label class="form-label mb-3">
                                 Organization: <input type="text" name="organization" placeholder="Organization" class="form-control">
-                            </label><br>
+                            </label>
                             <label class="form-label mb-3">
-                                Title: <input type="text" name="title" placeholder="Title" class="form-control">
+                                Job Title: <input type="text" name="job_title" placeholder="Title" class="form-control">
                             </label><br>
-                            <label class="form-label mb-3">
-                                Address: <input type="text" name="address" placeholder="Address">
+                            <label class="form-label mb-3 w-100">
+                                Address: <input type="text" name="address" placeholder="Address" class="form-control w-100">
                             </label><br>
                             <label class="form-label mb-3">
                                 Label: <input type="text" name="label" placeholder="Label" class="form-control">
@@ -101,8 +100,8 @@
                             <label class="form-label mb-3">
                                 URL: <input type="url" name="vcard_url" placeholder="URL" class="form-control">
                             </label><br>
-                            <label class="form-label mb-3">
-                                Note: <input type="text" name="note" placeholder="Note" class="form-control">
+                            <label class="form-label mb-3 w-100">
+                                Note: <textarea name="note" placeholder="Note" class="form-control w-100" rows="4"></textarea>
                             </label>
                         </div>
 
@@ -132,8 +131,8 @@
             <!-- QR Result Column -->
             <div class="col-lg-3">
                 <div class="card p-4">
+                    <h5>Generated QR Code:</h5>
                     <div id="qr-result" style="display: none;">
-                        <h2>Generated QR Code:</h2>
                         <img id="qr-code" alt="QR Code" src="" class="img-fluid mb-3">
                         <p id="qr-text" class="text-break">QR Code for:</p>
                     </div>
@@ -274,7 +273,36 @@
                         }
                     });
                 } else if (selectedType === "vcard") {
-                    // TODO: Implement VCard QR Code generation
+                    const vcardData = {
+                        first_name: formData.get("first_name"),
+                        last_name: formData.get("last_name"),
+                        vcard_email: formData.get("vcard_email"),
+                        vcard_mobile: formData.get("vcard_mobile"),
+                        job_title: formData.get("job_title"),
+                        organization: formData.get("organization"),
+                        address: formData.get("address"),
+                        label: formData.get("label"),
+                        vcard_url: formData.get("vcard_url"),
+                        note: formData.get("note"),
+                    };
+                    $.ajax({
+                        url: "{% url 'qr:qr_vcard_v1' %}",
+                        type: "GET",
+                        data: vcardData,
+                        xhrFields: {
+                            responseType: 'blob'
+                        },
+                        success: function(blob) {
+                            const imageUrl = URL.createObjectURL(blob);
+                            $qrCodeImg.attr('src', imageUrl);
+                            $qrResult.show();
+                            $qrTextP.text(`QR Code for: ${vcardData.first_name} ${vcardData.last_name}`);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error:', error);
+                            alert(`Error generating QR Code: ${error}`);
+                        }
+                    });
                 } else if (selectedType === "wifi") {
                     const ssid = formData.get("ssid");
                     const password = formData.get("password");

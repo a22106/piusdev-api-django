@@ -106,8 +106,8 @@ def generate_vcard_qr(vcard_data: Dict[str, str]) -> bytes:
 
     Args:
         vcard_data (Dict[str, str]): A dictionary containing VCard information.
-            Expected keys: first_name, last_name, vcard_email, vcard_mobile,
-                           organization, title, address, label, vcard_url, note
+            Expected keys: first_name, last_name, email, mobile,
+                           organization, title, address, label, url, note
 
     Returns:
         bytes: The generated QR code image in PNG format.
@@ -120,14 +120,18 @@ def generate_vcard_qr(vcard_data: Dict[str, str]) -> bytes:
         vcard += (
             f"FN:{vcard_data.get('first_name', '')} {vcard_data.get('last_name', '')}\n"
         )
+        if vcard_data.get("birthday"):
+            vcard += f"BDAY:{vcard_data.get('birthday')}\n"
         if vcard_data.get("vcard_email"):
             vcard += f"EMAIL:{vcard_data.get('vcard_email')}\n"
+        if vcard_data.get("vcard_phone"):
+            vcard += f"TEL;TYPE=VOICE:{vcard_data.get('vcard_phone')}\n"
         if vcard_data.get("vcard_mobile"):
             vcard += f"TEL;TYPE=CELL:{vcard_data.get('vcard_mobile')}\n"
         if vcard_data.get("organization"):
             vcard += f"ORG:{vcard_data.get('organization')}\n"
-        if vcard_data.get("title"):
-            vcard += f"TITLE:{vcard_data.get('title')}\n"
+        if vcard_data.get("job_title"):
+            vcard += f"TITLE:{vcard_data.get('job_title')}\n"
         if vcard_data.get("address"):
             vcard += f"ADR;TYPE=HOME:;;{vcard_data.get('address')};;;;\n"
         if vcard_data.get("label"):
