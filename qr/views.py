@@ -381,11 +381,10 @@ class QrSmsView(APIView):
     def get(self, request):
         logger.info("API Request to generate SMS QR Code")
         try:
-            country_code = request.query_params.get("country_code", "")
             phone_number = request.query_params.get("phone_number", "")
             message = request.query_params.get("message", "")
 
-            if not country_code or not phone_number or not message:
+            if not phone_number or not message:
                 return JsonResponse(
                     {
                         "detail": "Country code, phone number, and message parameters are required."
@@ -393,7 +392,7 @@ class QrSmsView(APIView):
                     status=400,
                 )
 
-            qr_image = generate_sms_qr(country_code, phone_number, message)
+            qr_image = generate_sms_qr(phone_number, message)
             return HttpResponse(qr_image, content_type="image/png")
         except Exception as e:
             logger.error(f"Error generating SMS QR Code via API: {e}")

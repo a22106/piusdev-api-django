@@ -176,19 +176,18 @@ def generate_wifi_qr(ssid: str, password: str, encryption: str = "WPA") -> bytes
         raise
 
 
-def generate_sms_qr(country_code: str, phone_number: str, message: str) -> bytes:
+def generate_sms_qr(phone_number: str, message: str) -> bytes:
     """
     Generate a QR code for an SMS message.
 
     Args:
-        country_code (str): The country code.
         phone_number (str): The phone number.
         message (str): The SMS message.
 
     Returns:
         bytes: The generated QR code image in PNG format.
     """
-    sms = f"SMSTO:{country_code}{phone_number}:{message}"
+    sms = f"SMSTO:{phone_number}:{message}"
     return create_qr_code(sms)
 
 
