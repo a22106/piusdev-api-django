@@ -13,24 +13,66 @@
                 <div class="card p-4">
                     <div class="mb-3">
                         <label class="form-label d-block">Select QR Code Type:</label>
-                        <div class="btn-group d-flex flex-wrap" role="group" aria-label="QR Code Type">
-                            <input type="radio" class="btn-check" name="qr_type" id="typeUrl" value="url" autocomplete="off" checked>
-                            <label class="btn btn-outline-primary flex-fill" for="typeUrl">URL</label>
-                        
-                            <input type="radio" class="btn-check" name="qr_type" id="typeEmail" value="email" autocomplete="off">
-                            <label class="btn btn-outline-primary flex-fill" for="typeEmail">Email</label>
-                        
-                            <input type="radio" class="btn-check" name="qr_type" id="typeText" value="text" autocomplete="off">
-                            <label class="btn btn-outline-primary flex-fill" for="typeText">Text</label>
-                        
-                            <input type="radio" class="btn-check" name="qr_type" id="typePhone" value="phone" autocomplete="off">
-                            <label class="btn btn-outline-primary flex-fill" for="typePhone">Phone Number</label>
-                        
-                            <input type="radio" class="btn-check" name="qr_type" id="typeVcard" value="vcard" autocomplete="off">
-                            <label class="btn btn-outline-primary flex-fill" for="typeVcard">V Card</label>
-                        
-                            <input type="radio" class="btn-check" name="qr_type" id="typeWifi" value="wifi" autocomplete="off">
-                            <label class="btn btn-outline-primary flex-fill" for="typeWifi">WiFi</label>
+                        <div class="row row-cols-lg-5 row-cols-md-4 row-cols-sm-3 row-cols-2 g-2" role="group" aria-label="QR Code Type">
+                            <div class="col">
+                                <input type="radio" class="btn-check" name="qr_type" id="typeUrl" value="url" autocomplete="off" checked>
+                                <label class="btn btn-outline-primary w-100" for="typeUrl">URL</label>
+                            </div>
+                            
+                            <div class="col">
+                                <input type="radio" class="btn-check" name="qr_type" id="typeEmail" value="email" autocomplete="off">
+                                <label class="btn btn-outline-primary w-100" for="typeEmail">Email</label>
+                            </div>
+                            
+                            <div class="col">
+                                <input type="radio" class="btn-check" name="qr_type" id="typeText" value="text" autocomplete="off">
+                                <label class="btn btn-outline-primary w-100" for="typeText">Text</label>
+                            </div>
+                            
+                            <div class="col">
+                                <input type="radio" class="btn-check" name="qr_type" id="typePhone" value="phone" autocomplete="off">
+                                <label class="btn btn-outline-primary w-100" for="typePhone">Phone</label>
+                            </div>
+                            
+                            <div class="col">
+                                <input type="radio" class="btn-check" name="qr_type" id="typeVcard" value="vcard" autocomplete="off">
+                                <label class="btn btn-outline-primary w-100" for="typeVcard">V Card</label>
+                            </div>
+                            
+                            <div class="col">
+                                <input type="radio" class="btn-check" name="qr_type" id="typeWifi" value="wifi" autocomplete="off">
+                                <label class="btn btn-outline-primary w-100" for="typeWifi">WiFi</label>
+                            </div>
+                            
+                            <div class="col">
+                                <input type="radio" class="btn-check" name="qr_type" id="typeSms" value="sms" autocomplete="off">
+                                <label class="btn btn-outline-primary w-100" for="typeSms">SMS</label>
+                            </div>
+                            
+                            <div class="col">
+                                <input type="radio" class="btn-check" name="qr_type" id="typeGeo" value="geo" autocomplete="off">
+                                <label class="btn btn-outline-primary w-100" for="typeGeo">Geolocation</label>
+                            </div>
+                    
+                            <div class="col">
+                                <input type="radio" class="btn-check" name="qr_type" id="typeEvent" value="event" autocomplete="off">
+                                <label class="btn btn-outline-primary w-100" for="typeEvent">Event</label>
+                            </div>
+                    
+                            <div class="col">
+                                <input type="radio" class="btn-check" name="qr_type" id="typeMeCard" value="mecard" autocomplete="off">
+                                <label class="btn btn-outline-primary w-100" for="typeMeCard">MeCard</label>
+                            </div>
+                    
+                            <div class="col">
+                                <input type="radio" class="btn-check" name="qr_type" id="typeWhatsApp" value="whatsapp" autocomplete="off">
+                                <label class="btn btn-outline-primary w-100" for="typeWhatsApp">WhatsApp</label>
+                            </div>
+                    
+                            <div class="col">
+                                <input type="radio" class="btn-check" name="qr_type" id="typeBitcoin" value="bitcoin" autocomplete="off">
+                                <label class="btn btn-outline-primary w-100" for="typeBitcoin">Bitcoin</label>
+                            </div>
                         </div>
                     </div>
 
@@ -122,7 +164,113 @@
                                 </select>
                             </label>
                         </div>
+                        
+                        <!-- SMS Input Section -->
+                        <div id="input-sms" class="input-section" style="display: none;">
+                            <label class="form-label mb-3 w-100">
+                                Country Code: <input type="text" name="country_code" placeholder="Country Code" class="form-control w-100" required>
+                            </label>
+                            <label class="form-label mb-3 w-100">
+                                Phone Number: <input type="text" name="phone_number" placeholder="Phone Number" class="form-control w-100" required>
+                            </label>
+                            <label class="form-label mb-3 w-100">
+                                Message (Optional): <textarea name="message" placeholder="Message" class="form-control w-100" rows="4"></textarea>
+                            </label>
+                        </div>
+                        
+                        <!-- Geolocation Input Section -->
+                        <div id="input-geo" class="input-section" style="display: none;">
+                            <label class="form-label mb-3 w-100">
+                                Latitude: <input type="text" name="latitude" placeholder="Enter Latitude" class="form-control w-100" required>
+                            </label>
+                            <label class="form-label mb-3 w-100">
+                                Longitude: <input type="text" name="longitude" placeholder="Enter Longitude" class="form-control w-100" required>
+                            </label>
+                            <label class="form-label mb-3 w-100">
+                                Query (Optional): <input type="text" name="query" placeholder="Enter Query" class="form-control w-100">
+                            </label>
+                            <label class="form-label mb-3 w-100">
+                                Zoom Level (Optional): <input type="number" name="zoom" placeholder="Enter Zoom Level" class="form-control w-100">
+                            </label>
+                        </div>
 
+                        <!-- Event Input Section -->
+                        <div id="input-event" class="input-section" style="display: none;">
+                            <label class="form-label mb-3 w-100">
+                                Summary: <input type="text" name="summary" placeholder="Event Summary" class="form-control w-100" required>
+                            </label>
+                            <label class="form-label mb-3 w-100">
+                                Start Date (YYYYMMDDTHHMMSSZ): <input type="text" name="start_date" placeholder="Start Date" class="form-control w-100" required>
+                            </label>
+                            <label class="form-label mb-3 w-100">
+                                End Date (YYYYMMDDTHHMMSSZ): <input type="text" name="end_date" placeholder="End Date" class="form-control w-100" required>
+                            </label>
+                            <label class="form-label mb-3 w-100">
+                                Location: <input type="text" name="location" placeholder="Event Location" class="form-control w-100">
+                            </label>
+                            <label class="form-label mb-3 w-100">
+                                Description: <textarea name="description" placeholder="Event Description" class="form-control w-100" rows="4"></textarea>
+                            </label>
+                        </div>
+
+                        <!-- MeCard Input Section -->
+                        <div id="input-mecard" class="input-section" style="display: none;">
+                            <label class="form-label mb-3 w-100">
+                                Name: <input type="text" name="name" placeholder="Name" class="form-control w-100" required>
+                            </label>
+                            <label class="form-label mb-3 w-100">
+                                Phonetic Reading: <input type="text" name="reading" placeholder="Phonetic Reading" class="form-control w-100">
+                            </label>
+                            <label class="form-label mb-3 w-100">
+                                Telephone: <input type="text" name="tel" placeholder="Telephone" class="form-control w-100">
+                            </label>
+                            <label class="form-label mb-3 w-100">
+                                Email: <input type="email" name="email" placeholder="Email" class="form-control w-100">
+                            </label>
+                            <label class="form-label mb-3 w-100">
+                                Memo: <input type="text" name="memo" placeholder="Memo" class="form-control w-100">
+                            </label>
+                            <label class="form-label mb-3 w-100">
+                                Birthday (YYYYMMDD): <input type="text" name="birthday" placeholder="Birthday" class="form-control w-100">
+                            </label>
+                            <label class="form-label mb-3 w-100">
+                                Address: <input type="text" name="address" placeholder="Address" class="form-control w-100">
+                            </label>
+                            <label class="form-label mb-3 w-100">
+                                URL: <input type="url" name="url" placeholder="URL" class="form-control w-100">
+                            </label>
+                            <label class="form-label mb-3 w-100">
+                                Nickname: <input type="text" name="nickname" placeholder="Nickname" class="form-control w-100">
+                            </label>
+                        </div>
+
+                        <!-- WhatsApp Input Section -->
+                        <div id="input-whatsapp" class="input-section" style="display: none;">
+                            <label class="form-label mb-3 w-100">
+                                Phone Number: <input type="text" name="phone_number" placeholder="11234567890" class="form-control w-100" required>
+                            </label>
+                            <label class="form-label mb-3 w-100">
+                                Message (Optional): <textarea name="message" placeholder="Message" class="form-control w-100" rows="4"></textarea>
+                            </label>
+                        </div>
+
+                        <!-- Bitcoin Input Section -->
+                        <div id="input-bitcoin" class="input-section" style="display: none;">
+                            <label class="form-label mb-3 w-100">
+                                Bitcoin Address: <input type="text" name="address" placeholder="Bitcoin Address" class="form-control w-100" required>
+                            </label>
+                            <label class="form-label mb-3 w-100">
+                                Amount (BTC): <input type="number" step="0.00000001" name="amount" placeholder="Amount in BTC" class="form-control w-100">
+                            </label>
+                            <label class="form-label mb-3 w-100">
+                                Label (Optional): <input type="text" name="label" placeholder="Label" class="form-control w-100">
+                            </label>
+                            <label class="form-label mb-3 w-100">
+                                Message (Optional): <textarea name="message" placeholder="Message" class="form-control w-100" rows="4"></textarea>
+                            </label>
+                        </div>
+
+                        <!-- Submit Button -->
                         <button type="submit">Generate QR Code</button>
                     </form>
                 </div>
@@ -144,9 +292,6 @@
 {#    <script src="{% static 'js/index.js' %}"></script>#}
 
     <script>
-    // selected type enum class url, email, text, phone, vcard, wifi
-
-    
         $(document).ready(function() {
             const $qrTypeRadios = $('input[name="qr_type"]');
             const $inputSections = $('.input-section');
@@ -165,17 +310,15 @@
 
                 // Hide all input sections
                 $inputSections.hide();
-                $inputSections.find('input, select').prop('required', false);
-
+                $inputSections.find('input, select, textarea').prop('disabled', true);
+                
                 // Show the input section corresponding to the selected QR code type
                 const $activeSection = $(`#input-${selectedType}`);
                 if ($activeSection.length) {
                     $activeSection.show();
-                    if (selectedType === "url" || selectedType === "text") {
-                        $activeSection.find('input').prop('required', true);
-                    } else if (selectedType === "email") {
-                        $activeSection.find('input[name="email"]').prop('required', true);
-                    }
+                    $activeSection.find('input, select, textarea').prop('disabled', false);
+                    // Set required fields based on selected type
+                    $activeSection.find('input[required], textarea[required]').prop('required', true);
                 }
             }
 
@@ -188,144 +331,75 @@
                 const selectedType = $('input[name="qr_type"]:checked').val();
                 console.log('QR Type:', selectedType);
 
-                const formData = new FormData(this);
+                // Collect form data from the visible input section only
+                const $activeSection = $(`#input-${selectedType}`);
+                const formDataArray = $activeSection.find('input, select, textarea').serializeArray();
+                const data = {};
+                formDataArray.forEach((item) => { 
+                    data[item.name] = item.value;
+                });
 
-                if (selectedType === "url"){
-                    const url = formData.get("url");
-                    $.ajax({
-                        url: "{% url 'qr:qr_url_v1' %}",
-                        type: "GET",
-                        data: {url: url},
-                        xhrFields: {
-                            responseType: 'blob'
-                        },
-                        success: function(blob) {
-                            const imageUrl = URL.createObjectURL(blob);
-                            $qrCodeImg.attr('src', imageUrl);
-                            $qrResult.show();
-                            $qrTextP.text(`QR Code for: ${url}`);
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('Error:', error);
-                            alert(`Error generating QR Code: ${error}`);
-                        }
-                    });
-                } else if (selectedType === "email") {
-                    const email = formData.get("email");
-                    const subject = formData.get("subject");
-                    const body = formData.get("body");
-                    $.ajax({
-                        url: "{% url 'qr:qr_email_v1' %}",
-                        type: "GET",
-                        data: {email: email, subject: subject, body: body},
-                        xhrFields: {
-                            responseType: 'blob'
-                        },
-                        success: function(blob) {
-                            const imageUrl = URL.createObjectURL(blob);
-                            $qrCodeImg.attr('src', imageUrl);
-                            $qrResult.show();
-                            $qrTextP.text(`QR Code for: ${email}`);
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('Error:', error);
-                            alert(`Error generating QR Code: ${error}`);
-                        }
-                    });
-                } else if (selectedType === "text") {
-                    const text = formData.get("text");
-                    $.ajax({
-                        url: "{% url 'qr:qr_text_v1' %}",
-                        type: "GET",
-                        data: {text: text},
-                        xhrFields: {
-                            responseType: 'blob'
-                        },
-                        success: function(blob) {
-                            const imageUrl = URL.createObjectURL(blob); 
-                            $qrCodeImg.attr('src', imageUrl);
-                            $qrResult.show();
-                            $qrTextP.text(`QR Code for: ${text}`);
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('Error:', error);
-                            alert(`Error generating QR Code: ${error}`);
-                        }
-                    });
-                } else if (selectedType === "phone") {
-                    const phone = formData.get("phone");
-                    $.ajax({
-                        url: "{% url 'qr:qr_phone_number_v1' %}",
-                        type: "GET",
-                        data: {phone: phone},
-                        xhrFields: {
-                            responseType: 'blob'
-                        },
-                        success: function(blob) {
-                            const imageUrl = URL.createObjectURL(blob);
-                            $qrCodeImg.attr('src', imageUrl);
-                            $qrResult.show();
-                            $qrTextP.text(`QR Code for: ${phone}`);
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('Error:', error);
-                            alert(`Error generating QR Code: ${error}`);
-                        }
-                    });
-                } else if (selectedType === "vcard") {
-                    const vcardData = {
-                        first_name: formData.get("first_name"),
-                        last_name: formData.get("last_name"),
-                        vcard_email: formData.get("vcard_email"),
-                        vcard_mobile: formData.get("vcard_mobile"),
-                        job_title: formData.get("job_title"),
-                        organization: formData.get("organization"),
-                        address: formData.get("address"),
-                        label: formData.get("label"),
-                        vcard_url: formData.get("vcard_url"),
-                        note: formData.get("note"),
-                    };
-                    $.ajax({
-                        url: "{% url 'qr:qr_vcard_v1' %}",
-                        type: "GET",
-                        data: vcardData,
-                        xhrFields: {
-                            responseType: 'blob'
-                        },
-                        success: function(blob) {
-                            const imageUrl = URL.createObjectURL(blob);
-                            $qrCodeImg.attr('src', imageUrl);
-                            $qrResult.show();
-                            $qrTextP.text(`QR Code for: ${vcardData.first_name} ${vcardData.last_name}`);
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('Error:', error);
-                            alert(`Error generating QR Code: ${error}`);
-                        }
-                    });
-                } else if (selectedType === "wifi") {
-                    const ssid = formData.get("ssid");
-                    const password = formData.get("password");
-                    const encryption = formData.get("encryption");
-                    $.ajax({
-                        url: "{% url 'qr:qr_wifi_v1' %}",
-                        type: "GET",
-                        data: {ssid: ssid, password: password, encryption: encryption},
-                        xhrFields: {
-                            responseType: 'blob'
-                        },
-                        success: function(blob) {
-                            const imageUrl = URL.createObjectURL(blob);
-                            $qrCodeImg.attr('src', imageUrl);
-                            $qrResult.show();
-                            $qrTextP.text(`QR Code for: ${ssid}`);
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('Error:', error);
-                            alert(`Error generating QR Code: ${error}`);
-                        }
-                    });
+                let url = "";
+                switch (selectedType) {
+                    case "url":
+                        url = "{% url 'qr:qr_url_v1' %}";
+                        break;
+                    case "email":
+                        url = "{% url 'qr:qr_email_v1' %}";
+                        break;
+                    case "text":
+                        url = "{% url 'qr:qr_text_v1' %}";
+                        break;
+                    case "phone":
+                        url = "{% url 'qr:qr_phone_number_v1' %}";
+                        break;
+                    case "vcard":
+                        url = "{% url 'qr:qr_vcard_v1' %}";
+                        break;
+                    case "wifi":
+                        url = "{% url 'qr:qr_wifi_v1' %}";
+                        break;
+                    case "sms":
+                        url = "{% url 'qr:qr_sms_v1' %}";
+                        break;
+                    case "geo":
+                        url = "{% url 'qr:qr_geo_v1' %}";
+                        break;
+                    case "event":
+                        url = "{% url 'qr:qr_event_v1' %}";
+                        break;
+                    case "mecard":
+                        url = "{% url 'qr:qr_mecard_v1' %}";
+                        break;
+                    case "whatsapp":
+                        url = "{% url 'qr:qr_whatsapp_v1' %}";
+                        break;
+                    case "bitcoin":
+                        url = "{% url 'qr:qr_bitcoin_v1' %}";
+                        break;
+                    default:
+                        alert("Invalid QR Code type selected.");
+                        return;
                 }
+                
+                $.ajax({
+                    url: url,
+                    type: "GET",
+                    data: data,
+                    xhrFields: {
+                        responseType: 'blob'
+                    },
+                    success: function(blob) {
+                        const imageUrl = URL.createObjectURL(blob);
+                        $qrCodeImg.attr('src', imageUrl);
+                        $qrResult.show();
+                        $qrTextP.text(`QR Code for: ${selectedType}`);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                        alert(`Error generating QR Code: ${error}`);
+                    }
+                });
             });
         });
     </script>
