@@ -2,6 +2,8 @@
 import qrcode
 from io import BytesIO
 import logging
+import urllib.parse
+
 from typing import Dict
 
 logger = logging.getLogger(__name__)
@@ -86,7 +88,7 @@ def generate_text_qr(text: str) -> bytes:
     return create_qr_code(text)
 
 
-def generate_phone_qr(phone: str) -> bytes:
+def generate_phone_qr(phone_number: str) -> bytes:
     """
     Generate a QR code for a phone number.
 
@@ -96,7 +98,7 @@ def generate_phone_qr(phone: str) -> bytes:
     Returns:
         bytes: The generated QR code image in PNG format.
     """
-    tel = f"tel:{phone}"
+    tel = f"tel:{phone_number}"
     return create_qr_code(tel)
 
 
@@ -174,17 +176,166 @@ def generate_wifi_qr(ssid: str, password: str, encryption: str = "WPA") -> bytes
         raise
 
 
-def generate_sms_qr(country_code: str, phone_number: str, message: str) -> bytes:
+def generate_sms_qr(phone_number: str, message: str) -> bytes:
     """
     Generate a QR code for an SMS message.
 
     Args:
-        country_code (str): The country code.
         phone_number (str): The phone number.
         message (str): The SMS message.
 
     Returns:
         bytes: The generated QR code image in PNG format.
     """
-    sms = f"SMSTO:{country_code}{phone_number}:{message}"
+    sms = f"SMSTO:{phone_number}:{message}"
     return create_qr_code(sms)
+
+
+def generate_geo_qr(
+    latitude: float, longitude: float, query: str = "", zoom: int = 0
+) -> bytes:
+    """
+    Generate a QR code for a geographical location.
+
+    Args:
+        latitude (float): Latitude of the location.
+        longitude (float): Longitude of the location.
+        query (str, optional): Query parameter, e.g., place name. Defaults to ''.
+        zoom (int, optional): Zoom level. Defaults to 0.
+
+    Returns:
+        bytes: The generated QR code image in PNG format.
+    """
+    try:
+        geo_uri = f"geo:{latitude},{longitude}"
+        params = []
+        if zoom > 0:
+            params.append(f"z={zoom}")
+        if query:
+            params.append(f"q={query}")
+        if params:
+            geo_uri += "?" + "&".join(params)
+        return create_qr_code(geo_uri)
+    except Exception as e:
+        logger.error(f"Error creating Geo QR Code: {e}")
+        raise
+
+
+def generate_event_qr(event_data: Dict[str, str]) -> bytes:
+    """
+    Generate a QR code for a calendar event.
+
+    Args:
+        event_data (Dict[str, str]): A dictionary containing event information.
+            Expected keys: summary, start_date, end_date, location, description
+
+    Returns:
+        bytes: The generated QR code image in PNG format.
+    """
+    try:
+        vcal = "BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\n"
+        vcal += f"SUMMARY:{event_data.get('summary', '')}\n"
+        vcal += f"DTSTART:{event_data.get('start_date', '')}\n"
+        vcal += f"DTEND:{event_data.get('end_date', '')}\n"
+        if event_data.get("location"):
+            vcal += f"LOCATION:{event_data.get('location')}\n"
+        if event_data.get("description"):
+            vcal += f"DESCRIPTION:{event_data.get('description')}\n"
+        vcal += "END:VEVENT\nEND:VCALENDAR"
+        return create_qr_code(vcal)
+    except Exception as e:
+        logger.error(f"Error creating Event QR Code: {e}")
+        raise
+
+
+def generate_mecard_qr(mecard_data: Dict[str, str]) -> bytes:
+    """
+    Generate a QR code in MECARD format.
+
+    Args:
+        mecard_data (Dict[str, str]): A dictionary containing contact information.
+            Expected keys: name, reading, tel, email, memo, birthday, address, url, nickname
+
+    Returns:
+        bytes: The generated QR code image in PNG format.
+    """
+    try:
+        mecard = "MECARD:"
+        if mecard_data.get("name"):
+            mecard += f"N:{mecard_data.get('name')};"
+        if mecard_data.get("reading"):
+            mecard += f"SOUND:{mecard_data.get('reading')};"
+        if mecard_data.get("tel"):
+            mecard += f"TEL:{mecard_data.get('tel')};"
+        if mecard_data.get("email"):
+            mecard += f"EMAIL:{mecard_data.get('email')};"
+        if mecard_data.get("memo"):
+            mecard += f"NOTE:{mecard_data.get('memo')};"
+        if mecard_data.get("birthday"):
+            mecard += f"BDAY:{mecard_data.get('birthday')};"
+        if mecard_data.get("address"):
+            mecard += f"ADR:{mecard_data.get('address')};"
+        if mecard_data.get("url"):
+            mecard += f"URL:{mecard_data.get('url')};"
+        if mecard_data.get("nickname"):
+            mecard += f"NICKNAME:{mecard_data.get('nickname')};"
+        mecard += ";"
+        return create_qr_code(mecard)
+    except Exception as e:
+        logger.error(f"Error creating MECARD QR Code: {e}")
+        raise
+
+
+def generate_whatsapp_qr(phone_number: str, message: str = "") -> bytes:
+    """
+    Generate a QR code for a WhatsApp message.
+
+    Args:
+        phone_number (str): The recipient's phone number in international format.
+        message (str, optional): The message to send. Defaults to ''.
+
+    Returns:
+        bytes: The generated QR code image in PNG format.
+    """
+    try:
+        whatsapp_uri = f"https://wa.me/{phone_number}"
+        if message:
+            query_params = {"text": message}
+            encoded_params = urllib.parse.urlencode(query_params)
+            whatsapp_uri += f"?{encoded_params}"
+        return create_qr_code(whatsapp_uri)
+    except Exception as e:
+        logger.error(f"Error creating WhatsApp QR Code: {e}")
+        raise
+
+
+def generate_bitcoin_qr(
+    address: str, amount: float = None, label: str = "", message: str = ""
+) -> bytes:
+    """
+    Generate a QR code for a Bitcoin payment.
+
+    Args:
+        address (str): The Bitcoin address.
+        amount (float, optional): The amount in BTC. Defaults to None.
+        label (str, optional): A label for the address. Defaults to ''.
+        message (str, optional): A message for the payment. Defaults to ''.
+
+    Returns:
+        bytes: The generated QR code image in PNG format.
+    """
+    try:
+        bitcoin_uri = f"bitcoin:{address}"
+        params = []
+        if amount is not None:
+            params.append(f"amount={amount}")
+        if label:
+            params.append(f"label={label}")
+        if message:
+            params.append(f"message={message}")
+        if params:
+            bitcoin_uri += "?" + "&".join(params)
+        return create_qr_code(bitcoin_uri)
+    except Exception as e:
+        logger.error(f"Error creating Bitcoin QR Code: {e}")
+        raise
