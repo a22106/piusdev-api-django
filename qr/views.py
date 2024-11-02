@@ -277,7 +277,7 @@ class QrPhoneNumberView(APIView):
         operation_id="Phone Number QR Code",
         manual_parameters=[
             openapi.Parameter(
-                "phone",
+                "phone_number",
                 openapi.IN_QUERY,
                 description="Phone number to encode in the QR Code",
                 type=openapi.TYPE_STRING,
@@ -289,13 +289,13 @@ class QrPhoneNumberView(APIView):
         logger.info("API Request to generate Phone QR Code")
 
         try:
-            phone = request.query_params.get("phone", "")
-            if not phone:
+            phone_number = request.query_params.get("phone_number", "")
+            if not phone_number:
                 return JsonResponse(
                     {"detail": "Phone parameter is required."}, status=400
                 )
 
-            qr_image = generate_phone_qr(phone)
+            qr_image = generate_phone_qr(phone_number)
             return HttpResponse(qr_image, content_type="image/png")
         except Exception as e:
             logger.error(f"Error generating Phone QR Code via API: {e}")
@@ -374,7 +374,6 @@ class QrSmsView(APIView):
                 openapi.IN_QUERY,
                 description="SMS message",
                 type=openapi.TYPE_STRING,
-                required=True,
             ),
         ],
         responses={200: openapi.Response("QR Code Image (PNG)")},
@@ -424,14 +423,12 @@ class QrGeoView(APIView):
                 openapi.IN_QUERY,
                 description="Optional query parameter (e.g., place name)",
                 type=openapi.TYPE_STRING,
-                required=False,
             ),
             openapi.Parameter(
                 "zoom",
                 openapi.IN_QUERY,
                 description="Optional zoom level",
                 type=openapi.TYPE_INTEGER,
-                required=False,
             ),
         ],
         responses={200: openapi.Response("QR Code Image (PNG)")},
