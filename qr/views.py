@@ -1,4 +1,7 @@
 # qr/views.py
+from lib2to3.fixes.fix_input import context
+
+from django.shortcuts import render
 from django.views import View
 from django.views.generic import TemplateView
 from django.http import HttpResponse, JsonResponse
@@ -8,6 +11,8 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
 import logging
+import pycountry
+import phonenumbers
 
 from rest_framework.views import APIView
 
@@ -30,7 +35,25 @@ logger = logging.getLogger(__name__)
 
 
 class IndexView(TemplateView):
-    template_name = "qr/index.html"
+    def get(self, request):
+        countries = []
+        for country in sorted(pycountry.countries, key=lambda x: x.name):
+            try:
+                country_code = phonenumbers.country_code_for_region(country.alpha_2)
+                countries.append(
+                    {
+                        "name": country.name,
+                        "dial_code": f"+{country_code}",
+                    }
+                )
+            except:
+                continue  # 국가 코드가 없는 경우 건너뜀
+
+        context = {
+            "countries": countries,
+            # 추가 context
+        }
+        return render(request, "qr/index.html", context)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

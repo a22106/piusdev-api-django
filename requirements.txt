@@ -2,6 +2,8 @@
 django
 python-dotenv
 str2bool
+pycountry
+phonenumbers
 
 # Swagger
 drf-yasg

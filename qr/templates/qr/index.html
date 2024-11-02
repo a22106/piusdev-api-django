@@ -101,46 +101,65 @@
 
                         <!-- Text Input Section -->
                         <div id="input-text" class="input-section" style="display: none;">
-                            <label class="form-label mb-3">
-                                Text: <input type="text" name="text" placeholder="Enter Text" class="form-control">
+                            <label class="form-label mb-3 w-100">
+                                Text: <textarea type="text" name="text" placeholder="Enter Text" class="form-control w-100" rows="4"></textarea>
                             </label>
                         </div>
 
                         <!-- Phone Number Input Section -->
                         <div id="input-phone" class="input-section" style="display: none;">
-                            <label class="form-label mb-3">
-                                Phone Number: <input type="text" name="phone" placeholder="Enter Phone Number" class="form-control">
-                            </label>
+                            {% include 'qr/input_phone.html' %}
                         </div>
 
                         <!-- VCard Input Section -->
                         <div id="input-vcard" class="input-section" style="display: none;">
-                            <label class="form-label mb-3">
-                                First Name: <input type="text" name="first_name" placeholder="First Name" class="form-control">
-                            </label>
-                            <label clfiass="form-label mb-3">
-                                Last Name: <input type="text" name="last_name" placeholder="Last Name" class="form-control">
-                            </label><br>
-                            <label class="form-label mb-3">
-                                Email: <input type="email" name="vcard_email" placeholder="Email" class="form-control">
-                            </label><br>
-                            <label class="form-label mb-3">
-                                Phone (Mobile): <input type="text" name="vcard_mobile" placeholder="Mobile Phone" class="form-control">
-                            </label><br>
-                            <label class="form-label mb-3">
-                                Organization: <input type="text" name="organization" placeholder="Organization" class="form-control">
-                            </label>
-                            <label class="form-label mb-3">
-                                Job Title: <input type="text" name="job_title" placeholder="Title" class="form-control">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label w-100">
+                                        First Name:
+                                        <input type="text" name="first_name" placeholder="First Name" class="form-control" style="border-top-right-radius: 0; border-bottom-right-radius: 0;">
+                                    </label>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label w-100">
+                                        Last Name:
+                                        <input type="text" name="last_name" placeholder="Last Name" class="form-control" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label w-100">
+                                        Email:
+                                        <input type="email" name="vcard_email" placeholder="Email" class="form-control" style="border-top-right-radius: 0; border-bottom-right-radius: 0;">
+                                    </label>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label w-100">
+                                        Phone (Mobile):
+                                        <input type="text" name="vcard_mobile" placeholder="Mobile Phone" class="form-control" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="row">   
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label w-100">
+                                        Organization:
+                                        <input type="text" name="organization" placeholder="Organization" class="form-control" style="border-top-right-radius: 0; border-bottom-right-radius: 0;">
+                                    </label>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label w-100">
+                                        Job Title:
+                                        <input type="text" name="job_title" placeholder="Title" class="form-control" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                                    </label>
+                                </div>
+                            </div>
+                            <label class="form-label mb-3 w-100">
+                                Address: <textarea type="text" name="address" placeholder="Address" class="form-control w-100" rows="2"></textarea>
                             </label><br>
                             <label class="form-label mb-3 w-100">
-                                Address: <input type="text" name="address" placeholder="Address" class="form-control w-100">
-                            </label><br>
-                            <label class="form-label mb-3">
-                                Label: <input type="text" name="label" placeholder="Label" class="form-control">
-                            </label><br>
-                            <label class="form-label mb-3">
-                                URL: <input type="url" name="vcard_url" placeholder="URL" class="form-control">
+                                URL: <input type="url" name="vcard_url" placeholder="https://example.com" class="form-control">
                             </label><br>
                             <label class="form-label mb-3 w-100">
                                 Note: <textarea name="note" placeholder="Note" class="form-control w-100" rows="4"></textarea>
@@ -167,12 +186,7 @@
                         
                         <!-- SMS Input Section -->
                         <div id="input-sms" class="input-section" style="display: none;">
-                            <label class="form-label mb-3 w-100">
-                                Country Code: <input type="text" name="country_code" placeholder="Country Code" class="form-control w-100" required>
-                            </label>
-                            <label class="form-label mb-3 w-100">
-                                Phone Number: <input type="text" name="phone_number" placeholder="Phone Number" class="form-control w-100" required>
-                            </label>
+                            {% include 'qr/input_phone.html' %}
                             <label class="form-label mb-3 w-100">
                                 Message (Optional): <textarea name="message" placeholder="Message" class="form-control w-100" rows="4"></textarea>
                             </label>
@@ -246,9 +260,7 @@
 
                         <!-- WhatsApp Input Section -->
                         <div id="input-whatsapp" class="input-section" style="display: none;">
-                            <label class="form-label mb-3 w-100">
-                                Phone Number: <input type="text" name="phone_number" placeholder="11234567890" class="form-control w-100" required>
-                            </label>
+                            {% include 'qr/input_phone.html' %}
                             <label class="form-label mb-3 w-100">
                                 Message (Optional): <textarea name="message" placeholder="Message" class="form-control w-100" rows="4"></textarea>
                             </label>
@@ -299,6 +311,13 @@
             const $qrCodeImg = $("#qr-code");
             const $qrTextP = $("#qr-text");
             const $qrResult = $("#qr-result");
+            
+            $(`#country-code-select`).select2({
+                theme: `bootstrap-5`,
+                placeholder: `Select a country`,
+                allowClear: true,
+                width: `resolve` // 필요에 따라 너비 조정
+            });
 
             /**
              * Show the relevant input section based on the selected QR code type.
