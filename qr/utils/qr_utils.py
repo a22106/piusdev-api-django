@@ -2,6 +2,8 @@
 import qrcode
 from io import BytesIO
 import logging
+import urllib.parse
+
 from typing import Dict
 
 logger = logging.getLogger(__name__)
@@ -86,7 +88,7 @@ def generate_text_qr(text: str) -> bytes:
     return create_qr_code(text)
 
 
-def generate_phone_qr(phone: str) -> bytes:
+def generate_phone_qr(phone_number: str) -> bytes:
     """
     Generate a QR code for a phone number.
 
@@ -96,7 +98,7 @@ def generate_phone_qr(phone: str) -> bytes:
     Returns:
         bytes: The generated QR code image in PNG format.
     """
-    tel = f"tel:{phone}"
+    tel = f"tel:{phone_number}"
     return create_qr_code(tel)
 
 
@@ -299,7 +301,9 @@ def generate_whatsapp_qr(phone_number: str, message: str = "") -> bytes:
     try:
         whatsapp_uri = f"https://wa.me/{phone_number}"
         if message:
-            whatsapp_uri += f"?text={message}"
+            query_params = {"text": message}
+            encoded_params = urllib.parse.urlencode(query_params)
+            whatsapp_uri += f"?{encoded_params}"
         return create_qr_code(whatsapp_uri)
     except Exception as e:
         logger.error(f"Error creating WhatsApp QR Code: {e}")

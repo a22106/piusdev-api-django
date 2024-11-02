@@ -1,3 +1,4 @@
+{# index.html #}
 {% extends 'base.html' %}
 {% load static %}
 
@@ -76,20 +77,24 @@
                         </div>
                     </div>
 
-                    <h1>QR Code Generator</h1>
+                    <h1>QR Code Generator</h1> 
+                    <p class="text-muted">
+                        <span class="text-danger">*</span> Required fields
+                    </p>
                     <form action="{% url 'qr:index' %}" method="post" id="qr-form">
                         {% csrf_token %}
                         <!-- URL Input Section -->
                         <div id="input-url" class="input-section" style="display: none;">
                             <label class="form-label mb-3 w-100">
-                                URL: <input type="text" name="url" placeholder="Enter URL" class="form-control w-100">
+                                <span class="text-danger">*</span> URL: 
+                                <input type="text" name="url" placeholder="https://example.com" class="form-control w-100">
                             </label>
                         </div>
 
                         <!-- Email Input Section -->
                         <div id="input-email" class="input-section" style="display: none;">
                             <label class="form-label mb-3 w-100">
-                                Email: <input type="email" name="email" placeholder="Enter Email" class="form-control w-100">
+                                <span class="text-danger">*</span> Email: <input type="email" name="email" placeholder="example@example.com" class="form-control w-100">
                             </label><br>
                             <label class="form-label mb-3 w-100">
                                 Subject: <input type="text" name="subject" placeholder="Enter Subject" class="form-control w-100">
@@ -102,7 +107,7 @@
                         <!-- Text Input Section -->
                         <div id="input-text" class="input-section" style="display: none;">
                             <label class="form-label mb-3 w-100">
-                                Text: <textarea type="text" name="text" placeholder="Enter Text" class="form-control w-100" rows="4"></textarea>
+                                <span class="text-danger">*</span>Text: <textarea type="text" name="text" placeholder="Enter Text" class="form-control w-100" rows="4"></textarea>
                             </label>
                         </div>
 
@@ -116,13 +121,13 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label w-100">
-                                        First Name:
+                                        <span class="text-danger">*</span> First Name:
                                         <input type="text" name="first_name" placeholder="First Name" class="form-control" style="border-top-right-radius: 0; border-bottom-right-radius: 0;">
                                     </label>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label w-100">
-                                        Last Name:
+                                        <span class="text-danger">*</span> Last Name:
                                         <input type="text" name="last_name" placeholder="Last Name" class="form-control" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
                                     </label>
                                 </div>
@@ -130,13 +135,13 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label w-100">
-                                        Email:
+                                        <span class="text-danger">*</span> Email:
                                         <input type="email" name="vcard_email" placeholder="Email" class="form-control" style="border-top-right-radius: 0; border-bottom-right-radius: 0;">
                                     </label>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label w-100">
-                                        Phone (Mobile):
+                                        <span class="text-danger">*</span> Phone (Mobile):
                                         <input type="text" name="vcard_mobile" placeholder="Mobile Phone" class="form-control" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
                                     </label>
                                 </div>
@@ -169,7 +174,7 @@
                         <!-- WiFi Input Section -->
                         <div id="input-wifi" class="input-section" style="display: none;">
                             <label class="form-label mb-3">
-                                Network name: <input type="text" name="ssid" placeholder="WiFi SSID" class="form-control">
+                                <span class="text-danger">*</span> Network name: <input type="text" name="ssid" placeholder="WiFi SSID" class="form-control">
                             </label>
                             <label class="form-label mb-3">
                                 Password: <input type="password" name="password" placeholder="WiFi Password" class="form-control">
@@ -195,10 +200,10 @@
                         <!-- Geolocation Input Section -->
                         <div id="input-geo" class="input-section" style="display: none;">
                             <label class="form-label mb-3 w-100">
-                                Latitude: <input type="text" name="latitude" placeholder="Enter Latitude" class="form-control w-100" required>
+                                <span class="text-danger">*</span> Latitude: <input type="text" name="latitude" placeholder="Enter Latitude" class="form-control w-100" required>
                             </label>
                             <label class="form-label mb-3 w-100">
-                                Longitude: <input type="text" name="longitude" placeholder="Enter Longitude" class="form-control w-100" required>
+                                <span class="text-danger">*</span> Longitude: <input type="text" name="longitude" placeholder="Enter Longitude" class="form-control w-100" required>
                             </label>
                             <label class="form-label mb-3 w-100">
                                 Query (Optional): <input type="text" name="query" placeholder="Enter Query" class="form-control w-100">
@@ -211,13 +216,13 @@
                         <!-- Event Input Section -->
                         <div id="input-event" class="input-section" style="display: none;">
                             <label class="form-label mb-3 w-100">
-                                Summary: <input type="text" name="summary" placeholder="Event Summary" class="form-control w-100" required>
+                                <span class="text-danger">*</span> Summary: <input type="text" name="summary" placeholder="Event Summary" class="form-control w-100" required>
                             </label>
                             <label class="form-label mb-3 w-100">
-                                Start Date (YYYYMMDDTHHMMSSZ): <input type="text" name="start_date" placeholder="Start Date" class="form-control w-100" required>
+                                <span class="text-danger">*</span> Start Date (YYYYMMDDTHHMMSSZ): <input type="text" name="start_date" placeholder="Start Date" class="form-control w-100" required>
                             </label>
                             <label class="form-label mb-3 w-100">
-                                End Date (YYYYMMDDTHHMMSSZ): <input type="text" name="end_date" placeholder="End Date" class="form-control w-100" required>
+                                <span class="text-danger">*</span> End Date (YYYYMMDDTHHMMSSZ): <input type="text" name="end_date" placeholder="End Date" class="form-control w-100" required>
                             </label>
                             <label class="form-label mb-3 w-100">
                                 Location: <input type="text" name="location" placeholder="Event Location" class="form-control w-100">
@@ -230,7 +235,7 @@
                         <!-- MeCard Input Section -->
                         <div id="input-mecard" class="input-section" style="display: none;">
                             <label class="form-label mb-3 w-100">
-                                Name: <input type="text" name="name" placeholder="Name" class="form-control w-100" required>
+                                <span class="text-danger">*</span> Name: <input type="text" name="name" placeholder="Name" class="form-control w-100" required>
                             </label>
                             <label class="form-label mb-3 w-100">
                                 Phonetic Reading: <input type="text" name="reading" placeholder="Phonetic Reading" class="form-control w-100">
@@ -269,10 +274,10 @@
                         <!-- Bitcoin Input Section -->
                         <div id="input-bitcoin" class="input-section" style="display: none;">
                             <label class="form-label mb-3 w-100">
-                                Bitcoin Address: <input type="text" name="address" placeholder="Bitcoin Address" class="form-control w-100" required>
+                                <span class="text-danger">*</span> Bitcoin Address: <input type="text" name="address" placeholder="Bitcoin Address" class="form-control w-100" required>
                             </label>
                             <label class="form-label mb-3 w-100">
-                                Amount (BTC): <input type="number" step="0.00000001" name="amount" placeholder="Amount in BTC" class="form-control w-100">
+                                <span class="text-danger">*</span> Amount (BTC): <input type="number" step="0.00001" name="amount" placeholder="Amount in BTC" class="form-control w-100">
                             </label>
                             <label class="form-label mb-3 w-100">
                                 Label (Optional): <input type="text" name="label" placeholder="Label" class="form-control w-100">
@@ -312,7 +317,7 @@
             const $qrTextP = $("#qr-text");
             const $qrResult = $("#qr-result");
             
-            $(`#country-code-select`).select2({
+            $(`.country-code-select`).select2({
                 theme: `bootstrap-5`,
                 placeholder: `Select a country`,
                 allowClear: true,
@@ -325,7 +330,6 @@
              */
             function showRelevantInput() {
                 const selectedType = $('input[name="qr_type"]:checked').val();
-                console.log('Selected Type:', selectedType);
 
                 // Hide all input sections
                 $inputSections.hide();
@@ -348,7 +352,6 @@
             $form.submit(function(event) {
                 event.preventDefault();
                 const selectedType = $('input[name="qr_type"]:checked').val();
-                console.log('QR Type:', selectedType);
 
                 // Collect form data from the visible input section only
                 const $activeSection = $(`#input-${selectedType}`);
@@ -357,6 +360,14 @@
                 formDataArray.forEach((item) => { 
                     data[item.name] = item.value;
                 });
+
+                // country_code와 phone_number가 모두 있으면 phone_number에 country_code를 붙임
+                if (data['country_code'] && data['phone_number']) {
+                    const countryCode = data['country_code'].replace(/\+/g, '').replace(/\s+/g, '');
+                    const phoneNumber = data['phone_number'].replace(/\s+/g, '');
+                    data['phone_number'] = countryCode + phoneNumber;
+                    delete data['country_code'];
+                }
 
                 let url = "";
                 switch (selectedType) {
@@ -412,7 +423,7 @@
                         const imageUrl = URL.createObjectURL(blob);
                         $qrCodeImg.attr('src', imageUrl);
                         $qrResult.show();
-                        $qrTextP.text(`QR Code for: ${selectedType}`);
+                        {#$qrTextP.text(`QR Code for: ${selectedType}`);#}
                     },
                     error: function(xhr, status, error) {
                         console.error('Error:', error);
