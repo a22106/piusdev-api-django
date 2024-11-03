@@ -36,118 +36,61 @@ logger = logging.getLogger(__name__)
 
 class IndexView(TemplateView):
     def get(self, request):
-        countries = []
-        for country in sorted(pycountry.countries, key=lambda x: x.name):
-            try:
-                country_code = phonenumbers.country_code_for_region(country.alpha_2)
-                countries.append(
-                    {
-                        "name": country.name,
-                        "dial_code": f"+{country_code}",
-                    }
-                )
-            except:
-                continue  # 국가 코드가 없는 경우 건너뜀
-
-        context = {
-            "countries": countries,
-            # 추가 context
-        }
+        countries = [
+            {
+                "name": country.name,
+                "dial_code": f"+{phonenumbers.country_code_for_region(country.alpha_2)}",
+            }
+            for country in sorted(pycountry.countries, key=lambda x: x.name)
+            if phonenumbers.country_code_for_region(country.alpha_2)
+        ]
+        context = {"countries": countries}
         return render(request, "qr/index.html", context)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["title"] = "QR Code Generator"
-        context["description"] = "A simple QR Code generator"
-        context["keywords"] = "QR Code, Generator"
+        context.update(
+            {
+                "title": "QR Code Generator",
+                "description": "A simple QR Code generator",
+                "keywords": "QR Code, Generator",
+            }
+        )
         return context
 
 
-# TODO: vcard Email 입력이 안되는 문제 있음
 class QrVcardView(APIView):
     @swagger_auto_schema(
         operation_id="VCard QR Code",
         manual_parameters=[
             openapi.Parameter(
-                "first_name",
-                openapi.IN_QUERY,
-                type=openapi.TYPE_STRING,
-                required=True,
+                "first_name", openapi.IN_QUERY, type=openapi.TYPE_STRING, required=True
             ),
             openapi.Parameter(
-                "last_name",
-                openapi.IN_QUERY,
-                type=openapi.TYPE_STRING,
-                required=True,
+                "last_name", openapi.IN_QUERY, type=openapi.TYPE_STRING, required=True
             ),
             openapi.Parameter(
-                "vcard_phone",
-                openapi.IN_QUERY,
-                description="Phone number",
-                type=openapi.TYPE_STRING,
+                "vcard_phone", openapi.IN_QUERY, type=openapi.TYPE_STRING
             ),
             openapi.Parameter(
                 "vcard_mobile",
                 openapi.IN_QUERY,
-                description="Mobile phone number",
                 type=openapi.TYPE_STRING,
                 required=True,
             ),
             openapi.Parameter(
-                "vcard_email",
-                openapi.IN_QUERY,
-                description="Email address",
-                type=openapi.TYPE_STRING,
-                required=True,
+                "vcard_email", openapi.IN_QUERY, type=openapi.TYPE_STRING, required=True
             ),
+            openapi.Parameter("vcard_url", openapi.IN_QUERY, type=openapi.TYPE_STRING),
             openapi.Parameter(
-                "vcard_url",
-                openapi.IN_QUERY,
-                description="Website URL",
-                type=openapi.TYPE_STRING,
+                "organization", openapi.IN_QUERY, type=openapi.TYPE_STRING
             ),
-            openapi.Parameter(
-                "organization",
-                openapi.IN_QUERY,
-                description="Organization",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "job_title",
-                openapi.IN_QUERY,
-                description="Job title",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "fax",
-                openapi.IN_QUERY,
-                description="Fax number",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "address",
-                openapi.IN_QUERY,
-                description="Address",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "zip",
-                openapi.IN_QUERY,
-                description="Zip code",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "country",
-                openapi.IN_QUERY,
-                description="Country",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "note",
-                openapi.IN_QUERY,
-                description="Note",
-                type=openapi.TYPE_STRING,
-            ),
+            openapi.Parameter("job_title", openapi.IN_QUERY, type=openapi.TYPE_STRING),
+            openapi.Parameter("fax", openapi.IN_QUERY, type=openapi.TYPE_STRING),
+            openapi.Parameter("address", openapi.IN_QUERY, type=openapi.TYPE_STRING),
+            openapi.Parameter("zip", openapi.IN_QUERY, type=openapi.TYPE_STRING),
+            openapi.Parameter("country", openapi.IN_QUERY, type=openapi.TYPE_STRING),
+            openapi.Parameter("note", openapi.IN_QUERY, type=openapi.TYPE_STRING),
         ],
         responses={200: openapi.Response("QR Code Image (PNG)")},
     )
@@ -167,18 +110,13 @@ class QrUrlView(APIView):
         operation_id="URL QR Code",
         manual_parameters=[
             openapi.Parameter(
-                "url",
-                openapi.IN_QUERY,
-                description="URL to encode in the QR Code",
-                type=openapi.TYPE_STRING,
-                required=True,
+                "url", openapi.IN_QUERY, type=openapi.TYPE_STRING, required=True
             )
         ],
         responses={200: openapi.Response("QR Code Image (PNG)")},
     )
     def get(self, request):
         logger.info("API Request to generate URL QR Code")
-
         try:
             url = request.query_params.get("url", "")
             if not url:
