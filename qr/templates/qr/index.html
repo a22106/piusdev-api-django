@@ -299,13 +299,14 @@
                     <h5>Generated QR Code:</h5>
                     <div id="qr-result" style="display: none;">
                         <img id="qr-code" alt="QR Code" src="" class="img-fluid mb-3">
-                        <p id="qr-text" class="text-break">QR Code for:</p>
                     </div>
+                    <button id="download-png" class="btn btn-primary mb-2" disabled>Download PNG</button>
+                    <button id="download-svg" class="btn" disabled>Download SVG</button>
                 </div>
             </div>
         </div>
     </div>
-    
+        
 {#    <script src="{% static 'js/index.js' %}"></script>#}
 
     <script>
@@ -314,7 +315,6 @@
             const $inputSections = $('.input-section');
             const $form = $("#qr-form");
             const $qrCodeImg = $("#qr-code");
-            const $qrTextP = $("#qr-text");
             const $qrResult = $("#qr-result");
             
             $(`.country-code-select`).select2({
@@ -423,7 +423,6 @@
                         const imageUrl = URL.createObjectURL(blob);
                         $qrCodeImg.attr('src', imageUrl);
                         $qrResult.show();
-                        {#$qrTextP.text(`QR Code for: ${selectedType}`);#}
                     },
                     error: function(xhr, status, error) {
                         console.error('Error:', error);
