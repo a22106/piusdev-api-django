@@ -1,12 +1,7 @@
 # qr/views.py
-from lib2to3.fixes.fix_input import context
-
 from django.shortcuts import render
-from django.views import View
 from django.views.generic import TemplateView
 from django.http import HttpResponse, JsonResponse
-from django.utils.decorators import method_decorator
-from django.views.decorators.http import require_http_methods
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
