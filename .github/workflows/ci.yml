@@ -3,12 +3,12 @@ name: Django CI
 on:
   push:
     branches:
-      - main
-      - feature/*
+#      - main
+      - test/*
   pull_request:
     branches:
-      - main
-
+#      - main
+      - test/*
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -38,7 +38,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.13'
+          python-version: '3.12'
 
       - name: Install dependencies
         run: |

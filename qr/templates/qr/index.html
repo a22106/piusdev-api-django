@@ -2,9 +2,9 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ title }}{% endblock %}
-{% block description %}{{ description }}{% endblock %}
-{% block keywords %}{{ keywords }}{% endblock %}
+{% block title %}{{ site_title }}{% endblock %}
+{% block description %}{{ site_description }}{% endblock %}
+{% block keywords %}{{ site_keywords }}{% endblock %}
 
 {% block content %}
     <div class="container-fluid">
@@ -352,6 +352,13 @@
             $form.submit(function(event) {
                 event.preventDefault();
                 const selectedType = $('input[name="qr_type"]:checked').val();
+                
+                // Google Analytics에 이벤트 전송
+                gtag('event', 'generate_qr_code', {
+                    'event_category': 'QR Code',
+                    'event_label': selectedType,
+                    'value': 1
+                });
 
                 // Collect form data from the visible input section only
                 const $activeSection = $(`#input-${selectedType}`);
