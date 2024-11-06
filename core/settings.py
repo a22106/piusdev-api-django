@@ -1,5 +1,7 @@
 import os, random, string
+import sys
 from pathlib import Path
+from configurations import Configuration
 
 import dj_database_url
 from dotenv import load_dotenv
@@ -103,6 +105,14 @@ DATABASES = {
         ssl_require=True,
     )
 }
+
+if "test" in sys.argv or "pytest" in sys.argv[0]:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 
 # Password validation

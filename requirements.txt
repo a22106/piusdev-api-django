@@ -2,6 +2,8 @@
 django
 python-dotenv
 str2bool
+pycountry
+phonenumbers
 
 # Swagger
 drf-yasg
@@ -13,7 +15,7 @@ django_plotly_dash
 django-bootstrap-v5
 django-qr-code
 django-debug-toolbar
-pytest-django
+django-configurations
 
 # Deployment
 whitenoise
@@ -27,6 +29,6 @@ Pillow
 dj-database-url
 psycopg2-binary
 
-# DB Layer
-# psycopg2-binary
-# mysqlclient
+# Test
+pytest
+pytest-django
