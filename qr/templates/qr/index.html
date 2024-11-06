@@ -355,7 +355,7 @@
                 event.preventDefault();
                 const selectedType = $('input[name="qr_type"]:checked').val();
                 
-                // Google Analytics에 이벤트 전송
+                // Generate QR Code 버튼 클릭 이벤트(GA)
                 gtag('event', 'generate_qr_code', {
                     'event_category': 'QR Code',
                     'event_label': selectedType,
@@ -457,6 +457,13 @@
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
+
+                    // Download PNG 버튼 클릭 이벤트(GA)
+                    gtag('event', 'download_png', {
+                        'event_category': 'QR Code',
+                        'event_label': selectedType,
+                        'value': 1
+                    });
                 }
             });
 
@@ -489,6 +496,13 @@
                         link.click();
                         document.body.removeChild(link);
                         URL.revokeObjectURL(url);
+
+                        // Download SVG 버튼 클릭 이벤트(GA)
+                        gtag('event', 'download_svg', {
+                            'event_category': 'QR Code',
+                            'event_label': selectedType,
+                            'value': 1
+                        });
                     };
                     img.src = $qrCodeImg.attr('src');
                 }
