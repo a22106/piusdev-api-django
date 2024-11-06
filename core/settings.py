@@ -99,13 +99,15 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
-
 DATABASES = {
-    "default": dj_database_url.config(
-        default=os.environ.get("DATABASE_URL"),
-        conn_max_age=600,
-        ssl_require=True,
-    )
+    "default": {
+        "ENGINE": os.environ.get("SUPABASE_ENGINE"),
+        "NAME": os.environ.get("SUPABASE_NAME"),
+        "USER": os.environ.get("SUPABASE_USER"),
+        "PASSWORD": os.environ.get("SUPABASE_PASSWORD"),
+        "HOST": os.environ.get("SUPABASE_HOST"),
+        "PORT": os.environ.get("SUPABASE_PORT"),
+    }
 }
 
 if "test" in sys.argv or "pytest" in sys.argv[0]:
@@ -173,3 +175,7 @@ LOGGING = {
         },
     },
 }
+
+# Supabase Settings
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
