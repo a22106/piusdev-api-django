@@ -1,5 +1,5 @@
 """
-ASGI config for investment_calculator project.
+ASGI config for qrcode project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 

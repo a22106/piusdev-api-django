@@ -26,11 +26,19 @@ from qr.utils.qr_utils import (
     generate_geo_qr,
 )
 
+from django.conf import settings
+from core.models import SiteSettings
+
 logger = logging.getLogger(__name__)
 
 
 class IndexView(TemplateView):
-    def get(self, request):
+    template_name = "qr/index.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # 국가 코드 리스트
         countries = []
         for country in sorted(pycountry.countries, key=lambda x: x.name):
             try:
@@ -42,23 +50,12 @@ class IndexView(TemplateView):
                     }
                 )
             except:
-                continue  # 국가 코드가 없는 경우 건너뜀
-
-        context = {
-            "countries": countries,
-            # 추가 context
-        }
-        return render(request, "qr/index.html", context)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["title"] = "QR Code Generator"
-        context["description"] = "A simple QR Code generator"
-        context["keywords"] = "QR Code, Generator"
+                logger.error(f"Error getting country code for {country.name}")
+                raise
+        context["countries"] = countries
+        
         return context
 
-
-# TODO: vcard Email 입력이 안되는 문제 있음
 class QrVcardView(APIView):
     @swagger_auto_schema(
         operation_id="VCard QR Code",

@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/investment_calculator.iml" filepath="$PROJECT_DIR$/.idea/investment_calculator.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/qrcode.iml" filepath="$PROJECT_DIR$/.idea/qrcode.iml" />
     </modules>
   </component>
 </project>

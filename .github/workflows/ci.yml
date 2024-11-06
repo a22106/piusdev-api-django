@@ -3,12 +3,12 @@ name: Django CI
 on:
   push:
     branches:
-      - main
-      - feature/*
+#      - main
+      - test/*
   pull_request:
     branches:
-      - main
-
+#      - main
+      - test/*
 jobs:
   test:
     runs-on: ubuntu-latest

@@ -32,3 +32,5 @@ psycopg2-binary
 # Test
 pytest
 pytest-django
+selenium
+webdriver-manager
