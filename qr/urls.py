@@ -26,11 +26,11 @@ app_name = "qr"
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="QR Code API",
+        title="QR Code Generator API",
         default_version="v1",
-        description="API documentation for QR Code generator",
+        description="A simple QR Code generator API",
         terms_of_service="https://www.google.com/policies/terms/",
-        contact=openapi.Contact(email="contact@qr.local"),
+        contact=openapi.Contact(email="bk22106@piusdev.com"),
         license=openapi.License(name="BSD License"),
     ),
     public=True,

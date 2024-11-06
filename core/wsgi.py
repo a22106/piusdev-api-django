@@ -1,5 +1,5 @@
 """
-WSGI config for investment_calculator project.
+WSGI config for qrcode project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
