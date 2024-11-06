@@ -1,0 +1,3 @@
+
+class PROVIDERS:
+    GOOGLE = "google"

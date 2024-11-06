@@ -28,6 +28,7 @@ urlpatterns = [
     path("", include("qr.urls", namespace="qr")),
     # API Documentation
     path("api/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
+    path("auth/", include("public_auth.urls", namespace="auth")),
 ]
 
 if settings.DEBUG:
