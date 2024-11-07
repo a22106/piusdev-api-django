@@ -92,8 +92,7 @@ def generate_phone_qr(phone_number: str) -> bytes:
     """
     Generate a QR code for a phone number.
 
-    Args:
-        phone (str): The phone number to encode in the QR code.
+    :param phone_number: (+)1234567890 +는 필요하지 않음
 
     Returns:
         bytes: The generated QR code image in PNG format.
