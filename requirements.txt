@@ -4,6 +4,7 @@ python-dotenv
 str2bool
 pycountry
 phonenumbers
+supabase
 
 # Swagger
 drf-yasg

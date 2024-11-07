@@ -1,5 +1,4 @@
 # qr/views.py
-from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.http import HttpResponse, JsonResponse
 from drf_yasg import openapi
