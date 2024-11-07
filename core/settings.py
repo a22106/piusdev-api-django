@@ -117,6 +117,8 @@ if "test" in sys.argv or "pytest" in sys.argv[0]:
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
+else:
+    DATABASES = dj_database_url.config(default=os.environ.get("DATABASE_URL"))
 
 
 # Password validation
