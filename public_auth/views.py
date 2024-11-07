@@ -11,7 +11,8 @@ from public_auth.constants import PROVIDERS
 
 @method_decorator(csrf_exempt, name="dispatch")
 class SignupView(View):
-    def post(self, request):
+    @staticmethod
+    def post(request):
         try:
             data = json.loads(request.body)
             email = data["email"]
@@ -26,9 +27,11 @@ class SignupView(View):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
 
+
 @method_decorator(csrf_exempt, name="dispatch")
 class LoginView(View):
-    def post(self, request):
+    @staticmethod
+    def post(request):
         try:
             data = json.loads(request.body)
             email = data["email"]
@@ -37,18 +40,18 @@ class LoginView(View):
             return JsonResponse({"error": "Invalid data"}, status=400)
 
         try:
-            response = supabase.auth.sign_in(
-                {"email": email, "password": password}
-            )
+            response = supabase.auth.sign_in({"email": email, "password": password})
             response_data = json.loads(response.model_dump_json())
             return JsonResponse({"data": response_data})
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
-        
+
+
 # provider login
 @method_decorator(csrf_exempt, name="dispatch")
 class ProviderLoginView(View):
-    def post(self, request):
+    @staticmethod
+    def post(request):
         try:
             data = json.loads(request.body)
             provider = data["provider"]
@@ -62,18 +65,22 @@ class ProviderLoginView(View):
             return JsonResponse({"data": response_data})
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
-        
+
+
 @method_decorator(csrf_exempt, name="dispatch")
 class DeleteUserView(View):
-    def post(self, request):
+    @staticmethod
+    def post(request):
         try:
             # Authorization 헤더에서 토큰을 가져옴
-            auth_header = request.headers.get('Authorization')
-            if not auth_header or not auth_header.startswith('Bearer '):
-                return JsonResponse({"error": "Invalid authorization header"}, status=401)
+            auth_header = request.headers.get("Authorization")
+            if not auth_header or not auth_header.startswith("Bearer "):
+                return JsonResponse(
+                    {"error": "Invalid authorization header"}, status=401
+                )
             print(auth_header)
-            token = auth_header.split(' ')[1]
-            
+            token = auth_header.split(" ")[1]
+
             # 사용자 삭제
             supabase.auth.admin.delete_user(token)
             return JsonResponse({"data": "User deleted"})
