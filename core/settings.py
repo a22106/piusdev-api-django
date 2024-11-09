@@ -106,12 +106,12 @@ WSGI_APPLICATION = "core.wsgi.application"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 DATABASES = {
     "default": {
-        "ENGINE": os.environ.get("SUPABASE_ENGINE", "django.db.backends.postgresql"),
-        "NAME": os.environ.get("SUPABASE_NAME", "postgres"),
-        "USER": os.environ.get("SUPABASE_USER", "postgres"),
-        "PASSWORD": os.environ.get("SUPABASE_PASSWORD", "postgres"),
-        "HOST": os.environ.get("SUPABASE_HOST", "127.0.0.1"),
-        "PORT": os.environ.get("SUPABASE_PORT", "54322"),
+        "ENGINE": os.environ.get("SUPABASE_DB_ENGINE", "django.db.backends.postgresql"),
+        "NAME": os.environ.get("SUPABASE_DB_NAME", "postgres"),
+        "USER": os.environ.get("SUPABASE_DB_USER", "postgres"),
+        "PASSWORD": os.environ.get("SUPABASE_DB_PASSWORD", "postgres"),
+        "HOST": os.environ.get("SUPABASE_DB_HOST", "127.0.0.1"),
+        "PORT": os.environ.get("SUPABASE_DB_PORT", "54322"),
     }
 }
 
