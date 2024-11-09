@@ -115,17 +115,17 @@ DATABASES = {
     }
 }
 
-if "test" in sys.argv or "pytest" in sys.argv[0]:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": "postgres",
-            "USER": "postgres",
-            "PASSWORD": "postgres",
-            "HOST": "127.0.0.1",
-            "PORT": "54322",
-        }
-    }
+# if "test" in sys.argv or "pytest" in sys.argv[0]:
+#     DATABASES = {
+#         "default": {
+#             "ENGINE": "django.db.backends.postgresql",
+#             "NAME": "postgres",
+#             "USER": "postgres",
+#             "PASSWORD": "postgres",
+#             "HOST": "127.0.0.1",
+#             "PORT": "54322",
+#         }
+#     }
 
 
 # Password validation
