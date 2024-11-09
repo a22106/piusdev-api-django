@@ -1,10 +1,11 @@
 name: Deploy Migrations to Production
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
+  pull_request:
+    branches: [ "main", "test/ci" ]
+  push:
+    branches: [ "main", "test/ci" ]
 
 jobs:
   deploy:
