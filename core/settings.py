@@ -1,11 +1,14 @@
-import os, random, string
+import os
+import random
+import string
 import sys
 from pathlib import Path
-from configurations import Configuration
 
-import dj_database_url
 from dotenv import load_dotenv
-from str2bool import str2bool
+
+from django.db import connections
+from django.db.utils import OperationalError
+
 
 load_dotenv()
 
@@ -28,6 +31,10 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
 ]
+
+
+if not DEBUG:
+    ALLOWED_HOSTS += os.environ.get("ALLOWED_HOSTS", "").split(",")
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
@@ -71,8 +78,6 @@ MIDDLEWARE = [
     "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
-# STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-
 ROOT_URLCONF = "core.urls"
 
 HOME_TEMPLATES = os.path.join(BASE_DIR, "templates")
@@ -101,24 +106,26 @@ WSGI_APPLICATION = "core.wsgi.application"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 DATABASES = {
     "default": {
-        "ENGINE": os.environ.get("SUPABASE_ENGINE"),
-        "NAME": os.environ.get("SUPABASE_NAME"),
-        "USER": os.environ.get("SUPABASE_USER"),
-        "PASSWORD": os.environ.get("SUPABASE_PASSWORD"),
-        "HOST": os.environ.get("SUPABASE_HOST"),
-        "PORT": os.environ.get("SUPABASE_PORT"),
+        "ENGINE": os.environ.get("SUPABASE_ENGINE", "django.db.backends.postgresql"),
+        "NAME": os.environ.get("SUPABASE_NAME", "postgres"),
+        "USER": os.environ.get("SUPABASE_USER", "postgres"),
+        "PASSWORD": os.environ.get("SUPABASE_PASSWORD", "postgres"),
+        "HOST": os.environ.get("SUPABASE_HOST", "127.0.0.1"),
+        "PORT": os.environ.get("SUPABASE_PORT", "54322"),
     }
 }
 
 if "test" in sys.argv or "pytest" in sys.argv[0]:
     DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": "postgres",
+            "USER": "postgres",
+            "PASSWORD": "postgres",
+            "HOST": "127.0.0.1",
+            "PORT": "54322",
         }
     }
-else:
-    DATABASES = dj_database_url.config(default=os.environ.get("DATABASE_URL"))
 
 
 # Password validation
@@ -179,5 +186,43 @@ LOGGING = {
 }
 
 # Supabase Settings
-SUPABASE_URL = os.environ.get("SUPABASE_URL")
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+SUPABASE_API_URL = os.environ.get("SUPABASE_URL", "http://127.0.0.1:54321")
+SUPABASE_GRAPHQL_URL = os.environ.get(
+    "SUPABASE_GRAPHQL_URL", "http://127.0.0.1:54321/graphql/v1"
+)
+SUPABASE_S3_STORAGE_URL = os.environ.get(
+    "SUPABASE_S3_STORAGE_URL", "http://127.0.0.1:54321/storage/v1/s3"
+)
+SUPABASE_DB_URL = os.environ.get(
+    "SUPABASE_DB_URL", "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+)
+SUPABASE_STUDIO_URL = os.environ.get("SUPABASE_STUDIO_URL", "http://127.0.0.1:54323")
+SUPABASE_INBUCKET_URL = os.environ.get(
+    "SUPABASE_INBUCKET_URL", "http://127.0.0.1:54324"
+)
+SUPABASE_JWT_SECRET = os.environ.get(
+    "SUPABASE_JWT_SECRET", "super-secret-jwt-token-with-at-least-32-characters-long"
+)
+SUPABASE_ANON_KEY = os.environ.get(
+    "SUPABASE_ANON_KEY",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0",
+)
+SUPABASE_SERVICE_ROLE_KEY = os.environ.get(
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU",
+)
+SUPABASE_S3_ACCESS_KEY = os.environ.get(
+    "SUPABASE_S3_ACCESS_KEY", "625729a08b95bf1b7ff351a663f3a23c"
+)
+SUPABASE_S3_SECRET_KEY = os.environ.get(
+    "SUPABASE_S3_SECRET_KEY",
+    "850181e4652dd023b7a98c58ae0d2d34bd487ee0cc3254aed6eda37307425907",
+)
+SUPABASE_S3_REGION = os.environ.get("SUPABASE_S3_REGION", "local")
+
+
+try:
+    connections["default"].cursor()
+except OperationalError:
+    print("데이터베이스 연결 실패")
+    sys.exit(1)
