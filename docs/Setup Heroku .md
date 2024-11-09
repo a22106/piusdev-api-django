@@ -1,4 +1,4 @@
-# Build
+# Setup Heroku
 
 ## Heroku Setup
 
