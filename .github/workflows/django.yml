@@ -3,11 +3,20 @@ name: Django CI
 on:
   pull_request:
     branches: [ "main" ]
+  push:
+    branches: [ "main", "test/ci" ]
 
 jobs:
   build:
 
     runs-on: ubuntu-latest
+
+    env:
+      SUPABASE_DB_USER: ${{ secrets.SUPABASE_DB_USER }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_DB_HOST: ${{ secrets.SUPABASE_DB_HOST }}
+      SUPABASE_DB_PORT: ${{ secrets.SUPABASE_DB_PORT }}
+
     strategy:
       max-parallel: 4
       matrix:
