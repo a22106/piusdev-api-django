@@ -6,7 +6,12 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
 from core.supabase import supabase
-from public_auth.constants import PROVIDERS
+from qr_auth.constants import PROVIDERS
+
+
+class LoginPageView(View):
+    def get(self, request):
+        return render(request, "registration/login.html")
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -36,11 +41,49 @@ class LoginView(View):
             data = json.loads(request.body)
             email = data["email"]
             password = data["password"]
+            remember_me = data.get("remember_me", False)
+            
+            response = supabase.auth.sign_in_with_password(
+                {"email": email, "password": password}
+            )
+            
+            # 세션 저장
+            request.session["access_token"] = response.session.access_token
+            request.session["refresh_token"] = response.session.refresh_token
+            
+            if remember_me:
+                request.session.set_expiry(60 * 60 * 24 * 30)  # 30일
+            else:
+                request.session.set_expiry(0)  # 브라우저 종료 시 세션 삭제
+                
+            return JsonResponse({
+                "success": True,
+                "data": {
+                    "access_token": request.session["access_token"],
+                    "refresh_token": request.session["refresh_token"],
+                    "user": response.user,
+                    "redirect_url": request.GET.get("next", "/"),
+                },
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                "success": False,
+                "error": str(e),
+            }, status=400)
+
+
+class LogoutView(View):
+    @staticmethod
+    def post(request):
+        try:
+            data = json.loads(request.body)
+            token = data["token"]
         except (KeyError, json.JSONDecodeError):
             return JsonResponse({"error": "Invalid data"}, status=400)
 
         try:
-            response = supabase.auth.sign_in({"email": email, "password": password})
+            response = supabase.auth.sign_out(token)
             response_data = json.loads(response.model_dump_json())
             return JsonResponse({"data": response_data})
         except Exception as e:

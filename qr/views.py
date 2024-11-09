@@ -25,18 +25,16 @@ from qr.utils.qr_utils import (
     generate_geo_qr,
 )
 
-from django.conf import settings
-from core.models import SiteSettings
 
 logger = logging.getLogger(__name__)
 
 
 class IndexView(TemplateView):
     template_name = "qr/index.html"
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
+
         # 국가 코드 리스트
         countries = []
         for country in sorted(pycountry.countries, key=lambda x: x.name):
@@ -52,8 +50,9 @@ class IndexView(TemplateView):
                 logger.error(f"Error getting country code for {country.name}")
                 raise
         context["countries"] = countries
-        
+
         return context
+
 
 class QrVcardView(APIView):
     @swagger_auto_schema(
