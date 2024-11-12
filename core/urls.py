@@ -27,7 +27,7 @@ urlpatterns = [
     path("", include("qr.urls", namespace="qr")),
     # API Documentation
     path("api/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
-    path("auth/", include("qr_auth.urls", namespace="auth")),
+    path("auth/", include("accounts.urls", namespace="auth")),
 ]
 
 if settings.DEBUG:
@@ -35,6 +35,7 @@ if settings.DEBUG:
 
     # Debug Toolbar addition
     urlpatterns += [path("__debug__/", include(debug_toolbar.urls))]
+    # urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
     # DRF-YASG (Swagger, ReDoc) addition
     urlpatterns += [

@@ -59,14 +59,14 @@
                         <span class="nav-link">{{ user.email }}</span>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link btn btn-outline-primary ms-2" href="{% url 'qr_auth:logout' %}">Sign Out</a>
+                        <a class="nav-link btn btn-outline-primary ms-2" href="{% url 'accounts:logout' %}">Sign Out</a>
                     </li>
                 {% else %}
                     <li class="nav-item">
-                        <a class="nav-link btn btn-outline-primary me-2" href="{% url 'qr_auth:signup' %}">Sign Up</a>
+                        <a class="nav-link btn btn-outline-primary me-2" href="{% url 'accounts:signup' %}">Sign Up</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link btn btn-primary" href="{% url 'qr_auth:login_page' %}" style="color: white;">Sign In</a>
+                        <a class="nav-link btn btn-primary" href="{% url 'accounts:login' %}" style="color: white;">Sign In</a>
                     </li>
                 {% endif %}
             </ul>

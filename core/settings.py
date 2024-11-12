@@ -53,7 +53,7 @@ if RENDER_EXTERNAL_HOSTNAME:
 
 INSTALLED_APPS = [
     "core",
-    "qr_auth",
+    "accounts",
     "qr",
     "django.contrib.admin",
     "django.contrib.auth",
