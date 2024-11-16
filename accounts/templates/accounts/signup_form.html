@@ -1,3 +1,4 @@
+{# accounts/templates/accounts/signup_form.html #}
 {% extends 'base.html' %}
 {% load static %}
 
@@ -14,13 +15,6 @@
         {% for error in form.non_field_errors %}
             {{ error }}
         {% endfor %}
-    </div>
-    {% endif %}
-  
-    
-    {% if error %}
-    <div class="alert alert-danger">
-        {{ error }}
     </div>
     {% endif %}
 
@@ -49,7 +43,7 @@
     </div>
 
     <button class="w-100 btn btn-lg btn-primary mt-3" type="submit">Sign Up</button>
-    <p class="mt-3 text-center">Already have an account? <a href="{% url 'accounts:login' %}">Login here</a></p>
+    <p class="mt-3 text-center">Already have an account? <a href="{% url 'accounts:signin' %}">Login here</a></p>
   </form>
 
   {% if debug %}

@@ -12,7 +12,7 @@ class AuthMiddleware:
     def __call__(self, request):
         # 인증이 필요없는 경로들
         public_paths = [
-            reverse("accounts:login"),
+            reverse("signin"),
             reverse("accounts:signup"),
             "/static/",
         ]
@@ -27,7 +27,7 @@ class AuthMiddleware:
         if not access_token:
             if request.headers.get("X-Requested-With") == "XMLHttpRequest":
                 return JsonResponse({"error": "Unauthorized"}, status=401)
-            return redirect("accounts:login")
+            return redirect("signin")
 
         # 토큰 유효성 검증
         try:
@@ -37,6 +37,6 @@ class AuthMiddleware:
         except Exception:
             if request.headers.get("X-Requested-With") == "XMLHttpRequest":
                 return JsonResponse({"error": "Invalid token"}, status=401)
-            return redirect("accounts:login")
+            return redirect("signin")
 
         return self.get_response(request)

@@ -31,7 +31,7 @@ class DeleteUserForm(forms.Form):
     user_uuid = forms.UUIDField(widget=forms.HiddenInput())
 
 
-class LoginForm(AuthenticationForm):
+class SignInForm(AuthenticationForm):
     username = forms.EmailField(
         widget=forms.EmailInput(
             attrs={"class": "form-control", "placeholder": "name@example.com"}
@@ -42,4 +42,10 @@ class LoginForm(AuthenticationForm):
             attrs={"class": "form-control", "placeholder": "Password"}
         )
     )
-    remember_me = forms.BooleanField(required=False)
+    remember_me = forms.BooleanField(required=False, widget=forms.CheckboxInput())
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if "username" in cleaned_data:
+            cleaned_data["email"] = cleaned_data["username"]
+        return cleaned_data

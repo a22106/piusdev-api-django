@@ -16,7 +16,7 @@ from django.contrib.auth import get_user_model
 
 from core.supabase import supabase
 from accounts.constants import PROVIDERS
-from .forms import SignUpForm, LoginForm, DeleteUserForm
+from .forms import SignUpForm, SignInForm, DeleteUserForm
 
 
 class SignUpView(CreateView):
@@ -51,6 +51,7 @@ class SignUpView(CreateView):
             user = user_model.objects.create_user(
                 username=auth_response.user.email,
                 email=auth_response.user.email,
+                password=form.cleaned_data["password1"],
             )
 
             # Django 로그인 처리
@@ -68,10 +69,14 @@ class SignUpView(CreateView):
         return context
 
 
-class LoginView(DjangoLoginView):
-    form_class = LoginForm
-    template_name = "accounts/login_form.html"
+class SignInView(DjangoLoginView):
+    form_class = SignInForm
+    template_name = "accounts/signin_form.html"
     redirect_authenticated_user = True
+
+    def get_success_url(self):
+        # 로그인 성공 후 리다이렉트할 URL
+        return reverse_lazy("qr:index")
 
     def form_valid(self, form):
         remember_me = form.cleaned_data.get("remember_me")
@@ -85,27 +90,27 @@ class LoginView(DjangoLoginView):
         try:
             response = supabase.auth.sign_in_with_password(
                 {
-                    "email": form.cleaned_data["username"],
+                    "email": form.cleaned_data["email"],
                     "password": form.cleaned_data["password"],
                 }
             )
             # 세션 저장
             self.request.session["access_token"] = response.session.access_token
             self.request.session["refresh_token"] = response.session.refresh_token
-            self.request.session["expires_at"] = int(response.session.expires_at)
+            self.request.session["expires_at"] = response.session.expires_at
 
             user_model = get_user_model()
-            user = user_model.objects.get(username=response.user.email)
+            user = user_model.objects.get(email=response.user.email)
             login(self.request, user)
+
+            return super().form_valid(form)
 
         except Exception as e:
             form.add_error(None, str(e))
             return self.form_invalid(form)
 
-        return super().form_valid(form)
 
-
-class LogoutView(View):
+class SignOutView(View):
     def get(self, request):
         try:
             # Supabase 로그아웃
@@ -122,10 +127,10 @@ class LogoutView(View):
 
             logout(request)
 
-            return redirect("accounts:login")
+            return redirect("/")
         except Exception as e:
             print(f"Logout error: {str(e)}")
-            return redirect("accounts:login")
+            return redirect("/")
 
 
 # provider login
