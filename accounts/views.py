@@ -2,6 +2,9 @@ import datetime
 import json
 import traceback
 
+from django.core.signing import TimestampSigner, SignatureExpired, BadSignature
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
@@ -13,6 +16,7 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib import messages
 
 from core.supabase import supabase
 from accounts.constants import PROVIDERS
@@ -30,6 +34,12 @@ class SignUpView(CreateView):
                 {
                     "email": form.cleaned_data["email"],
                     "password": form.cleaned_data["password1"],
+                    "options": {
+                        "data": {
+                            "email": form.cleaned_data["email"],
+                        },
+                        "email_redirect_to": f"{settings.SITE_URL}/accounts/verify-email"  # 이메일 인증 후 리다이렉트될 URL
+                    }
                 }
             )
             # 세션 정보 저장
@@ -52,12 +62,38 @@ class SignUpView(CreateView):
                 username=auth_response.user.email,
                 email=auth_response.user.email,
                 password=form.cleaned_data["password1"],
+                is_active=False,
             )
 
-            # Django 로그인 처리
-            login(self.request, user)
+            # # Django 로그인 처리
+            # login(self.request, user)
 
+            # 이메일 인증 토큰 생성
+            signer = TimestampSigner()
+            token = signer.sign(user.id)
+
+            # 이메일 인증 전송
+            verification_url = f"{settings.SITE_URL}/accounts/verify-email/{token}"
+            email_context = {
+                "verification_url": verification_url,
+                "user_email": user.email,
+            }
+            email_html = render_to_string("accounts/verify_email_template.html", email_context)
+            email_text = render_to_string("accounts/verify_email_template.txt", email_context)
+
+            send_mail(
+                subject="Verify your email",
+                message=email_text,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                html_message=email_html,
+                fail_silently=False,
+            )
+
+
+            messages.success(self.request, "Please check your email for verification.")
             return redirect("/")
+
         except Exception as e:
             form.add_error(None, str(e))
             print(traceback.format_exc())
@@ -172,3 +208,27 @@ class DeleteUserView(View):
                 )
 
         return redirect("accounts:signup")
+
+class VerifyEmailView(View):
+    def get(self, request, token):
+        try:
+            signer = TimestampSigner()
+            email = signer.unsign(token, max_age=60 * 60 * 24) # 24시간 유효
+
+            user_model = get_user_model()
+            user = user_model.objects.get(email=email)
+
+            if not user.is_active:
+                user.is_active = True
+                user.save()
+                messages.success(request, "Your email has been verified.")
+            else:
+                messages.info(request, "Your email has already been verified.")
+
+            return redirect("/")
+        except SignatureExpired:
+            messages.error(request, "The verification link has expired.")
+            return redirect("/")
+        except (BadSignature, user_model.DoesNotExist):
+            messages.error(request, "The verification link is invalid.")
+            return redirect("/")

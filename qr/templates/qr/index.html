@@ -7,6 +7,13 @@
 {% block keywords %}{{ site_keywords }}{% endblock %}
 
 {% block content %}
+{% comment %} alert {% endcomment %}
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
     <div class="container-fluid">
         <div class="row">
             <!-- QR Form Column -->
@@ -19,42 +26,42 @@
                                 <input type="radio" class="btn-check" name="qr_type" id="typeUrl" value="url" autocomplete="off" checked>
                                 <label class="btn btn-outline-primary w-100" for="typeUrl">URL</label>
                             </div>
-                            
+
                             <div class="col">
                                 <input type="radio" class="btn-check" name="qr_type" id="typeEmail" value="email" autocomplete="off">
                                 <label class="btn btn-outline-primary w-100" for="typeEmail">Email</label>
                             </div>
-                            
+
                             <div class="col">
                                 <input type="radio" class="btn-check" name="qr_type" id="typeText" value="text" autocomplete="off">
                                 <label class="btn btn-outline-primary w-100" for="typeText">Text</label>
                             </div>
-                            
+
                             <div class="col">
                                 <input type="radio" class="btn-check" name="qr_type" id="typePhone" value="phone" autocomplete="off">
                                 <label class="btn btn-outline-primary w-100" for="typePhone">Phone</label>
                             </div>
-                            
+
                             <div class="col">
                                 <input type="radio" class="btn-check" name="qr_type" id="typeVcard" value="vcard" autocomplete="off">
                                 <label class="btn btn-outline-primary w-100" for="typeVcard">V Card</label>
                             </div>
-                            
+
                             <div class="col">
                                 <input type="radio" class="btn-check" name="qr_type" id="typeWifi" value="wifi" autocomplete="off">
                                 <label class="btn btn-outline-primary w-100" for="typeWifi">WiFi</label>
                             </div>
-                            
+
                             <div class="col">
                                 <input type="radio" class="btn-check" name="qr_type" id="typeSms" value="sms" autocomplete="off">
                                 <label class="btn btn-outline-primary w-100" for="typeSms">SMS</label>
                             </div>
-                            
+
                             <div class="col">
                                 <input type="radio" class="btn-check" name="qr_type" id="typeGeo" value="geo" autocomplete="off">
                                 <label class="btn btn-outline-primary w-100" for="typeGeo">Geolocation</label>
                             </div>
-                    
+
 {#                            <div class="col">#}
 {#                                <input type="radio" class="btn-check" name="qr_type" id="typeEvent" value="event" autocomplete="off">#}
 {#                                <label class="btn btn-outline-primary w-100" for="typeEvent">Event</label>#}
@@ -64,12 +71,12 @@
 {#                                <input type="radio" class="btn-check" name="qr_type" id="typeMeCard" value="mecard" autocomplete="off">#}
 {#                                <label class="btn btn-outline-primary w-100" for="typeMeCard">MeCard</label>#}
 {#                            </div>#}
-                    
+
                             <div class="col">
                                 <input type="radio" class="btn-check" name="qr_type" id="typeWhatsApp" value="whatsapp" autocomplete="off">
                                 <label class="btn btn-outline-primary w-100" for="typeWhatsApp">WhatsApp</label>
                             </div>
-                    
+
 {#                            <div class="col">#}
 {#                                <input type="radio" class="btn-check" name="qr_type" id="typeBitcoin" value="bitcoin" autocomplete="off">#}
 {#                                <label class="btn btn-outline-primary w-100" for="typeBitcoin">Bitcoin</label>#}
@@ -77,7 +84,7 @@
                         </div>
                     </div>
 
-                    <h1>QR Code Generator</h1> 
+                    <h1>QR Code Generator</h1>
                     <p class="text-muted">
                         <span class="text-danger">*</span> Required fields
                     </p>
@@ -86,7 +93,7 @@
                         <!-- URL Input Section -->
                         <div id="input-url" class="input-section" style="display: none;">
                             <label class="form-label mb-3 w-100">
-                                <span class="text-danger">*</span> URL: 
+                                <span class="text-danger">*</span> URL:
                                 <input type="text" name="url" placeholder="https://example.com" class="form-control w-100">
                             </label>
                         </div>
@@ -146,7 +153,7 @@
                                     </label>
                                 </div>
                             </div>
-                            <div class="row">   
+                            <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label w-100">
                                         Organization:
@@ -188,7 +195,7 @@
                                 </select>
                             </label>
                         </div>
-                        
+
                         <!-- SMS Input Section -->
                         <div id="input-sms" class="input-section" style="display: none;">
                             {% include 'qr/input_phone.html' %}
@@ -196,7 +203,7 @@
                                 Message (Optional): <textarea name="message" placeholder="Message" class="form-control w-100" rows="4"></textarea>
                             </label>
                         </div>
-                        
+
                         <!-- Geolocation Input Section -->
                         <div id="input-geo" class="input-section" style="display: none;">
                             <label class="form-label mb-3 w-100">
@@ -306,7 +313,7 @@
             </div>
         </div>
     </div>
-        
+
 {#    <script src="{% static 'js/index.js' %}"></script>#}
 
     <script>
@@ -318,7 +325,7 @@
             const $qrResult = $("#qr-result");
             const $downloadPng = $("#download-png");
             const $downloadSvg = $("#download-svg");
-            
+
             $(`.country-code-select`).select2({
                 theme: `bootstrap-5`,
                 placeholder: `Select a country`,
@@ -336,7 +343,7 @@
                 // Hide all input sections
                 $inputSections.hide();
                 $inputSections.find('input, select, textarea').prop('disabled', true);
-                
+
                 // Show the input section corresponding to the selected QR code type
                 const $activeSection = $(`#input-${selectedType}`);
                 if ($activeSection.length) {
@@ -354,7 +361,7 @@
             $form.submit(function(event) {
                 event.preventDefault();
                 const selectedType = $('input[name="qr_type"]:checked').val();
-                
+
                 // Generate QR Code 버튼 클릭 이벤트(GA)
                 gtag('event', 'generate_qr_code', {
                     'event_category': 'QR Code',
@@ -366,7 +373,7 @@
                 const $activeSection = $(`#input-${selectedType}`);
                 const formDataArray = $activeSection.find('input, select, textarea').serializeArray();
                 const data = {};
-                formDataArray.forEach((item) => { 
+                formDataArray.forEach((item) => {
                     data[item.name] = item.value;
                 });
 
@@ -420,7 +427,7 @@
                         alert("Invalid QR Code type selected.");
                         return;
                 }
-                
+
                 $.ajax({
                     url: url,
                     type: "GET",
@@ -432,7 +439,7 @@
                         const imageUrl = URL.createObjectURL(blob);
                         $qrCodeImg.attr('src', imageUrl);
                         $qrResult.show();
-                        
+
                         // Enable download buttons
                         $downloadPng.prop('disabled', false);
                         $downloadSvg.prop('disabled', false);
@@ -440,7 +447,7 @@
                     error: function(xhr, status, error) {
                         console.error('Error:', error);
                         alert(`Error generating QR Code: ${error}`);
-                        
+
                         // Disable download buttons on error
                         $downloadPng.prop('disabled', true);
                         $downloadSvg.prop('disabled', true);
@@ -478,14 +485,14 @@
                         canvas.height = img.height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0);
-                        
+
                         // Create SVG
                         const svg = `
                             <svg xmlns="http://www.w3.org/2000/svg" width="${img.width}" height="${img.height}">
                                 <image href="${canvas.toDataURL('image/png')}" width="${img.width}" height="${img.height}"/>
                             </svg>
                         `;
-                        
+
                         // Download SVG
                         const blob = new Blob([svg], { type: 'image/svg+xml' });
                         const url = URL.createObjectURL(blob);
