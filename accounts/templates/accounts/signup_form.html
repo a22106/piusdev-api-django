@@ -16,6 +16,13 @@
         {% endfor %}
     </div>
     {% endif %}
+  
+    
+    {% if error %}
+    <div class="alert alert-danger">
+        {{ error }}
+    </div>
+    {% endif %}
 
     <div class="form-floating">
       {{ form.email }}
@@ -44,5 +51,17 @@
     <button class="w-100 btn btn-lg btn-primary mt-3" type="submit">Sign Up</button>
     <p class="mt-3 text-center">Already have an account? <a href="{% url 'accounts:login' %}">Login here</a></p>
   </form>
+
+  {% if debug %}
+  <form method="post" action="{% url 'accounts:api_delete_user' %}" class="mt-5">
+    {% csrf_token %}
+    <h3 class="h5 mb-3">Debug: Delete User</h3>
+    <div class="form-floating">
+      <input type="text" name="user_uuid" class="form-control" id="userUUID" placeholder="User UUID">
+      <label for="userUUID">User UUID</label>
+    </div>
+    <button class="w-100 btn btn-lg btn-danger mt-3" type="submit">Delete User</button>
+  </form>
+  {% endif %}
 </main>
 {% endblock %}

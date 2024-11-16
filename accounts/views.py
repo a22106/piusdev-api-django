@@ -1,5 +1,7 @@
 import datetime
 import json
+import traceback
+
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
@@ -9,34 +11,64 @@ from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.contrib.auth import login
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
+from django.conf import settings
+from django.contrib.auth import get_user_model
 
 from core.supabase import supabase
 from accounts.constants import PROVIDERS
-from .forms import SignUpForm, LoginForm
+from .forms import SignUpForm, LoginForm, DeleteUserForm
 
 
 class SignUpView(CreateView):
     form_class = SignUpForm
     template_name = "accounts/signup_form.html"
-    success_url = reverse_lazy("accounts:login")
+    success_url = "/"
 
     def form_valid(self, form):
-        response = super().form_valid(form)
-        # Supabase 회원가입 처리
         try:
-            supabase.auth.sign_up(
+            auth_response = supabase.auth.sign_up(
                 {
                     "email": form.cleaned_data["email"],
                     "password": form.cleaned_data["password1"],
                 }
             )
+            # 세션 정보 저장
+            self.request.session["access_token"] = auth_response.session.access_token
+            self.request.session["refresh_token"] = auth_response.session.refresh_token
+            self.request.session["expires_at"] = auth_response.session.expires_at
+
+            # 사용자 정보 저장
+            self.request.session["user"] = {
+                "id": auth_response.user.id,
+                "email": auth_response.user.email,
+                "role": auth_response.user.role,
+                "created_at": int(auth_response.user.created_at.timestamp()),
+            }
+
+            # Django 로그인 처리
+
+            user_model = get_user_model()
+            user = user_model.objects.create_user(
+                username=auth_response.user.email,
+                email=auth_response.user.email,
+            )
+
+            # Django 로그인 처리
+            login(self.request, user)
+
+            return redirect("/")
         except Exception as e:
             form.add_error(None, str(e))
+            print(traceback.format_exc())
             return self.form_invalid(form)
-        return response
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["debug"] = settings.DEBUG
+        return context
 
 
-class CustomLoginView(DjangoLoginView):
+class LoginView(DjangoLoginView):
     form_class = LoginForm
     template_name = "accounts/login_form.html"
     redirect_authenticated_user = True
@@ -60,6 +92,12 @@ class CustomLoginView(DjangoLoginView):
             # 세션 저장
             self.request.session["access_token"] = response.session.access_token
             self.request.session["refresh_token"] = response.session.refresh_token
+            self.request.session["expires_at"] = int(response.session.expires_at)
+
+            user_model = get_user_model()
+            user = user_model.objects.get(username=response.user.email)
+            login(self.request, user)
+
         except Exception as e:
             form.add_error(None, str(e))
             return self.form_invalid(form)
@@ -67,85 +105,27 @@ class CustomLoginView(DjangoLoginView):
         return super().form_valid(form)
 
 
-@method_decorator(csrf_exempt, name="dispatch")
-class SignupView(View):
-    @staticmethod
-    def post(request):
-        try:
-            data = json.loads(request.body)
-            email = data["email"]
-            password = data["password"]
-        except (KeyError, json.JSONDecodeError):
-            return JsonResponse({"error": "Invalid data"}, status=400)
-
-        try:
-            response = supabase.auth.sign_up({"email": email, "password": password})
-            response_data = json.loads(response.model_dump_json())
-            return JsonResponse({"data": response_data})
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
-
-
-@method_decorator(csrf_exempt, name="dispatch")
-class LoginView(View):
-    @staticmethod
-    def post(request):
-        try:
-            data = json.loads(request.body)
-            email = data["email"]
-            password = data["password"]
-            remember_me = data.get("remember_me", False)
-
-            response = supabase.auth.sign_in_with_password(
-                {"email": email, "password": password}
-            )
-
-            # 세션 저장
-            request.session["access_token"] = response.session.access_token
-            request.session["refresh_token"] = response.session.refresh_token
-
-            if remember_me:
-                request.session.set_expiry(60 * 60 * 24 * 30)  # 30일
-            else:
-                request.session.set_expiry(0)  # 브라우저 종료 시 세션 삭제
-
-            return JsonResponse(
-                {
-                    "success": True,
-                    "data": {
-                        "access_token": request.session["access_token"],
-                        "refresh_token": request.session["refresh_token"],
-                        "user": response.user,
-                        "redirect_url": request.GET.get("next", "/"),
-                    },
-                }
-            )
-
-        except Exception as e:
-            return JsonResponse(
-                {
-                    "success": False,
-                    "error": str(e),
-                },
-                status=400,
-            )
-
-
 class LogoutView(View):
-    @staticmethod
-    def post(request):
+    def get(self, request):
         try:
-            data = json.loads(request.body)
-            token = data["token"]
-        except (KeyError, json.JSONDecodeError):
-            return JsonResponse({"error": "Invalid data"}, status=400)
+            # Supabase 로그아웃
+            supabase.auth.sign_out()
 
-        try:
-            response = supabase.auth.sign_out(token)
-            response_data = json.loads(response.model_dump_json())
-            return JsonResponse({"data": response_data})
+            # Django 세션에서 Supabase 관련 데이터 삭제
+            request.session.pop("access_token", None)
+            request.session.pop("refresh_token", None)
+            request.session.pop("expires_at", None)
+            request.session.pop("user", None)
+
+            # Django 로그아웃
+            from django.contrib.auth import logout
+
+            logout(request)
+
+            return redirect("accounts:login")
         except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
+            print(f"Logout error: {str(e)}")
+            return redirect("accounts:login")
 
 
 # provider login
@@ -168,22 +148,22 @@ class ProviderLoginView(View):
             return JsonResponse({"error": str(e)}, status=400)
 
 
-@method_decorator(csrf_exempt, name="dispatch")
 class DeleteUserView(View):
-    @staticmethod
-    def post(request):
-        try:
-            # Authorization 헤더에서 토큰을 가져옴
-            auth_header = request.headers.get("Authorization")
-            if not auth_header or not auth_header.startswith("Bearer "):
-                return JsonResponse(
-                    {"error": "Invalid authorization header"}, status=401
-                )
-            print(auth_header)
-            token = auth_header.split(" ")[1]
+    def post(self, request):
+        if not settings.DEBUG:
+            return JsonResponse({"error": "Not allowed"}, status=403)
 
-            # 사용자 삭제
-            supabase.auth.admin.delete_user(token)
-            return JsonResponse({"data": "User deleted"})
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
+        form = DeleteUserForm(request.POST)
+        if form.is_valid():
+            try:
+                user_uuid = form.cleaned_data["user_uuid"]
+                supabase.auth.admin.delete_user(str(user_uuid))
+                return redirect("accounts:signup")
+            except Exception as e:
+                return render(
+                    request,
+                    "accounts/signup_form.html",
+                    {"form": form, "error": str(e)},
+                )
+
+        return redirect("accounts:signup")

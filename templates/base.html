@@ -52,14 +52,15 @@
                     <a class="nav-link" href="{% url 'qr:api' %}">API Documentation</a>
                 </li>
             </ul>
-            <!-- Add this new ul for auth buttons -->
+
+            {% comment %} 로그인 상태에 따른 버튼 표시 {% endcomment %}
             <ul class="navbar-nav ms-auto">
                 {% if user.is_authenticated %}
                     <li class="nav-item">
                         <span class="nav-link">{{ user.email }}</span>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link btn btn-outline-primary ms-2" href="{% url 'accounts:logout' %}">Sign Out</a>
+                        <a class="nav-link btn btn-outline-primary ms-2" href="{% url 'accounts:api_logout' %}">Sign Out</a>
                     </li>
                 {% else %}
                     <li class="nav-item">

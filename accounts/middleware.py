@@ -1,5 +1,8 @@
 from django.http import JsonResponse
 from django.urls import reverse
+from django.shortcuts import redirect
+
+from core.supabase import supabase
 
 
 class AuthMiddleware:
