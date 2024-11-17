@@ -1,11 +1,15 @@
 from django.conf import settings
-from core.supabase import supabase
+from supabase import create_client
 import logging
 
 logger = logging.getLogger(__name__)
 
 TEST_USER_EMAIL = "test_user@example.com"
 TEST_USER_PASSWORD = "TestPassword123!"
+
+# Supabase 클라이언트 초기화
+supabase = create_client(settings.SUPABASE_API_URL, settings.SUPABASE_ANON_KEY)
+supabase_admin = create_client(settings.SUPABASE_API_URL, settings.SUPABASE_SERVICE_ROLE_KEY)
 
 def create_test_user():
     try:
@@ -30,7 +34,7 @@ def create_test_user():
 
 def delete_test_user(user_id):
     try:
-        supabase.auth.admin.delete_user(user_id)
+        supabase_admin.auth.admin.delete_user(user_id)
         logger.info(f"테스트 사용자 삭제: {TEST_USER_EMAIL}")
     except Exception as e:
         logger.error(f"테스트 사용자 삭제 실패: {e}")
