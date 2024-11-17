@@ -51,9 +51,14 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'qr:api' %}">API Documentation</a>
                 </li>
+                {% if debug %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pius_hwang">Admin</a>
+                    </li>
+                {% endif %}
             </ul>
 
-            {% comment %} 로그인 상태에 따른 버튼 표시 {% endcomment %}
+            {# 로그인 상태에 따른 버튼 표시 #}
             <ul class="navbar-nav ms-auto">
                 {% if user.is_authenticated %}
                     <li class="nav-item">
@@ -75,8 +80,26 @@
     </div>
 </nav>
 
-<!-- Main Content -->
+<!-- 디버깅 정보 추가 -->
+{% if debug %}
+<div class="container mt-2">
+    <h5>디버깅 정보:</h5>
+    <p>User is_authenticated: {{ user.is_authenticated }}</p>
+    <p>User email: {{ user.email }}</p>
+</div>
+{% endif %}
+
+<!-- Flash Messages -->
 <div class="container mt-4">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
     {% block content %}
         <!-- Child templates will inject content here -->
     {% endblock %}

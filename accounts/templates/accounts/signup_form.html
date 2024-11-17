@@ -10,15 +10,7 @@
     {% csrf_token %}
     <h1 class="h3 mb-3 fw-normal">Create Account</h1>
 
-    {% if form.non_field_errors %}
-    <div class="alert alert-danger">
-        {% for error in form.non_field_errors %}
-            {{ error }}
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    <div class="form-floating">
+    <div class="form-floating mb-3">
       {{ form.email }}
       <label for="{{ form.email.id_for_label }}">Email address</label>
       {% if form.email.errors %}
@@ -26,7 +18,7 @@
       {% endif %}
     </div>
 
-    <div class="form-floating">
+    <div class="form-floating mb-3">
       {{ form.password1 }}
       <label for="{{ form.password1.id_for_label }}">Password</label>
       {% if form.password1.errors %}
@@ -34,7 +26,7 @@
       {% endif %}
     </div>
 
-    <div class="form-floating">
+    <div class="form-floating mb-3">
       {{ form.password2 }}
       <label for="{{ form.password2.id_for_label }}">Confirm Password</label>
       {% if form.password2.errors %}
@@ -45,17 +37,5 @@
     <button class="w-100 btn btn-lg btn-primary mt-3" type="submit">Sign Up</button>
     <p class="mt-3 text-center">Already have an account? <a href="{% url 'accounts:signin' %}">Login here</a></p>
   </form>
-
-  {% if debug %}
-  <form method="post" action="{% url 'accounts:api_delete_user' %}" class="mt-5">
-    {% csrf_token %}
-    <h3 class="h5 mb-3">Debug: Delete User</h3>
-    <div class="form-floating">
-      <input type="text" name="user_uuid" class="form-control" id="userUUID" placeholder="User UUID">
-      <label for="userUUID">User UUID</label>
-    </div>
-    <button class="w-100 btn btn-lg btn-danger mt-3" type="submit">Delete User</button>
-  </form>
-  {% endif %}
 </main>
 {% endblock %}

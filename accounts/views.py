@@ -1,32 +1,36 @@
 import datetime
 import json
 import traceback
+import uuid
+import logging
 
-from django.core.signing import TimestampSigner, SignatureExpired, BadSignature
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
-from django.http import JsonResponse
+from django.http import HttpRequest, JsonResponse
 from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.views import LoginView as DjangoLoginView
-from django.contrib.auth import login
 from django.urls import reverse_lazy
-from django.views.generic import CreateView
+from django.views.generic import CreateView, FormView
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.contrib import messages
+from django.contrib.auth import login, logout
+from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 from core.supabase import supabase
 from accounts.constants import PROVIDERS
 from .forms import SignUpForm, SignInForm, DeleteUserForm
 
+# 로거 설정
+logger = logging.getLogger(__name__)
 
-class SignUpView(CreateView):
+
+class SignUpView(FormView):
     form_class = SignUpForm
     template_name = "accounts/signup_form.html"
-    success_url = "/"
+    success_url = reverse_lazy("qr:index")
 
     def form_valid(self, form):
         try:
@@ -38,65 +42,36 @@ class SignUpView(CreateView):
                         "data": {
                             "email": form.cleaned_data["email"],
                         },
-                        "email_redirect_to": f"{settings.SITE_URL}/accounts/verify-email"  # 이메일 인증 후 리다이렉트될 URL
-                    }
+                        "email_redirect_to": f"{settings.SITE_URL}/",
+                    },
                 }
             )
-            # 세션 정보 저장
-            self.request.session["access_token"] = auth_response.session.access_token
-            self.request.session["refresh_token"] = auth_response.session.refresh_token
-            self.request.session["expires_at"] = auth_response.session.expires_at
 
-            # 사용자 정보 저장
-            self.request.session["user"] = {
-                "id": auth_response.user.id,
-                "email": auth_response.user.email,
-                "role": auth_response.user.role,
-                "created_at": int(auth_response.user.created_at.timestamp()),
+            # Supabase 세션 저장 - 필요한 데이터만 저장
+            self.request.session["supabase_session"] = {
+                "access_token": auth_response.session.access_token,
+                "refresh_token": auth_response.session.refresh_token,
+                "expires_at": auth_response.session.expires_at,
             }
+
+            # Django 사용자 생성 또는 가져오기
+            User = get_user_model()
+            user, created = User.objects.get_or_create(
+                email=form.cleaned_data["email"],
+                defaults={
+                    "username": form.cleaned_data["email"],  # 이메일을 username으로 사용
+                }
+            )
 
             # Django 로그인 처리
+            login(self.request, user)
 
-            user_model = get_user_model()
-            user = user_model.objects.create_user(
-                username=auth_response.user.email,
-                email=auth_response.user.email,
-                password=form.cleaned_data["password1"],
-                is_active=False,
-            )
-
-            # # Django 로그인 처리
-            # login(self.request, user)
-
-            # 이메일 인증 토큰 생성
-            signer = TimestampSigner()
-            token = signer.sign(user.id)
-
-            # 이메일 인증 전송
-            verification_url = f"{settings.SITE_URL}/accounts/verify-email/{token}"
-            email_context = {
-                "verification_url": verification_url,
-                "user_email": user.email,
-            }
-            email_html = render_to_string("accounts/verify_email_template.html", email_context)
-            email_text = render_to_string("accounts/verify_email_template.txt", email_context)
-
-            send_mail(
-                subject="Verify your email",
-                message=email_text,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.email],
-                html_message=email_html,
-                fail_silently=False,
-            )
-
-
-            messages.success(self.request, "Please check your email for verification.")
-            return redirect("/")
-
+            messages.success(self.request, "Successfully signed up. Please check your email.")
+            return super().form_valid(form)
         except Exception as e:
-            form.add_error(None, str(e))
-            print(traceback.format_exc())
+            # 에러 메시지를 전달
+            logger.error(f"Sign up error: {str(e)}")
+            messages.error(self.request, f"Sign up error: {str(e)}")
             return self.form_invalid(form)
 
     def get_context_data(self, **kwargs):
@@ -104,68 +79,80 @@ class SignUpView(CreateView):
         context["debug"] = settings.DEBUG
         return context
 
-
-class SignInView(DjangoLoginView):
+class SignInView(View):
     form_class = SignInForm
     template_name = "accounts/signin_form.html"
-    redirect_authenticated_user = True
 
     def get_success_url(self):
-        # 로그인 성공 후 리다이렉트할 URL
         return reverse_lazy("qr:index")
 
-    def form_valid(self, form):
-        remember_me = form.cleaned_data.get("remember_me")
-        if not remember_me:
-            # 세션 만료 시간을 브라우저 종료시로 설정
-            self.request.session.set_expiry(0)
-        else:
-            # 30일 동안 세션 유지
-            self.request.session.set_expiry(60 * 60 * 24 * 30)
+    def get(self, request: HttpRequest):
+        form = self.form_class()
+        return render(request, self.template_name, {"form": form})
 
-        try:
-            response = supabase.auth.sign_in_with_password(
-                {
+    def post(self, request: HttpRequest):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            try:
+                # Supabase 로그인
+                response = supabase.auth.sign_in_with_password({
                     "email": form.cleaned_data["email"],
                     "password": form.cleaned_data["password"],
+                })
+
+                # Supabase 세션 저장
+                request.session["supabase_session"] = {
+                    "access_token": response.session.access_token,
+                    "refresh_token": response.session.refresh_token,
+                    "expires_at": response.session.expires_at,
                 }
-            )
-            # 세션 저장
-            self.request.session["access_token"] = response.session.access_token
-            self.request.session["refresh_token"] = response.session.refresh_token
-            self.request.session["expires_at"] = response.session.expires_at
 
-            user_model = get_user_model()
-            user = user_model.objects.get(email=response.user.email)
-            login(self.request, user)
+                # Django 사용자 생성 또는 가져오기
+                User = get_user_model()
+                user, created = User.objects.get_or_create(
+                    email=form.cleaned_data["email"],
+                    defaults={
+                        "username": form.cleaned_data["email"],  # 이메일을 username으로 사용
+                    }
+                )
 
-            return super().form_valid(form)
+                # Django 로그인 처리
+                login(request, user)
 
-        except Exception as e:
-            form.add_error(None, str(e))
-            return self.form_invalid(form)
+                if not form.cleaned_data.get("remember_me"):
+                    request.session.set_expiry(0)
+                else:
+                    request.session.set_expiry(60 * 60 * 24 * 30)  # 30일
+
+                messages.success(request, "Successfully logged in.")
+                return redirect(self.get_success_url())
+
+            except Exception as e:
+                logger.error(f"Login error: {e}")
+                messages.error(request, f"Login error: {str(e)}")
+                return render(request, self.template_name, {"form": form})
+
+        return render(request, self.template_name, {"form": form})
 
 
-class SignOutView(View):
+class LogOutView(View):
     def get(self, request):
         try:
             # Supabase 로그아웃
             supabase.auth.sign_out()
 
-            # Django 세션에서 Supabase 관련 데이터 삭제
-            request.session.pop("access_token", None)
-            request.session.pop("refresh_token", None)
-            request.session.pop("expires_at", None)
-            request.session.pop("user", None)
-
             # Django 로그아웃
-            from django.contrib.auth import logout
-
             logout(request)
 
+            # Django 세션에서 Supabase 관련 데이터 삭제
+            request.session.pop("supabase_session", None)
+            request.session.pop("user", None)
+
+            messages.success(request, "Successfully logged out.")
             return redirect("/")
         except Exception as e:
-            print(f"Logout error: {str(e)}")
+            logger.error(f"Logout error: {str(e)}")
+            messages.error(request, "Logout error.")
             return redirect("/")
 
 
@@ -209,26 +196,9 @@ class DeleteUserView(View):
 
         return redirect("accounts:signup")
 
+
 class VerifyEmailView(View):
     def get(self, request, token):
-        try:
-            signer = TimestampSigner()
-            email = signer.unsign(token, max_age=60 * 60 * 24) # 24시간 유효
-
-            user_model = get_user_model()
-            user = user_model.objects.get(email=email)
-
-            if not user.is_active:
-                user.is_active = True
-                user.save()
-                messages.success(request, "Your email has been verified.")
-            else:
-                messages.info(request, "Your email has already been verified.")
-
-            return redirect("/")
-        except SignatureExpired:
-            messages.error(request, "The verification link has expired.")
-            return redirect("/")
-        except (BadSignature, user_model.DoesNotExist):
-            messages.error(request, "The verification link is invalid.")
-            return redirect("/")
+        # Removed Django's email verification logic
+        messages.success(request, "Email verification successful.")
+        return redirect("/")

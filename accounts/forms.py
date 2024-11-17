@@ -1,11 +1,7 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
 
 
-class SignUpForm(UserCreationForm):
+class SignUpForm(forms.Form):
     email = forms.EmailField(
         widget=forms.EmailInput(
             attrs={"class": "form-control", "placeholder": "name@example.com"}
@@ -22,17 +18,20 @@ class SignUpForm(UserCreationForm):
         )
     )
 
-    class Meta:
-        model = User
-        fields = ("email", "password1", "password2")
+    def clean_password2(self):
+        password1 = self.cleaned_data.get('password1')
+        password2 = self.cleaned_data.get('password2')
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError("Passwords don't match.")
+        return password2
 
 
 class DeleteUserForm(forms.Form):
     user_uuid = forms.UUIDField(widget=forms.HiddenInput())
 
 
-class SignInForm(AuthenticationForm):
-    username = forms.EmailField(
+class SignInForm(forms.Form):
+    email = forms.EmailField(
         widget=forms.EmailInput(
             attrs={"class": "form-control", "placeholder": "name@example.com"}
         )
@@ -46,6 +45,5 @@ class SignInForm(AuthenticationForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        if "username" in cleaned_data:
-            cleaned_data["email"] = cleaned_data["username"]
+        # Additional validation can be added here if necessary
         return cleaned_data
