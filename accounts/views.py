@@ -1,22 +1,16 @@
-import datetime
 import json
-import traceback
-import uuid
 import logging
 
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
 from django.http import HttpRequest, JsonResponse
 from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, FormView
+from django.views.generic import FormView
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login, logout
-from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 
 from core.supabase import supabase
@@ -55,8 +49,8 @@ class SignUpView(FormView):
             }
 
             # Django 사용자 생성 또는 가져오기
-            User = get_user_model()
-            user, created = User.objects.get_or_create(
+            user_model = get_user_model()
+            user, _ = user_model.objects.get_or_create(
                 email=form.cleaned_data["email"],
                 defaults={
                     "username": form.cleaned_data["email"],  # 이메일을 username으로 사용
@@ -108,8 +102,8 @@ class SignInView(View):
                 }
 
                 # Django 사용자 생성 또는 가져오기
-                User = get_user_model()
-                user, created = User.objects.get_or_create(
+                user_model = get_user_model()
+                user, _ = user_model.objects.get_or_create(
                     email=form.cleaned_data["email"],
                     defaults={
                         "username": form.cleaned_data["email"],  # 이메일을 username으로 사용
