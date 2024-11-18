@@ -68,6 +68,11 @@ INSTALLED_APPS = [
     "debug_toolbar",
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'accounts.backends.CustomAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
