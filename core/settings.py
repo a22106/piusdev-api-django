@@ -23,7 +23,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 if not SECRET_KEY:
     SECRET_KEY = "".join(random.choice(string.ascii_lowercase) for i in range(32))
 
-DEBUG = os.environ.get("DEBUG", "True") == "True"
+DEBUG = os.environ.get("DEBUG", True)
 SITE_URL = "http://localhost:8000" if DEBUG else "https://qrcode.piusdev.com"
 
 ALLOWED_HOSTS = [
@@ -108,12 +108,12 @@ WSGI_APPLICATION = "core.wsgi.application"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 DATABASES = {
     "default": {
-        "ENGINE": os.environ.get("SUPABASE_DB_ENGINE", "django.db.backends.postgresql"),
-        "NAME": os.environ.get("SUPABASE_DB_NAME", "postgres"),
-        "USER": os.environ.get("SUPABASE_DB_USER", "postgres"),
-        "PASSWORD": os.environ.get("SUPABASE_DB_PASSWORD", "postgres"),
-        "HOST": os.environ.get("SUPABASE_DB_HOST", "127.0.0.1"),
-        "PORT": os.environ.get("SUPABASE_DB_PORT", "54322"),
+        "ENGINE": os.environ.get("DB_ENGINE", "django.db.backends.postgresql"),
+        "NAME": os.environ.get("DB_NAME", "postgres"),
+        "USER": os.environ.get("DB_USER", "postgres"),
+        "PASSWORD": os.environ.get("DB_PASSWORD", "postgres"),
+        "HOST": os.environ.get("DB_HOST", "127.0.0.1"),
+        "PORT": os.environ.get("DB_PORT", "5432"),
     }
 }
 

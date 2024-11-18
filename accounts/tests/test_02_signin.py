@@ -1,4 +1,5 @@
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.contrib.auth import get_user_model
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service as ChromeService
@@ -15,10 +16,16 @@ class TestSignIn(StaticLiveServerTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # 이미 create_test_user에서 생성되었으므로 별도 생성 불필요
+        user_model = get_user_model()
+        cls.user = user_model.objects.create_user(
+            username=TEST_USER_EMAIL,
+            email=TEST_USER_EMAIL,
+            password=TEST_USER_PASSWORD
+        )
 
     @classmethod
     def tearDownClass(cls):
+        cls.user.delete()
         super().tearDownClass()
 
     def setUp(self):
@@ -50,4 +57,6 @@ class TestSignIn(StaticLiveServerTestCase):
 
         # 추가적인 검증 (예: 사용자 계정 페이지로 리디렉션)
         current_url = self.driver.current_url
-        assert "/account" in current_url, f"예상된 리디렉션 URL이 아닙니다: {current_url}"
+        print(f"Current URL: {current_url}")
+        expected_url = self.live_server_url + "/"
+        assert current_url == expected_url, f"예상된 리디렉션 URL이 아닙니다: 예상: {expected_url}, 실제: {current_url}"

@@ -1,5 +1,5 @@
 from django import forms
-
+from django.contrib.auth import get_user_model
 
 class SignUpForm(forms.Form):
     email = forms.EmailField(
@@ -18,6 +18,13 @@ class SignUpForm(forms.Form):
         )
     )
 
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        user_model = get_user_model()
+        if user_model.objects.filter(email=email).exists():
+            raise forms.ValidationError("Email already in use.")
+        return email
+
     def clean_password2(self):
         password1 = self.cleaned_data.get('password1')
         password2 = self.cleaned_data.get('password2')
@@ -25,10 +32,8 @@ class SignUpForm(forms.Form):
             raise forms.ValidationError("Passwords don't match.")
         return password2
 
-
 class DeleteUserForm(forms.Form):
     user_uuid = forms.UUIDField(widget=forms.HiddenInput())
-
 
 class SignInForm(forms.Form):
     email = forms.EmailField(
@@ -45,5 +50,5 @@ class SignInForm(forms.Form):
 
     def clean(self):
         cleaned_data = super().clean()
-        # Additional validation can be added here if necessary
+        # 추가적인 검증 로직 여기에 추가
         return cleaned_data

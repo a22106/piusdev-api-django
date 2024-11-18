@@ -1,4 +1,5 @@
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.contrib.auth import get_user_model
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service as ChromeService
@@ -6,7 +7,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 import time
 import logging
 
-from accounts.tests.utils import TEST_USER_EMAIL, TEST_USER_PASSWORD, create_test_user, delete_test_user
+from accounts.tests.utils import TEST_USER_EMAIL, TEST_USER_PASSWORD
 
 logger = logging.getLogger(__name__)
 
@@ -14,12 +15,16 @@ class TestSignUp(StaticLiveServerTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.user_id = create_test_user()
+        # 회원가입 테스트 시 이미 테스트 사용자가 생성되었으므로 별도 생성을 생략
 
     @classmethod
     def tearDownClass(cls):
-        if cls.user_id:
-            delete_test_user(cls.user_id)
+        user_model = get_user_model()
+        try:
+            user = user_model.objects.get(email=TEST_USER_EMAIL)
+            user.delete()
+        except user_model.DoesNotExist:
+            pass
         super().tearDownClass()
 
     def setUp(self):
