@@ -6,10 +6,11 @@ pycountry
 phonenumbers
 supabase
 
+
 # Swagger
 drf-yasg
 djangorestframework
-
+whitenoise
 # Django
 django-admin-berry
 django_plotly_dash
