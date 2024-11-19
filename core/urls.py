@@ -1,4 +1,4 @@
-from django.conf import settings
+from core import settings
 from django.contrib import admin
 from django.urls import path, include, re_path
 from rest_framework import permissions
@@ -35,7 +35,6 @@ if settings.DEBUG:
 
     # Debug Toolbar addition
     urlpatterns += [path("__debug__/", include('debug_toolbar.urls'))]
-    # urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
     # DRF-YASG (Swagger, ReDoc) addition
     urlpatterns += [

@@ -33,24 +33,35 @@ class SignUpView(FormView):
                 password=form.cleaned_data["password1"],
                 is_active=False,
             )
-            current_site = get_current_site(self.request)
-            subject = "Verify your email"
-            message = render_to_string(
-                "accounts/email_verification.html",
-                {
-                    "user": user,
-                    "domain": current_site.domain,
-                    "uid": urlsafe_base64_encode(force_bytes(user.pk)),
-                    "token": email_verification_token.make_token(user),
-                },
-            )
+
+            try:
+                current_site = get_current_site(self.request)
+                subject = "Verify your email"
+                message = render_to_string(
+                    "accounts/email_verification.html",
+                    {
+                        "user": user,
+                        "domain": current_site.domain,
+                        "uid": urlsafe_base64_encode(force_bytes(user.pk)),
+                        "token": email_verification_token.make_token(user),
+                    },
+                )
+                user.email_user(subject, message)
+                messages.success(self.request, "Successfully signed up. Please check your email.")
+            except Exception as email_error:
+                logger.error(f"Email sending error: {str(email_error)}")
+                messages.warning(
+                    self.request,
+                    "Account created successfully, but verification email could not be sent. "
+                    "Please contact support."
+                )
+
             login(self.request, user, backend='accounts.backends.CustomAuthBackend')
-            user.email_user(subject, message)
-            messages.success(self.request, "Successfully signed up. Please check your email.")
             return super().form_valid(form)
+
         except Exception as e:
             logger.error(f"Signup error: {str(e)}")
-            messages.error(self.request, f"Signup error: {str(e)}")
+            messages.error(self.request, "An error occurred during signup. Please try again.")
             return self.form_invalid(form)
 
     def get_context_data(self, **kwargs):
