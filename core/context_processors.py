@@ -1,5 +1,6 @@
 from .models import SiteSettings
 
+
 def site_settings(request):
     config = SiteSettings.objects.first()
     return {

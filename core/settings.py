@@ -18,12 +18,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
+
 SECRET_KEY = os.environ.get("SECRET_KEY")
 if not SECRET_KEY:
     SECRET_KEY = "".join(random.choice(string.ascii_lowercase) for i in range(32))
 
-DEBUG = os.environ.get("DEBUG", "True") == "True"
+DEBUG = os.environ.get("DEBUG", "True").lower() == "true"
+SITE_URL = "http://localhost:8000" if DEBUG else "https://qrcode.piusdev.com"
 
 ALLOWED_HOSTS = [
     "piusdev-qrcode-9f0c9f745f56.herokuapp.com",
@@ -53,6 +54,8 @@ if RENDER_EXTERNAL_HOSTNAME:
 
 INSTALLED_APPS = [
     "core",
+    "accounts",
+    "qr",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -60,19 +63,23 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "bootstrap5",
-    "qr",
     "drf_yasg",
     "rest_framework",
     "debug_toolbar",
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'accounts.backends.CustomAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "accounts.middleware.AuthMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
@@ -106,12 +113,12 @@ WSGI_APPLICATION = "core.wsgi.application"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 DATABASES = {
     "default": {
-        "ENGINE": os.environ.get("SUPABASE_DB_ENGINE", "django.db.backends.postgresql"),
-        "NAME": os.environ.get("SUPABASE_DB_NAME", "postgres"),
-        "USER": os.environ.get("SUPABASE_DB_USER", "postgres"),
-        "PASSWORD": os.environ.get("SUPABASE_DB_PASSWORD", "postgres"),
-        "HOST": os.environ.get("SUPABASE_DB_HOST", "127.0.0.1"),
-        "PORT": os.environ.get("SUPABASE_DB_PORT", "54322"),
+        "ENGINE": os.environ.get("DB_ENGINE", "django.db.backends.postgresql"),
+        "NAME": os.environ.get("DB_NAME", "postgres"),
+        "USER": os.environ.get("DB_USER", "postgres"),
+        "PASSWORD": os.environ.get("DB_PASSWORD", "postgres"),
+        "HOST": os.environ.get("DB_HOST", "127.0.0.1"),
+        "PORT": os.environ.get("DB_PORT", "5432"),
     }
 }
 
@@ -166,9 +173,46 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "[{asctime}] {levelname} {name} {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
+    },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+        "file": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "debug.log"),
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console", "file"],
+            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
+            "propagate": True,
+        },
+        "accounts": {
+            "handlers": ["console", "file"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+        "accounts.middleware": {
+            "handlers": ['console'],
+            "level": 'DEBUG',
+        },
+        "accounts.views": {
+            "handlers": ['console'],
+            "level": 'DEBUG',
         },
     },
 }
@@ -212,3 +256,25 @@ try:
 except OperationalError:
     print("데이터베이스 연결 실패")
     sys.exit(1)
+
+# Email Settings
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "no-reply@piusdev.com"
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = "no-reply@piusdev.com"
+
+# 세션 쿠키 보안 설정 (배포 시 적절히 설정)
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # 기본값, 데이터베이스에 세션 저장
+SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", "False") == "True" # HTTPS를 통해서만 쿠키를 전송
+SESSION_COOKIE_HTTPONLY = True  # 쿠키를 통한 자바스크립트 접근 방지
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False # 브라우저 종료 시 세션 만료
+SESSION_COOKIE_SAMESITE = 'Lax'  # 쿠키의 SameSite 속성 설정
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 7  # 7일
+
+INTERNAL_IPS = [
+    '127.0.0.1',
+]
+

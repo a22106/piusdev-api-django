@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.urls import path, reverse
+from django.urls import path
 from .views import (
     IndexView,
     HelloWorldView,
@@ -21,6 +21,7 @@ from .views import (
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+
 
 app_name = "qr"
 

@@ -10,5 +10,12 @@
       <jdbc-url>jdbc:sqlite:C:\Users\bk221\Projects\3_Piusdev\investment_calculator\db.sqlite3</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="supabase postgres@localhost" uuid="7a67a240-bde2-4059-aa40-b1e5a80174ba">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://localhost:54322/postgres</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>

@@ -39,25 +39,67 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container">
         <a class="navbar-brand" href="{% url 'qr:index' %}">QR Code Generator</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
+            <ul class="navbar-nav me-auto">
                 <li class="nav-item active">
                     <a class="nav-link" href="{% url 'qr:index' %}">Home</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'qr:api' %}">API Documentation</a>
                 </li>
+                {% if debug %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pius_hwang">Admin</a>
+                    </li>
+                {% endif %}
+            </ul>
+
+            {# 로그인 상태에 따른 버튼 표시 #}
+            <ul class="navbar-nav ms-auto">
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <span class="nav-link">{{ user.email }}</span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-outline-primary ms-2" href="{% url 'accounts:logout' %}">Sign Out</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-outline-primary me-2" href="{% url 'accounts:signup' %}">Sign Up</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-primary" href="{% url 'accounts:signin' %}" style="color: white;">Sign In</a>
+                    </li>
+                {% endif %}
             </ul>
         </div>
     </div>
 </nav>
 
-<!-- Main Content -->
+<!-- 디버깅 정보 추가 -->
+{% if debug %}
+<div class="container mt-2">
+    <h5>디버깅 정보:</h5>
+    <p>User is_authenticated: {{ user.is_authenticated }}</p>
+    <p>User email: {{ user.email }}</p>
+</div>
+{% endif %}
+
+<!-- Flash Messages -->
 <div class="container mt-4">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
     {% block content %}
         <!-- Child templates will inject content here -->
     {% endblock %}
