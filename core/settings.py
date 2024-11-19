@@ -23,7 +23,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 if not SECRET_KEY:
     SECRET_KEY = "".join(random.choice(string.ascii_lowercase) for i in range(32))
 
-DEBUG = os.environ.get("DEBUG", True)
+DEBUG = os.environ.get("DEBUG", "True").lower() == "true"
 SITE_URL = "http://localhost:8000" if DEBUG else "https://qrcode.piusdev.com"
 
 ALLOWED_HOSTS = [
