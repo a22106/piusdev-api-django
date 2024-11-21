@@ -1,47 +1,63 @@
 <script lang="ts">
-  import svelteLogo from './assets/svelte.svg'
-  import viteLogo from '/vite.svg'
-  import Counter from './lib/Counter.svelte'
+  import QRCodeGenerator from "./components/QRCodeGenerator.svelte";
 </script>
 
-<main>
-  <div>
-    <a href="https://vite.dev" target="_blank" rel="noreferrer">
-      <img src={viteLogo} class="logo" alt="Vite Logo" />
-    </a>
-    <a href="https://svelte.dev" target="_blank" rel="noreferrer">
-      <img src={svelteLogo} class="logo svelte" alt="Svelte Logo" />
-    </a>
-  </div>
-  <h1>Vite + Svelte</h1>
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+  <!-- Navbar -->
+  <nav class="bg-white shadow-md">
+    <div class="container mx-auto px-4">
+      <div class="flex justify-between items-center h-16">
+        <!-- Logo/Brand -->
+        <a href="/" class="flex items-center space-x-2">
+          <span class="text-xl font-bold text-gray-800">QR Code Generator</span>
+        </a>
 
-  <div class="card">
-    <Counter />
-  </div>
+        <!-- Navigation Links -->
+        <div class="hidden md:flex items-center space-x-4">
+          <a
+            href="/"
+            class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+            >Home</a
+          >
+          <a
+            href="/api"
+            class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+            >API Documentation</a
+          >
+        </div>
 
-  <p>
-    Check out <a href="https://github.com/sveltejs/kit#readme" target="_blank" rel="noreferrer">SvelteKit</a>, the official Svelte app framework powered by Vite!
-  </p>
+        <!-- Auth Buttons -->
+        <div class="flex items-center space-x-2">
+          <a
+            href="/signup"
+            class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+            >Sign Up</a
+          >
+          <a
+            href="/signin"
+            class="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium"
+            >Sign In</a
+          >
+        </div>
+      </div>
+    </div>
+  </nav>
 
-  <p class="read-the-docs">
-    Click on the Vite and Svelte logos to learn more
-  </p>
-</main>
+  <main>
+    <QRCodeGenerator />
+  </main>
+</div>
 
 <style>
-  .logo {
-    height: 6em;
-    padding: 1.5em;
-    will-change: filter;
-    transition: filter 300ms;
-  }
-  .logo:hover {
-    filter: drop-shadow(0 0 2em #646cffaa);
-  }
-  .logo.svelte:hover {
-    filter: drop-shadow(0 0 2em #ff3e00aa);
-  }
-  .read-the-docs {
-    color: #888;
+  :global(body) {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(
+      to bottom right,
+      rgb(239, 246, 255),
+      rgb(238, 242, 255)
+    );
   }
 </style>

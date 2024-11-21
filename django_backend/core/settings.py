@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     "drf_yasg",
     "rest_framework",
     "debug_toolbar",
+    "corsheaders",
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -76,6 +77,7 @@ AUTHENTICATION_BACKENDS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "accounts.middleware.AuthMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -284,3 +286,11 @@ INTERNAL_IPS = [
 # Whitenoise configuration for serving static files
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+CORS_ALLOW_ALL_ORIGINS = True  # Only for development
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # Vite default port
+    "http://localhost:5174",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:5174",
+]

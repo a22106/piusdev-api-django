@@ -18,6 +18,7 @@ django-bootstrap-v5
 django-qr-code
 django-debug-toolbar
 django-configurations
+django-cors-headers
 
 # Deployment
 whitenoise
