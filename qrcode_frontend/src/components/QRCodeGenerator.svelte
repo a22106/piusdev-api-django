@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  
+
   let selectedType = 'url';
   let qrCodeImage: string | null = null;
   let downloadEnabled = false;
@@ -47,10 +47,10 @@
     try {
       // Adjust endpoint for phone number
       let endpoint = `${API_BASE_URL}/${selectedType === 'phone' ? 'phonenumber' : selectedType}/`;
-      
+
       // Adjust form data based on type
       const adjustedFormData = { ...formData };
-      
+
       // Handle special cases
       switch (selectedType) {
         case 'phone':
@@ -75,12 +75,12 @@
 
       const queryParams = new URLSearchParams(adjustedFormData).toString();
       const fullUrl = `${endpoint}?${queryParams}`;
-      
+
       console.log('Sending request to:', fullUrl);
       console.log('Form data:', adjustedFormData);
-      
+
       const response = await fetch(fullUrl);
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Server response:', {
@@ -127,229 +127,229 @@
   function getInputFields(): InputField[] {
     switch (selectedType) {
       case 'url':
-        return [{ 
-          name: 'url', 
-          type: 'text', 
+        return [{
+          name: 'url',
+          type: 'text',
           label: 'URL',
-          required: true 
+          required: true
         }];
-      
+
       case 'text':
-        return [{ 
-          name: 'text', 
-          type: 'textarea', 
+        return [{
+          name: 'text',
+          type: 'textarea',
           label: 'Text',
-          required: true 
+          required: true
         }];
-      
+
       case 'email':
         return [
-          { 
-            name: 'email', 
-            type: 'email', 
+          {
+            name: 'email',
+            type: 'email',
             label: 'Email Address',
-            required: true 
+            required: true
           },
-          { 
-            name: 'subject', 
-            type: 'text', 
-            label: 'Subject' 
+          {
+            name: 'subject',
+            type: 'text',
+            label: 'Subject'
           },
-          { 
-            name: 'body', 
-            type: 'textarea', 
-            label: 'Message Body' 
+          {
+            name: 'body',
+            type: 'textarea',
+            label: 'Message Body'
           }
         ];
-      
+
       case 'phone':
-        return [{ 
-          name: 'phone', 
-          type: 'tel', 
+        return [{
+          name: 'phone',
+          type: 'tel',
           label: 'Phone Number',
-          required: true 
+          required: true
         }];
-      
+
       case 'vcard':
         return [
-          { 
-            name: 'first_name', 
-            type: 'text', 
+          {
+            name: 'first_name',
+            type: 'text',
             label: 'First Name',
-            required: true 
+            required: true
           },
-          { 
-            name: 'last_name', 
-            type: 'text', 
+          {
+            name: 'last_name',
+            type: 'text',
             label: 'Last Name',
-            required: true 
+            required: true
           },
-          { 
-            name: 'phone', 
-            type: 'tel', 
-            label: 'Phone Number' 
+          {
+            name: 'phone',
+            type: 'tel',
+            label: 'Phone Number'
           },
-          { 
-            name: 'mobile', 
-            type: 'tel', 
+          {
+            name: 'mobile',
+            type: 'tel',
             label: 'Mobile Number',
-            required: true 
+            required: true
           },
-          { 
-            name: 'email', 
-            type: 'email', 
+          {
+            name: 'email',
+            type: 'email',
             label: 'Email',
-            required: true 
+            required: true
           },
-          { 
-            name: 'url', 
-            type: 'url', 
-            label: 'Website' 
+          {
+            name: 'url',
+            type: 'url',
+            label: 'Website'
           },
-          { 
-            name: 'organization', 
-            type: 'text', 
-            label: 'Organization' 
+          {
+            name: 'organization',
+            type: 'text',
+            label: 'Organization'
           }
         ];
-      
+
       case 'wifi':
         return [
-          { 
-            name: 'ssid', 
-            type: 'text', 
+          {
+            name: 'ssid',
+            type: 'text',
             label: 'Network Name (SSID)',
-            required: true 
+            required: true
           },
-          { 
-            name: 'password', 
-            type: 'password', 
-            label: 'Password' 
+          {
+            name: 'password',
+            type: 'password',
+            label: 'Password'
           },
-          { 
-            name: 'encryption', 
-            type: 'select', 
+          {
+            name: 'encryption',
+            type: 'select',
             label: 'Encryption',
             options: [
               { value: 'WPA', label: 'WPA/WPA2' },
               { value: 'WEP', label: 'WEP' },
               { value: 'nopass', label: 'None' }
             ],
-            required: true 
+            required: true
           }
         ];
-      
+
       case 'sms':
         return [
-          { 
-            name: 'phone_number', 
-            type: 'tel', 
+          {
+            name: 'phone_number',
+            type: 'tel',
             label: 'Phone Number',
-            required: true 
+            required: true
           },
-          { 
-            name: 'message', 
-            type: 'textarea', 
-            label: 'Message' 
+          {
+            name: 'message',
+            type: 'textarea',
+            label: 'Message'
           }
         ];
-      
+
       case 'geo':
         return [
-          { 
-            name: 'latitude', 
-            type: 'number', 
+          {
+            name: 'latitude',
+            type: 'number',
             label: 'Latitude',
             required: true,
             step: 'any'
           },
-          { 
-            name: 'longitude', 
-            type: 'number', 
+          {
+            name: 'longitude',
+            type: 'number',
             label: 'Longitude',
             required: true,
             step: 'any'
           },
-          { 
-            name: 'query', 
-            type: 'text', 
-            label: 'Place Name' 
+          {
+            name: 'query',
+            type: 'text',
+            label: 'Place Name'
           }
         ];
-      
+
       case 'event':
         return [
-          { 
-            name: 'summary', 
-            type: 'text', 
+          {
+            name: 'summary',
+            type: 'text',
             label: 'Event Title',
-            required: true 
+            required: true
           },
-          { 
-            name: 'start_date', 
-            type: 'datetime-local', 
+          {
+            name: 'start_date',
+            type: 'datetime-local',
             label: 'Start Date',
-            required: true 
+            required: true
           },
-          { 
-            name: 'end_date', 
-            type: 'datetime-local', 
+          {
+            name: 'end_date',
+            type: 'datetime-local',
             label: 'End Date',
-            required: true 
+            required: true
           },
-          { 
-            name: 'location', 
-            type: 'text', 
-            label: 'Location' 
+          {
+            name: 'location',
+            type: 'text',
+            label: 'Location'
           },
-          { 
-            name: 'description', 
-            type: 'textarea', 
-            label: 'Description' 
+          {
+            name: 'description',
+            type: 'textarea',
+            label: 'Description'
           }
         ];
-      
+
       case 'whatsapp':
         return [
-          { 
-            name: 'phone_number', 
-            type: 'tel', 
+          {
+            name: 'phone_number',
+            type: 'tel',
             label: 'Phone Number',
-            required: true 
+            required: true
           },
-          { 
-            name: 'message', 
-            type: 'textarea', 
-            label: 'Message' 
+          {
+            name: 'message',
+            type: 'textarea',
+            label: 'Message'
           }
         ];
-      
+
       case 'bitcoin':
         return [
-          { 
-            name: 'address', 
-            type: 'text', 
+          {
+            name: 'address',
+            type: 'text',
             label: 'Bitcoin Address',
-            required: true 
+            required: true
           },
-          { 
-            name: 'amount', 
-            type: 'number', 
+          {
+            name: 'amount',
+            type: 'number',
             label: 'Amount (BTC)',
             step: 'any'
           },
-          { 
-            name: 'label', 
-            type: 'text', 
-            label: 'Label' 
+          {
+            name: 'label',
+            type: 'text',
+            label: 'Label'
           },
-          { 
-            name: 'message', 
-            type: 'text', 
-            label: 'Message' 
+          {
+            name: 'message',
+            type: 'text',
+            label: 'Message'
           }
         ];
-      
+
       default:
         return [];
     }
@@ -361,7 +361,7 @@
     <h1 class="text-4xl font-bold mb-12 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
       QR Code Generator
     </h1>
-    
+
     <div class="max-w-5xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8 p-8">
         <!-- QR Type Selection -->
@@ -395,7 +395,7 @@
                     {/if}
                   </span>
                 </label>
-                
+
                 {#if field.type === 'textarea'}
                   <textarea
                     id="{field.name}-input"
