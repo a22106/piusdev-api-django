@@ -110,6 +110,12 @@
                             <label class="form-label mb-3 w-100">
                                 <span class="text-danger">*</span>Text: <textarea type="text" name="text" placeholder="Enter Text" class="form-control w-100" rows="4"></textarea>
                             </label>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" name="rounded" id="roundedCorners">
+                                <label class="form-check-label" for="roundedCorners">
+                                    Use rounded corners
+                                </label>
+                            </div>
                         </div>
 
                         <!-- Phone Number Input Section -->
@@ -365,10 +371,15 @@
 
                 // Collect form data from the visible input section only
                 const $activeSection = $(`#input-${selectedType}`);
-                const formDataArray = $activeSection.find('input, select, textarea').serializeArray();
+                const formDataArray = $activeSection.find('input:not([type="checkbox"]), select, textarea').serializeArray();
                 const data = {};
                 formDataArray.forEach((item) => {
                     data[item.name] = item.value;
+                });
+
+                // Add checkbox values
+                $activeSection.find('input[type="checkbox"]').each(function() {
+                    data[this.name] = this.checked;
                 });
 
                 // country_code와 phone_number가 모두 있으면 phone_number에 country_code를 붙임

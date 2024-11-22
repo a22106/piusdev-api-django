@@ -239,6 +239,13 @@ class QrTextView(APIView):
                 description="Text to encode in the QR Code",
                 type=openapi.TYPE_STRING,
                 required=True,
+            ),
+            openapi.Parameter(
+                "rounded",
+                openapi.IN_QUERY,
+                description="Use rounded corners for QR code",
+                type=openapi.TYPE_BOOLEAN,
+                default=False
             )
         ],
         responses={200: openapi.Response("QR Code Image (PNG)")},
@@ -248,12 +255,14 @@ class QrTextView(APIView):
 
         try:
             text = request.query_params.get("text", "")
+            use_rounded = request.query_params.get("rounded", "").lower() == "true"
+
             if not text:
                 return JsonResponse(
                     {"detail": "Text parameter is required."}, status=400
                 )
 
-            qr_image = generate_text_qr(text)
+            qr_image = generate_text_qr(text, use_rounded)
             return HttpResponse(qr_image, content_type="image/png")
         except Exception as e:
             logger.error(f"Error generating Text QR Code via API: {e}")

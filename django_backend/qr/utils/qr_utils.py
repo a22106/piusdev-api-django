@@ -10,7 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 def create_qr_code(
-    data: str, version: int = 1, error_correction=qrcode.constants.ERROR_CORRECT_L
+    data: str, version: int = 1, error_correction=qrcode.constants.ERROR_CORRECT_L,
+    module_drawer=None
 ) -> bytes:
     """
     Create a QR code image from the given data.
@@ -19,6 +20,7 @@ def create_qr_code(
         data (str): The data to encode in the QR code.
         version (int, optional): The version of the QR code. Defaults to 1.
         error_correction: The error correction level. Defaults to ERROR_CORRECT_L.
+        module_drawer: Optional module drawer for styled QR codes.
 
     Returns:
         bytes: The generated QR code image in PNG format.
@@ -32,7 +34,12 @@ def create_qr_code(
     qr.add_data(data)
     qr.make(fit=True)
 
-    img = qr.make_image(fill_color="black", back_color="white")
+    if module_drawer:
+        from qrcode.image.styledpil import StyledPilImage
+        img = qr.make_image(image_factory=StyledPilImage, module_drawer=module_drawer)
+    else:
+        img = qr.make_image(fill_color="black", back_color="white")
+
     buffer = BytesIO()
     img.save(buffer, format="PNG")
     return buffer.getvalue()
@@ -75,16 +82,20 @@ def generate_email_qr(email: str, subject: str = "", body: str = "") -> bytes:
     return create_qr_code(mailto)
 
 
-def generate_text_qr(text: str) -> bytes:
+def generate_text_qr(text: str, use_rounded: bool = False) -> bytes:
     """
     Generate a QR code for plain text.
 
     Args:
         text (str): The text to encode in the QR code.
+        use_rounded (bool): Whether to use rounded corners for the QR code.
 
     Returns:
         bytes: The generated QR code image in PNG format.
     """
+    if use_rounded:
+        from qrcode.image.styles.moduledrawers.pil import RoundedModuleDrawer
+        return create_qr_code(text, module_drawer=RoundedModuleDrawer())
     return create_qr_code(text)
 
 
