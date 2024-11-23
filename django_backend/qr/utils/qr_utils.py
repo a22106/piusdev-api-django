@@ -3,7 +3,7 @@ from enum import Enum
 from io import BytesIO
 import logging
 import urllib.parse
-from PIL import Image
+from PIL import Image, ImageColor
 
 from typing import Dict, Type
 
@@ -76,6 +76,21 @@ def _get_color_mask(mask_type: Type[QRColorMasks]):
     result = mask_map.get(mask_type, SolidFillColorMask())
     return result
 
+
+def _convert_color_to_rgb(color: str) -> tuple:
+    """
+    Convert color string to RGB tuple.
+    Supports color names ('red', 'blue') and hex values ('#FF0000').
+    """
+    try:
+        # ImageColor.getrgb는 'red', '#FF0000' 같은 색상명을 RGB 튜플로 변환
+        return ImageColor.getrgb(color)
+    except Exception as e:
+        logger.error(f"Error converting color {color}: {e}")
+        # 기본값으로 검정색 반환
+        return (0, 0, 0)
+
+
 def create_qr_code(
     data: str, version: int = None,
     error_correction=ERROR_CORRECT_L,
@@ -94,19 +109,25 @@ def create_qr_code(
             border=4,
         )
         qr.add_data(data)
-        qr.make(fit=True) # fit=True: QR code Version(size)를 자동으로 조절
+        qr.make(fit=True)  # fit=True: QR code Version(size)를 자동으로 조절
 
         module_drawer = _get_module_drawer(style)
-        color_mask = _get_color_mask(color_mask)
+        color_mask_instance = _get_color_mask(color_mask)
+
+        # 색상 문자열을 RGB 튜플로 변환
+        fill_color_rgb = _convert_color_to_rgb(fill_color)
+        back_color_rgb = _convert_color_to_rgb(back_color)
+
+        if isinstance(color_mask_instance, SolidFillColorMask):
+            color_mask_instance.back_color = back_color_rgb
+            color_mask_instance.front_color = fill_color_rgb
 
         img = qr.make_image(
             image_factory=StyledPilImage,
-            fill=fill_color,
-            back_color=back_color,
             module_drawer=module_drawer,
-            color_mask=color_mask,
+            color_mask=color_mask_instance,
             embeded_image=embedded_image,
-            embeded_image_ratio=embedded_image_ratio,
+            embeded_image_ratio=embedded_image_ratio if embedded_image else 0,
         )
 
         buffer = BytesIO()
@@ -184,6 +205,7 @@ def generate_text_qr(
         fill_color=fill_color,
         back_color=back_color,
         color_mask=color_mask,
+        error_correction=ERROR_CORRECT_H if embedded_image else ERROR_CORRECT_L,
         embedded_image=embedded_image,
         embedded_image_ratio=embedded_image_ratio
     )

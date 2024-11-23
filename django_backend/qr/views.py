@@ -8,6 +8,7 @@ from drf_yasg.utils import swagger_auto_schema
 import logging
 import pycountry
 import phonenumbers
+from rest_framework.request import Request
 
 from rest_framework.views import APIView
 
@@ -231,6 +232,7 @@ class QrEmailView(APIView):
                 {"detail": "Error generating Email QR Code."}, status=500
             )
 
+
 class QrTextWithImageView(APIView):
     @swagger_auto_schema(
         operation_id="Text QR Code with Image",
@@ -251,7 +253,10 @@ class QrTextWithImageView(APIView):
                     default='SOLID_FILL'
                 ),
                 'embedded_image': openapi.Schema(type=openapi.TYPE_FILE, description='Image to embed in QR code'),
-                'embedded_image_ratio': openapi.Schema(type=openapi.TYPE_NUMBER, description='Size ratio of embedded image (0.1-0.5)', default=0.25),
+                'embedded_image_ratio': openapi.Schema(
+                    type=openapi.TYPE_NUMBER,
+                    description='Size ratio of embedded image (0.1-0.5). I recommand not to be more than **0.3**',
+                    default=0.2),
             },
             required=['text']
         ),
@@ -261,24 +266,27 @@ class QrTextWithImageView(APIView):
             500: openapi.Response("Server Error"),
         },
     )
-    def post(self, request: HttpRequest):
+    def post(self, request: Request):
         logger.info("API Request to generate Text QR Code with Image")
 
         try:
             # 파라미터에서 QR 데이터, 스타일, 색상, 배경색, 색상마스크 추출
-            text = request.data.get("text", "")
+            text = request.POST.get("text", "")
             style = request.data.get("style", "SQUARE_MODULE")
             fill_color = request.data.get("fill_color", "black")
             back_color = request.data.get("back_color", "white")
             color_mask = request.data.get("color_mask", "SOLID_FILL")
-            embedded_image_ratio = request.data.get("embedded_image_ratio", 0.25)
+            embedded_image_ratio = float(request.data.get("embedded_image_ratio", 0.25))
 
             # 파라미터 유효성 검사
             if not text:
                 return JsonResponse({"detail": "Text parameter is required."}, status=400)
 
             if not (0.1 <= embedded_image_ratio <= 0.5):
-                return JsonResponse({"detail": "embedded_image_ratio must be between 0.1 and 0.5"}, status=400)
+                return JsonResponse(
+                    {"detail": "embedded_image_ratio must be between 0.1 and 0.5"},
+                    status=400
+                )
 
             try:
                 style = QRStyles[style]
@@ -311,6 +319,7 @@ class QrTextWithImageView(APIView):
         except Exception as e:
             logger.error(f"Error generating Text QR Code with Image via API: {e}")
             return JsonResponse({"detail": "Error generating Text QR Code with Image."}, status=500)
+
 
 class QrTextView(APIView):
     @swagger_auto_schema(
@@ -396,6 +405,7 @@ class QrTextView(APIView):
             return JsonResponse(
                 {"detail": "Error generating Text QR Code."}, status=500
             )
+
 
 class QrPhoneNumberView(APIView):
     @swagger_auto_schema(
@@ -868,8 +878,6 @@ class QrBitcoinView(APIView):
             )
 
 
-
-# Swagger endpoint response {"detail": "Hello World"}
 class HelloWorldView(APIView):
     @swagger_auto_schema(
         operation_description="This is a test view",
