@@ -1,6 +1,7 @@
 # qr/views.py
 from django.views.generic import TemplateView
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
+from PIL import Image
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
@@ -11,6 +12,8 @@ import phonenumbers
 from rest_framework.views import APIView
 
 from qr.utils.qr_utils import (
+    QRColorMasks,
+    QRStyles,
     generate_url_qr,
     generate_email_qr,
     generate_text_qr,
@@ -228,6 +231,86 @@ class QrEmailView(APIView):
                 {"detail": "Error generating Email QR Code."}, status=500
             )
 
+class QrTextWithImageView(APIView):
+    @swagger_auto_schema(
+        operation_id="Text QR Code with Image",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'text': openapi.Schema(type=openapi.TYPE_STRING, description='Text to encode'),
+                'style': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='QR code style (SQUARE_MODULE, GAPPED_SQUARE_MODULE, CIRCLE_MODULE, ROUNDED_MODULE, HORIZONTAL_BARS, VERTICAL_BARS)',
+                    default='SQUARE_MODULE'
+                ),
+                'fill_color': openapi.Schema(type=openapi.TYPE_STRING, description='QR code pattern color', default='black'),
+                'back_color': openapi.Schema(type=openapi.TYPE_STRING, description='QR code background color', default='white'),
+                'color_mask': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='Color mask type (SOLID_FILL, RADIAL_GRADIANT, SQUARE_GRADIANT, HORIZONTAL_GRADIANT, VERTICAL_GRADIANT)',
+                    default='SOLID_FILL'
+                ),
+                'embedded_image': openapi.Schema(type=openapi.TYPE_FILE, description='Image to embed in QR code'),
+                'embedded_image_ratio': openapi.Schema(type=openapi.TYPE_NUMBER, description='Size ratio of embedded image (0.1-0.5)', default=0.25),
+            },
+            required=['text']
+        ),
+        responses={
+            200: openapi.Response("QR Code Text"),
+            400: openapi.Response("Bad Request"),
+            500: openapi.Response("Server Error"),
+        },
+    )
+    def post(self, request: HttpRequest):
+        logger.info("API Request to generate Text QR Code with Image")
+
+        try:
+            # 파라미터에서 QR 데이터, 스타일, 색상, 배경색, 색상마스크 추출
+            text = request.data.get("text", "")
+            style = request.data.get("style", "SQUARE_MODULE")
+            fill_color = request.data.get("fill_color", "black")
+            back_color = request.data.get("back_color", "white")
+            color_mask = request.data.get("color_mask", "SOLID_FILL")
+            embedded_image_ratio = request.data.get("embedded_image_ratio", 0.25)
+
+            # 파라미터 유효성 검사
+            if not text:
+                return JsonResponse({"detail": "Text parameter is required."}, status=400)
+
+            if not (0.1 <= embedded_image_ratio <= 0.5):
+                return JsonResponse({"detail": "embedded_image_ratio must be between 0.1 and 0.5"}, status=400)
+
+            try:
+                style = QRStyles[style]
+            except KeyError:
+                return JsonResponse({"detail": "Invalid style parameter."}, status=400)
+
+            try:
+                color_mask = QRColorMasks[color_mask]
+            except KeyError:
+                return JsonResponse({"detail": "Invalid color_mask parameter."}, status=400)
+
+            embedded_image = None
+            if 'embedded_image' in request.FILES:
+                try:
+                    image_file = request.FILES['embedded_image']
+                    embedded_image = Image.open(image_file)
+                except Exception as e:
+                    logger.error(f"Error opening embedded image file: {e}")
+                    return JsonResponse({"detail": "Invalid embedded image file."}, status=400)
+            qr_image = generate_text_qr(
+                text,
+                style=style,
+                fill_color=fill_color,
+                back_color=back_color,
+                color_mask=color_mask,
+                embedded_image=embedded_image,
+                embedded_image_ratio=embedded_image_ratio
+            )
+            return HttpResponse(qr_image, content_type="image/png")
+        except Exception as e:
+            logger.error(f"Error generating Text QR Code with Image via API: {e}")
+            return JsonResponse({"detail": "Error generating Text QR Code with Image."}, status=500)
 
 class QrTextView(APIView):
     @swagger_auto_schema(
@@ -241,35 +324,78 @@ class QrTextView(APIView):
                 required=True,
             ),
             openapi.Parameter(
-                "rounded",
+                "style",
                 openapi.IN_QUERY,
-                description="Use rounded corners for QR code",
-                type=openapi.TYPE_BOOLEAN,
-                default=False
-            )
+                description="QR code style (SQUARE_MODULE, GAPPED_SQUARE_MODULE, CIRCLE_MODULE, ROUNDED_MODULE, HORIZONTAL_BARS, VERTICAL_BARS)",
+                type=openapi.TYPE_STRING,
+                default="SQUARE_MODULE"
+            ),
+            openapi.Parameter(
+                "fill_color",
+                openapi.IN_QUERY,
+                description="QR code pattern color (e.g., 'black', '#000000')",
+                type=openapi.TYPE_STRING,
+                default="black"
+            ),
+            openapi.Parameter(
+                "back_color",
+                openapi.IN_QUERY,
+                description="QR code background color (e.g., 'white', '#FFFFFF')",
+                type=openapi.TYPE_STRING,
+                default="white"
+            ),
+            openapi.Parameter(
+                "color_mask",
+                openapi.IN_QUERY,
+                description="Color mask type (SOLID_FILL, RADIAL_GRADIANT, SQUARE_GRADIANT, HORIZONTAL_GRADIANT, VERTICAL_GRADIANT)",
+                type=openapi.TYPE_STRING,
+                default="SOLID_FILL"
+            ),
         ],
-        responses={200: openapi.Response("QR Code Image (PNG)")},
+        responses={200: openapi.Response("QR Code Text")},
     )
     def get(self, request):
         logger.info("API Request to generate Text QR Code")
 
         try:
             text = request.query_params.get("text", "")
-            use_rounded = request.query_params.get("rounded", "").lower() == "true"
+            style_str = request.query_params.get("style", "SQUARE_MODULE")
+            fill_color = request.query_params.get("fill_color", "black")
+            back_color = request.query_params.get("back_color", "white")
+            color_mask_str = request.query_params.get("color_mask", "SOLID_FILL")
 
             if not text:
                 return JsonResponse(
                     {"detail": "Text parameter is required."}, status=400
                 )
 
-            qr_image = generate_text_qr(text, use_rounded)
+            try:
+                style = QRStyles[style_str]
+            except KeyError:
+                return JsonResponse(
+                    {"detail": "Invalid style parameter."}, status=400
+                )
+
+            try:
+                color_mask = QRColorMasks[color_mask_str]
+            except KeyError:
+                return JsonResponse(
+                    {"detail": "Invalid color_mask parameter."}, status=400
+                )
+
+            qr_image = generate_text_qr(
+                text,
+                style=style,
+                fill_color=fill_color,
+                back_color=back_color,
+                color_mask=color_mask
+            )
             return HttpResponse(qr_image, content_type="image/png")
         except Exception as e:
             logger.error(f"Error generating Text QR Code via API: {e}")
             return JsonResponse(
                 {"detail": "Error generating Text QR Code."}, status=500
             )
-
 
 class QrPhoneNumberView(APIView):
     @swagger_auto_schema(
@@ -740,6 +866,7 @@ class QrBitcoinView(APIView):
             return JsonResponse(
                 {"detail": "Error generating Bitcoin QR Code."}, status=500
             )
+
 
 
 # Swagger endpoint response {"detail": "Hello World"}

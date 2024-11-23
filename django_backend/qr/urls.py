@@ -4,6 +4,7 @@ from .views import (
     IndexView,
     HelloWorldView,
     HelloDjangoView,
+    QrTextWithImageView,
     QrUrlView,
     QrEmailView,
     QrTextView,
@@ -54,6 +55,7 @@ urlpatterns = [
     path("v1/qr/mecard/", QrMeCardView.as_view(), name="qr_mecard_v1"),
     path("v1/qr/whatsapp/", QrWhatsAppView.as_view(), name="qr_whatsapp_v1"),
     path("v1/qr/bitcoin/", QrBitcoinView.as_view(), name="qr_bitcoin_v1"),
+    path("v1/qr/text-with-image/", QrTextWithImageView.as_view(), name="qr_text_with_image_v1"),
 ]
 
 if settings.DEBUG:

@@ -82,7 +82,7 @@
                     <p class="text-muted">
                         <span class="text-danger">*</span> Required fields
                     </p>
-                    <form action="{% url 'qr:index' %}" method="post" id="qr-form">
+                    <form action="{% url 'qr:index' %}" method="post" id="qr-form" enctype="multipart/form-data">
                         {% csrf_token %}
                         <!-- URL Input Section -->
                         <div id="input-url" class="input-section" style="display: none;">
@@ -108,14 +108,53 @@
                         <!-- Text Input Section -->
                         <div id="input-text" class="input-section" style="display: none;">
                             <label class="form-label mb-3 w-100">
-                                <span class="text-danger">*</span>Text: <textarea type="text" name="text" placeholder="Enter Text" class="form-control w-100" rows="4"></textarea>
+                                <span class="text-danger">*</span>Text:
+                                <textarea type="text" name="text" placeholder="Enter Text" class="form-control w-100" rows="4"></textarea>
                             </label>
-                            <div class="form-check mb-3">
-                                <input class="form-check-input" type="checkbox" name="rounded" id="roundedCorners">
-                                <label class="form-check-label" for="roundedCorners">
-                                    Use rounded corners
-                                </label>
-                            </div>
+
+                            <label class="form-label mb-3 w-100">
+                                Style:
+                                <select name="style" class="form-select">
+                                    <option value="SQUARE_MODULE">Square</option>
+                                    <option value="GAPPED_SQUARE_MODULE">Gapped Square</option>
+                                    <option value="CIRCLE_MODULE">Circle</option>
+                                    <option value="ROUNDED_MODULE">Rounded</option>
+                                    <option value="HORIZONTAL_BARS">Horizontal Bars</option>
+                                    <option value="VERTICAL_BARS">Vertical Bars</option>
+                                </select>
+                            </label>
+
+                            <label class="form-label mb-3 w-100">
+                                Fill Color:
+                                <input type="color" name="fill_color" value="#000000" class="form-control">
+                            </label>
+
+                            <label class="form-label mb-3 w-100">
+                                Background Color:
+                                <input type="color" name="back_color" value="#FFFFFF" class="form-control">
+                            </label>
+
+                            <label class="form-label mb-3 w-100">
+                                Color Mask:
+                                <select name="color_mask" class="form-select">
+                                    <option value="SOLID_FILL">Solid Fill</option>
+                                    <option value="RADIAL_GRADIANT">Radial Gradient</option>
+                                    <option value="SQUARE_GRADIANT">Square Gradient</option>
+                                    <option value="HORIZONTAL_GRADIANT">Horizontal Gradient</option>
+                                    <option value="VERTICAL_GRADIANT">Vertical Gradient</option>
+                                </select>
+                            </label>
+
+                            <label class="form-label mb-3 w-100">
+                                Embedded Image:
+                                <input type="file" name="embedded_image" class="form-control" accept="image/*">
+                            </label>
+
+                            <label class="form-label mb-3 w-100">
+                                Embedded Image Size (10-50%):
+                                <input type="range" name="embedded_image_ratio" class="form-range" min="0.1" max="0.5" step="0.05" value="0.25">
+                                <span class="embedded-image-ratio-value">25%</span>
+                            </label>
                         </div>
 
                         <!-- Phone Number Input Section -->
@@ -362,19 +401,13 @@
                 event.preventDefault();
                 const selectedType = $('input[name="qr_type"]:checked').val();
 
-                // Generate QR Code 버튼 클릭 이벤트(GA)
-                gtag('event', 'generate_qr_code', {
-                    'event_category': 'QR Code',
-                    'event_label': selectedType,
-                    'value': 1
-                });
+                // Create FormData object to handle file upload
+                const formData = new FormData();
 
-                // Collect form data from the visible input section only
+                // Add all form fields to FormData
                 const $activeSection = $(`#input-${selectedType}`);
-                const formDataArray = $activeSection.find('input:not([type="checkbox"]), select, textarea').serializeArray();
-                const data = {};
-                formDataArray.forEach((item) => {
-                    data[item.name] = item.value;
+                $activeSection.find('input:not([type="file"]), select, textarea').each(function() {
+                    formData.append(this.name, this.value);
                 });
 
                 // Add checkbox values
@@ -388,6 +421,12 @@
                     const phoneNumber = data['phone_number'].replace(/\s+/g, '');
                     data['phone_number'] = countryCode + phoneNumber;
                     delete data['country_code'];
+                }
+
+                // Add file if present
+                const fileInput = $activeSection.find('input[type="file"]')[0];
+                if (fileInput && fileInput.files[0]) {
+                    formData.append('embedded_image', fileInput.files[0]);
                 }
 
                 let url = "";
@@ -435,8 +474,10 @@
 
                 $.ajax({
                     url: url,
-                    type: "GET",
-                    data: data,
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
                     xhrFields: {
                         responseType: 'blob'
                     },
@@ -458,6 +499,11 @@
                         $downloadSvg.prop('disabled', true);
                     }
                 });
+            });
+
+            // Add event listener for embedded image ratio slider
+            $('input[name="embedded_image_ratio"]').on('input', function() {
+                $('.embedded-image-ratio-value').text(`${Math.round(this.value * 100)}%`);
             });
 
             // Handle PNG download

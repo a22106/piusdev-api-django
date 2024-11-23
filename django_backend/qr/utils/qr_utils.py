@@ -1,13 +1,16 @@
 # qr/utils/qr_utils.py
 from enum import Enum
-import qrcode
-from qrcode.main import QRCode
 from io import BytesIO
 import logging
 import urllib.parse
 from PIL import Image
 
-from typing import Dict
+from typing import Dict, Type
+
+import qrcode
+from qrcode.constants import ERROR_CORRECT_L, ERROR_CORRECT_H
+from qrcode.main import QRCode
+from qrcode.image.styledpil import StyledPilImage
 
 # QR Code Styles
 from qrcode.image.styles.moduledrawers.pil import (
@@ -30,6 +33,7 @@ from qrcode.image.styles.colormasks import (
 
 logger = logging.getLogger(__name__)
 
+
 class QRStyles(Enum):
     SQUARE_MODULE = 1
     GAPPED_SQUARE_MODULE = 2
@@ -38,77 +42,79 @@ class QRStyles(Enum):
     HORIZONTAL_BARS = 5
     VERTICAL_BARS = 6
 
+
 class QRColorMasks(Enum):
     SOLID_FILL = 1
     RADIAL_GRADIANT = 2
     SQUARE_GRADIANT = 3
     HORIZONTAL_GRADIANT = 4
     VERTICAL_GRADIANT = 5
-    IMAGE = 6
+
+
+def _get_module_drawer(style: Type[QRStyles]):
+    style_map = {
+        QRStyles.SQUARE_MODULE: SquareModuleDrawer(),
+        QRStyles.GAPPED_SQUARE_MODULE: GappedSquareModuleDrawer(),
+        QRStyles.CIRCLE_MODULE: CircleModuleDrawer(),
+        QRStyles.ROUNDED_MODULE: RoundedModuleDrawer(),
+        QRStyles.HORIZONTAL_BARS: HorizontalBarsDrawer(),
+        QRStyles.VERTICAL_BARS: VerticalBarsDrawer(),
+    }
+    result = style_map.get(style, SquareModuleDrawer())
+    return result
+
+
+def _get_color_mask(mask_type: Type[QRColorMasks]):
+    mask_map = {
+        QRColorMasks.SOLID_FILL: SolidFillColorMask(),
+        QRColorMasks.RADIAL_GRADIANT: RadialGradiantColorMask(),
+        QRColorMasks.SQUARE_GRADIANT: SquareGradiantColorMask(),
+        QRColorMasks.HORIZONTAL_GRADIANT: HorizontalGradiantColorMask(),
+        QRColorMasks.VERTICAL_GRADIANT: VerticalGradiantColorMask(),
+    }
+
+    result = mask_map.get(mask_type, SolidFillColorMask())
+    return result
 
 def create_qr_code(
-    data: str, version: int = 1,
-    error_correction=qrcode.constants.ERROR_CORRECT_L,
-    module_drawer=None,
+    data: str, version: int = None,
+    error_correction=ERROR_CORRECT_L,
     fill_color: str = "black",
     back_color: str = "white",
-    style: QRStyles = QRStyles.SQUARE_MODULE,
-    color_mask: QRColorMasks = QRColorMasks.SOLID_FILL,
-    embeded_image: Image = None,
-    embeded_image_ratio: float = 0.25
+    style: Type[QRStyles] = QRStyles.SQUARE_MODULE,
+    color_mask: Type[QRColorMasks] = QRColorMasks.SOLID_FILL,
+    embedded_image: Image = None,
+    embedded_image_ratio: float = 0.25
 ) -> bytes:
-    """
-    Create a QR code image from the given data.
+    try:
+        qr = QRCode(
+            version=version,
+            error_correction=error_correction,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(data)
+        qr.make(fit=True) # fit=True: QR code Version(size)를 자동으로 조절
 
-    Args:
-        data (str): QR 코드에 포함할 데이터
-        version (int, optional): QR 코드 버전. Defaults to 1.
-        error_correction: 에러 보정 레벨. Defaults to ERROR_CORRECT_L.
-        module_drawer: 스타일 옵션.
+        module_drawer = _get_module_drawer(style)
+        color_mask = _get_color_mask(color_mask)
 
-    Returns:
-        bytes: The generated QR code image in PNG format.
-    """
-    qr = QRCode(
-        version=version,
-        error_correction=error_correction,
-        box_size=10,
-        border=4,
-    )
-    qr.add_data(data)
-    qr.make(fit=True)
+        img = qr.make_image(
+            image_factory=StyledPilImage,
+            fill=fill_color,
+            back_color=back_color,
+            module_drawer=module_drawer,
+            color_mask=color_mask,
+            embeded_image=embedded_image,
+            embeded_image_ratio=embedded_image_ratio,
+        )
 
-    if color_mask == QRColorMasks.SOLID_FILL:
-        color_mask = SolidFillColorMask()
-
-    if module_drawer:
-        from qrcode.image.styledpil import StyledPilImage
-        if style == QRStyles.SQUARE_MODULE:
-            module_drawer = SquareModuleDrawer()
-        if style == QRStyles.GAPPED_SQUARE_MODULE:
-            module_drawer = GappedSquareModuleDrawer()
-        if style == QRStyles.CIRCLE_MODULE:
-            module_drawer = CircleModuleDrawer()
-        if style == QRStyles.ROUNDED_MODULE:
-            module_drawer = RoundedModuleDrawer()
-        if style == QRStyles.HORIZONTAL_BARS:
-            module_drawer = HorizontalBarsDrawer()
-        if style == QRStyles.VERTICAL_BARS:
-            module_drawer = VerticalBarsDrawer()
-
-    img = qr.make_image(
-        image_factory=StyledPilImage,
-        fill=fill_color,
-        back_color=back_color,
-        module_drawer=module_drawer,
-        color_mask=color_mask,
-        embeded_image=embeded_image,
-        embeded_image_ratio=embeded_image_ratio,
-    )
-
-    buffer = BytesIO()
-    img.save(buffer, format="PNG")
-    return buffer.getvalue()
+        buffer = BytesIO()
+        img.save(buffer, format="PNG")
+        return buffer.getvalue()
+    except Exception as e:
+        logger.error(f"Error creating QR Code: {e}")
+        raise
 
 
 def generate_url_qr(url: str) -> bytes:
@@ -148,18 +154,39 @@ def generate_email_qr(email: str, subject: str = "", body: str = "") -> bytes:
     return create_qr_code(mailto)
 
 
-def generate_text_qr(text: str, style: QRStyles = QRStyles.DEFAULT) -> bytes:
+def generate_text_qr(
+    text: str,
+    style: Type[QRStyles] = QRStyles.SQUARE_MODULE,
+    fill_color: str = "black",
+    back_color: str = "white",
+    color_mask: Type[QRColorMasks] = QRColorMasks.SOLID_FILL,
+    embedded_image: Image = None,
+    embedded_image_ratio: float = 0.25
+) -> bytes:
     """
     Generate a QR code for plain text.
 
     Args:
         text (str): The text to encode in the QR code.
         style (QRStyles): The style of the QR code.
+        fill_color (str): Color of the QR code pattern.
+        back_color (str): Background color.
+        color_mask (QRColorMasks): Color mask type for gradient effects.
+        embedded_image (PIL.Image): Optional image to embed in center of QR code.
+        embedded_image_ratio (float): Size ratio of embedded image (0.1-0.5).
 
     Returns:
         bytes: The generated QR code image in PNG format.
     """
-    return create_qr_code(text, style=style)
+    return create_qr_code(
+        text,
+        style=style,
+        fill_color=fill_color,
+        back_color=back_color,
+        color_mask=color_mask,
+        embedded_image=embedded_image,
+        embedded_image_ratio=embedded_image_ratio
+    )
 
 
 def generate_phone_qr(phone_number: str) -> bytes:
