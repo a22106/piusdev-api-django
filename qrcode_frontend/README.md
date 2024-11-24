@@ -1,5 +1,9 @@
 # QR Code Generator Frontend
 
+## Run the project
+- `npm install`
+- `npm run dev`
+
 ## Testing
 
 ## Unit Testing

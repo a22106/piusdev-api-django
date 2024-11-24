@@ -130,7 +130,7 @@ def create_qr_code(
         )
 
         buffer = BytesIO()
-        img.save(buffer, format="PNG")
+        # img.save(buffer, format="PNG")
         return buffer.getvalue()
     except Exception as e:
         logger.error(f"Error creating QR Code: {e}")
