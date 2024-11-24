@@ -12,6 +12,7 @@ from rest_framework.request import Request
 
 from rest_framework.views import APIView
 
+from qr.decorators import qr_swagger_decorator
 from qr.utils.qr_utils import (
     QRColorMasks,
     QRStyles,
@@ -57,827 +58,267 @@ class IndexView(TemplateView):
 
         return context
 
+class BaseQrView(APIView):
+    def validate_common_params(self, request: Request):
+        style = request.data.get("style", "SQUARE_MODULE")
+        fill_color = request.data.get("fill_color", "black")
+        back_color = request.data.get("back_color", "white")
+        color_mask = request.data.get("color_mask", "SOLID_FILL")
+        embedded_image_ratio = float(request.data.get("embedded_image_ratio", 0.25))
 
-class QrVcardView(APIView):
-    @swagger_auto_schema(
-        operation_id="VCard QR Code",
-        manual_parameters=[
-            openapi.Parameter(
-                "first_name",
-                openapi.IN_QUERY,
-                type=openapi.TYPE_STRING,
-                required=True,
-            ),
-            openapi.Parameter(
-                "last_name",
-                openapi.IN_QUERY,
-                type=openapi.TYPE_STRING,
-                required=True,
-            ),
-            openapi.Parameter(
-                "vcard_phone",
-                openapi.IN_QUERY,
-                description="Phone number",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "vcard_mobile",
-                openapi.IN_QUERY,
-                description="Mobile phone number",
-                type=openapi.TYPE_STRING,
-                required=True,
-            ),
-            openapi.Parameter(
-                "vcard_email",
-                openapi.IN_QUERY,
-                description="Email address",
-                type=openapi.TYPE_STRING,
-                required=True,
-            ),
-            openapi.Parameter(
-                "vcard_url",
-                openapi.IN_QUERY,
-                description="Website URL",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "organization",
-                openapi.IN_QUERY,
-                description="Organization",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "job_title",
-                openapi.IN_QUERY,
-                description="Job title",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "fax",
-                openapi.IN_QUERY,
-                description="Fax number",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "address",
-                openapi.IN_QUERY,
-                description="Address",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "zip",
-                openapi.IN_QUERY,
-                description="Zip code",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "country",
-                openapi.IN_QUERY,
-                description="Country",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "note",
-                openapi.IN_QUERY,
-                description="Note",
-                type=openapi.TYPE_STRING,
-            ),
-        ],
-        responses={200: openapi.Response("QR Code Image (PNG)")},
-    )
-    def get(self, request):
-        try:
-            qr_image = generate_vcard_qr(request.query_params)
-            return HttpResponse(qr_image, content_type="image/png")
-        except Exception as e:
-            logger.error(f"Error generating VCard QR Code via API: {e}")
-            return JsonResponse(
-                {"detail": "Error generating VCard QR Code."}, status=500
-            )
-
-
-class QrUrlView(APIView):
-    @swagger_auto_schema(
-        operation_id="URL QR Code",
-        manual_parameters=[
-            openapi.Parameter(
-                "url",
-                openapi.IN_QUERY,
-                description="URL to encode in the QR Code",
-                type=openapi.TYPE_STRING,
-                required=True,
-            )
-        ],
-        responses={200: openapi.Response("QR Code Image (PNG)")},
-    )
-    def get(self, request):
-        logger.info("API Request to generate URL QR Code")
+        if not (0.1 <= embedded_image_ratio <= 0.5):
+            raise ValueError("embedded_image_ratio must be between 0.1 and 0.5")
 
         try:
-            url = request.query_params.get("url", "")
-            if not url:
-                return JsonResponse(
-                    {"detail": "URL parameter is required."}, status=400
-                )
-            qr_image = generate_url_qr(url)
-            return HttpResponse(qr_image, content_type="image/png")
-        except Exception as e:
-            logger.error(f"Error generating URL QR Code via API: {e}")
-            return JsonResponse({"detail": "Error generating URL QR Code."}, status=500)
-
-
-class QrEmailView(APIView):
-    @swagger_auto_schema(
-        operation_id="Email QR Code",
-        manual_parameters=[
-            openapi.Parameter(
-                "email",
-                openapi.IN_QUERY,
-                description="Email address to encode in the QR Code",
-                type=openapi.TYPE_STRING,
-                required=True,
-            ),
-            openapi.Parameter(
-                "subject",
-                openapi.IN_QUERY,
-                description="Subject to encode in the QR Code",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "body",
-                openapi.IN_QUERY,
-                description="Body to encode in the QR Code",
-                type=openapi.TYPE_STRING,
-            ),
-        ],
-        responses={200: openapi.Response("QR Code Image (PNG)")},
-    )
-    def get(self, request):
-        logger.info("API Request to generate Email QR Code")
+            style = QRStyles[style]
+        except KeyError:
+            raise ValueError("Invalid style parameter.")
 
         try:
-            email = request.query_params.get("email", "")
-            subject = request.query_params.get("subject", "")
-            body = request.query_params.get("body", "")
-            if not email:
-                return JsonResponse(
-                    {"detail": "Email parameter is required."}, status=400
-                )
+            color_mask = QRColorMasks[color_mask]
+        except KeyError:
+            raise ValueError("Invalid color_mask parameter.")
 
-            qr_image = generate_email_qr(email, subject, body)
-            return HttpResponse(qr_image, content_type="image/png")
-        except Exception as e:
-            logger.error(f"Error generating Email QR Code via API: {e}")
-            return JsonResponse(
-                {"detail": "Error generating Email QR Code."}, status=500
+        return {
+            "style": style,
+            "fill_color": fill_color,
+            "back_color": back_color,
+            "color_mask": color_mask,
+            "embedded_image_ratio": embedded_image_ratio
+        }
+
+    def process_embedded_image(self, request: Request):
+        embedded_image = None
+        if 'embedded_image' in request.FILES:
+            try:
+                image_file = request.FILES['embedded_image']
+                embedded_image = Image.open(image_file)
+            except Exception as e:
+                raise ValueError("Invalid embedded image file.")
+        return embedded_image
+
+    def handle_qr_generation(self, request: Request, generator_func, required_params):
+        """QR 코드 생성 템플릿 메서드"""
+        try:
+            # 1. 필요 파라미터 검증
+            for param in required_params:
+                if not request.data.get(param):
+                    return JsonResponse(
+                        {"detail": f"{param} parameter is required."},
+                        status=400
+                    )
+
+            # 2. 공통 파라미터
+            common_params = self.validate_common_params(request)
+
+            # 3. 임베드 이미지
+            embedded_image = self.process_embedded_image(request)
+
+            # 4. QR 코드 생성
+            qr_image = generator_func(
+                **{k: request.data.get(k) for k in required_params},
+                **common_params,
+                embedded_image=embedded_image
             )
+            return HttpResponse(qr_image, content_type="image/png")
+        except ValueError as e:
+            return JsonResponse({"detail": str(e)}, status=400)
+        except Exception as e:
+            logger.error(f"Error generating QR Code: {e}")
+            return JsonResponse({"detail": "Error generating QR Code."}, status=500)
+
+class QrVcardView(BaseQrView):
+    @qr_swagger_decorator(
+        "VCard QR Code",
+        {
+            "first_name": openapi.Schema(type=openapi.TYPE_STRING, description='First name'),
+            "last_name": openapi.Schema(type=openapi.TYPE_STRING, description='Last name'),
+            "vcard_mobile": openapi.Schema(type=openapi.TYPE_STRING, description='Mobile phone number'),
+            "vcard_email": openapi.Schema(type=openapi.TYPE_STRING, description='Email address'),
+            "vcard_url": openapi.Schema(type=openapi.TYPE_STRING, description='Website URL'),
+            "organization": openapi.Schema(type=openapi.TYPE_STRING, description='Organization'),
+            "job_title": openapi.Schema(type=openapi.TYPE_STRING, description='Job title'),
+            "fax": openapi.Schema(type=openapi.TYPE_STRING, description='Fax number'),
+            "address": openapi.Schema(type=openapi.TYPE_STRING, description='Address'),
+            "zip": openapi.Schema(type=openapi.TYPE_STRING, description='Zip code'),
+            "country": openapi.Schema(type=openapi.TYPE_STRING, description='Country'),
+            "note": openapi.Schema(type=openapi.TYPE_STRING, description='Note')
+        }
+    )
+    def post(self, request):
+        return self.handle_qr_generation(
+            request,
+            generate_vcard_qr,
+            ["first_name", "last_name", "vcard_mobile", "vcard_email"]
+        )
 
 
-class QrTextWithImageView(APIView):
-    @swagger_auto_schema(
-        operation_id="Text QR Code with Image",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'text': openapi.Schema(type=openapi.TYPE_STRING, description='Text to encode'),
-                'style': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description='QR code style (SQUARE_MODULE, GAPPED_SQUARE_MODULE, CIRCLE_MODULE, ROUNDED_MODULE, HORIZONTAL_BARS, VERTICAL_BARS)',
-                    default='SQUARE_MODULE'
-                ),
-                'fill_color': openapi.Schema(type=openapi.TYPE_STRING, description='QR code pattern color', default='black'),
-                'back_color': openapi.Schema(type=openapi.TYPE_STRING, description='QR code background color', default='white'),
-                'color_mask': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description='Color mask type (SOLID_FILL, RADIAL_GRADIANT, SQUARE_GRADIANT, HORIZONTAL_GRADIANT, VERTICAL_GRADIANT)',
-                    default='SOLID_FILL'
-                ),
-                'embedded_image': openapi.Schema(type=openapi.TYPE_FILE, description='Image to embed in QR code'),
-                'embedded_image_ratio': openapi.Schema(
-                    type=openapi.TYPE_NUMBER,
-                    description='Size ratio of embedded image (0.1-0.5). I recommand not to be more than **0.3**',
-                    default=0.2),
-            },
-            required=['text']
-        ),
-        responses={
-            200: openapi.Response("QR Code Text"),
-            400: openapi.Response("Bad Request"),
-            500: openapi.Response("Server Error"),
-        },
+class QrUrlView(BaseQrView):
+    @qr_swagger_decorator(
+        "URL QR Code",
+        {
+            "url": openapi.Schema(type=openapi.TYPE_STRING, description='URL to encode in the QR Code'),
+        }
     )
     def post(self, request: Request):
-        logger.info("API Request to generate Text QR Code with Image")
-
-        try:
-            # 파라미터에서 QR 데이터, 스타일, 색상, 배경색, 색상마스크 추출
-            text = request.POST.get("text", "")
-            style = request.data.get("style", "SQUARE_MODULE")
-            fill_color = request.data.get("fill_color", "black")
-            back_color = request.data.get("back_color", "white")
-            color_mask = request.data.get("color_mask", "SOLID_FILL")
-            embedded_image_ratio = float(request.data.get("embedded_image_ratio", 0.25))
-
-            # 파라미터 유효성 검사
-            if not text:
-                return JsonResponse({"detail": "Text parameter is required."}, status=400)
-
-            if not (0.1 <= embedded_image_ratio <= 0.5):
-                return JsonResponse(
-                    {"detail": "embedded_image_ratio must be between 0.1 and 0.5"},
-                    status=400
-                )
-
-            try:
-                style = QRStyles[style]
-            except KeyError:
-                return JsonResponse({"detail": "Invalid style parameter."}, status=400)
-
-            try:
-                color_mask = QRColorMasks[color_mask]
-            except KeyError:
-                return JsonResponse({"detail": "Invalid color_mask parameter."}, status=400)
-
-            embedded_image = None
-            if 'embedded_image' in request.FILES:
-                try:
-                    image_file = request.FILES['embedded_image']
-                    embedded_image = Image.open(image_file)
-                except Exception as e:
-                    logger.error(f"Error opening embedded image file: {e}")
-                    return JsonResponse({"detail": "Invalid embedded image file."}, status=400)
-            qr_image = generate_text_qr(
-                text,
-                style=style,
-                fill_color=fill_color,
-                back_color=back_color,
-                color_mask=color_mask,
-                embedded_image=embedded_image,
-                embedded_image_ratio=embedded_image_ratio
-            )
-            return HttpResponse(qr_image, content_type="image/png")
-        except Exception as e:
-            logger.error(f"Error generating Text QR Code with Image via API: {e}")
-            return JsonResponse({"detail": "Error generating Text QR Code with Image."}, status=500)
+        return self.handle_qr_generation(request, generate_url_qr, ["url"])
 
 
-class QrTextView(APIView):
-    @swagger_auto_schema(
-        operation_id="Text QR Code",
-        manual_parameters=[
-            openapi.Parameter(
-                "text",
-                openapi.IN_QUERY,
-                description="Text to encode in the QR Code",
-                type=openapi.TYPE_STRING,
-                required=True,
-            ),
-            openapi.Parameter(
-                "style",
-                openapi.IN_QUERY,
-                description="QR code style (SQUARE_MODULE, GAPPED_SQUARE_MODULE, CIRCLE_MODULE, ROUNDED_MODULE, HORIZONTAL_BARS, VERTICAL_BARS)",
-                type=openapi.TYPE_STRING,
-                default="SQUARE_MODULE"
-            ),
-            openapi.Parameter(
-                "fill_color",
-                openapi.IN_QUERY,
-                description="QR code pattern color (e.g., 'black', '#000000')",
-                type=openapi.TYPE_STRING,
-                default="black"
-            ),
-            openapi.Parameter(
-                "back_color",
-                openapi.IN_QUERY,
-                description="QR code background color (e.g., 'white', '#FFFFFF')",
-                type=openapi.TYPE_STRING,
-                default="white"
-            ),
-            openapi.Parameter(
-                "color_mask",
-                openapi.IN_QUERY,
-                description="Color mask type (SOLID_FILL, RADIAL_GRADIANT, SQUARE_GRADIANT, HORIZONTAL_GRADIANT, VERTICAL_GRADIANT)",
-                type=openapi.TYPE_STRING,
-                default="SOLID_FILL"
-            ),
-        ],
-        responses={200: openapi.Response("QR Code Text")},
+class QrEmailView(BaseQrView):
+    @qr_swagger_decorator(
+        "Email QR Code",
+        {
+            "email": openapi.Schema(type=openapi.TYPE_STRING, description='Email address'),
+            "subject": openapi.Schema(type=openapi.TYPE_STRING, description='Subject'),
+            "body": openapi.Schema(type=openapi.TYPE_STRING, description='Body'),
+        }
     )
-    def get(self, request):
-        logger.info("API Request to generate Text QR Code")
-
-        try:
-            text = request.query_params.get("text", "")
-            style_str = request.query_params.get("style", "SQUARE_MODULE")
-            fill_color = request.query_params.get("fill_color", "black")
-            back_color = request.query_params.get("back_color", "white")
-            color_mask_str = request.query_params.get("color_mask", "SOLID_FILL")
-
-            if not text:
-                return JsonResponse(
-                    {"detail": "Text parameter is required."}, status=400
-                )
-
-            try:
-                style = QRStyles[style_str]
-            except KeyError:
-                return JsonResponse(
-                    {"detail": "Invalid style parameter."}, status=400
-                )
-
-            try:
-                color_mask = QRColorMasks[color_mask_str]
-            except KeyError:
-                return JsonResponse(
-                    {"detail": "Invalid color_mask parameter."}, status=400
-                )
-
-            qr_image = generate_text_qr(
-                text,
-                style=style,
-                fill_color=fill_color,
-                back_color=back_color,
-                color_mask=color_mask
-            )
-            return HttpResponse(qr_image, content_type="image/png")
-        except Exception as e:
-            logger.error(f"Error generating Text QR Code via API: {e}")
-            return JsonResponse(
-                {"detail": "Error generating Text QR Code."}, status=500
-            )
+    def post(self, request):
+        return self.handle_qr_generation(request, generate_email_qr, ["email", "subject", "body"])
 
 
-class QrPhoneNumberView(APIView):
-    @swagger_auto_schema(
-        operation_id="Phone Number QR Code",
-        manual_parameters=[
-            openapi.Parameter(
-                "phone_number",
-                openapi.IN_QUERY,
-                description="Phone number to encode in the QR Code",
-                type=openapi.TYPE_STRING,
-            )
-        ],
-        responses={200: openapi.Response("QR Code Image (PNG)")},
+class QrTextView(BaseQrView):
+    @qr_swagger_decorator(
+        "Text QR Code",
+        {
+            "text": openapi.Schema(type=openapi.TYPE_STRING, description='Text to encode'),
+        }
     )
-    def get(self, request):
-        logger.info("API Request to generate Phone QR Code")
-
-        try:
-            phone_number = request.query_params.get("phone_number", "")
-            if not phone_number:
-                return JsonResponse(
-                    {"detail": "Phone parameter is required."}, status=400
-                )
-
-            qr_image = generate_phone_qr(phone_number)
-            return HttpResponse(qr_image, content_type="image/png")
-        except Exception as e:
-            logger.error(f"Error generating Phone QR Code via API: {e}")
-            return JsonResponse(
-                {"detail": "Error generating Phone QR Code."}, status=500
-            )
+    def post(self, request):
+        return self.handle_qr_generation(request, generate_text_qr, ["text"])
 
 
-class QrWifiView(APIView):
-    @swagger_auto_schema(
-        operation_id="WiFi QR Code",
-        manual_parameters=[
-            openapi.Parameter(
-                "ssid",  # Network name
-                openapi.IN_QUERY,
-                description="SSID to encode in the QR Code",
-                type=openapi.TYPE_STRING,
-                required=True,
-            ),
-            openapi.Parameter(
-                "password",
-                openapi.IN_QUERY,
-                description="Password to encode in the QR Code",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "encryption",  # Network security type(WEP, WPA/WPA2, None)
-                openapi.IN_QUERY,
-                description="Encryption type to encode in the QR Code",
-                type=openapi.TYPE_STRING,
-            ),
-        ],
-        responses={200: openapi.Response("QR Code Image (PNG)")},
+class QrPhoneNumberView(BaseQrView):
+    @qr_swagger_decorator(
+        "Phone Number QR Code",
+        {
+            "phone_number": openapi.Schema(type=openapi.TYPE_STRING, description='Phone number'),
+        }
     )
-    def get(self, request):
-        logger.info("API Request to generate WiFi QR Code")
-
-        try:
-            ssid = request.query_params.get("ssid", "")
-            password = request.query_params.get("password", "")
-            encryption = request.query_params.get("encryption", "WPA")
-            if not ssid:
-                return JsonResponse(
-                    {"detail": "SSID parameter is required."}, status=400
-                )
-
-            qr_image = generate_wifi_qr(ssid, password, encryption)
-            return HttpResponse(qr_image, content_type="image/png")
-        except Exception as e:
-            logger.error(f"Error generating WiFi QR Code via API: {e}")
-            return JsonResponse(
-                {"detail": "Error generating WiFi QR Code."}, status=500
-            )
+    def post(self, request):
+        return self.handle_qr_generation(request, generate_phone_qr, ["phone_number"])
 
 
-class QrSmsView(APIView):
-    @swagger_auto_schema(
-        operation_id="SMS QR Code",
-        manual_parameters=[
-            openapi.Parameter(
-                "country_code",
-                openapi.IN_QUERY,
-                description="Country code",
-                type=openapi.TYPE_STRING,
-                required=True,
-            ),
-            openapi.Parameter(
-                "phone_number",
-                openapi.IN_QUERY,
-                description="Phone number",
-                type=openapi.TYPE_STRING,
-                required=True,
-            ),
-            openapi.Parameter(
-                "message",
-                openapi.IN_QUERY,
-                description="SMS message",
-                type=openapi.TYPE_STRING,
-            ),
-        ],
-        responses={200: openapi.Response("QR Code Image (PNG)")},
+class QrWifiView(BaseQrView):
+    @qr_swagger_decorator(
+        "WiFi QR Code",
+        {
+            "ssid": openapi.Schema(type=openapi.TYPE_STRING, description='Network SSID'),
+            "password": openapi.Schema(type=openapi.TYPE_STRING, description='Network password'),
+            "encryption": openapi.Schema(type=openapi.TYPE_STRING, description='Encryption type (WEP, WPA, WPA2)'),
+            "hidden": openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Whether the network is hidden'),
+        }
     )
-    def get(self, request):
-        logger.info("API Request to generate SMS QR Code")
-        try:
-            phone_number = request.query_params.get("phone_number", "")
-            message = request.query_params.get("message", "")
-
-            if not phone_number or not message:
-                return JsonResponse(
-                    {
-                        "detail": "Country code, phone number, and message parameters are required."
-                    },
-                    status=400,
-                )
-
-            qr_image = generate_sms_qr(phone_number, message)
-            return HttpResponse(qr_image, content_type="image/png")
-        except Exception as e:
-            logger.error(f"Error generating SMS QR Code via API: {e}")
-            return JsonResponse({"detail": "Error generating SMS QR Code."}, status=500)
+    def post(self, request):
+        return self.handle_qr_generation(request, generate_wifi_qr, ["ssid", "password", "encryption"])
 
 
-class QrGeoView(APIView):
-    @swagger_auto_schema(
-        operation_id="Geographical Location QR Code",
-        manual_parameters=[
-            openapi.Parameter(
-                "latitude",
-                openapi.IN_QUERY,
-                description="Latitude of the location",
-                type=openapi.TYPE_NUMBER,
-                required=True,
-            ),
-            openapi.Parameter(
-                "longitude",
-                openapi.IN_QUERY,
-                description="Longitude of the location",
-                type=openapi.TYPE_NUMBER,
-                required=True,
-            ),
-            openapi.Parameter(
-                "query",
-                openapi.IN_QUERY,
-                description="Optional query parameter (e.g., place name)",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "zoom",
-                openapi.IN_QUERY,
-                description="Optional zoom level",
-                type=openapi.TYPE_INTEGER,
-            ),
-        ],
-        responses={200: openapi.Response("QR Code Image (PNG)")},
+class QrSmsView(BaseQrView):
+    @qr_swagger_decorator(
+        "SMS QR Code",
+        {
+            "phone_number": openapi.Schema(type=openapi.TYPE_STRING, description='Phone number'),
+            "message": openapi.Schema(type=openapi.TYPE_STRING, description='SMS message'),
+        }
     )
-    def get(self, request):
-        logger.info("API Request to generate Geo QR Code")
-        try:
-            latitude = request.query_params.get("latitude", None)
-            longitude = request.query_params.get("longitude", None)
-            query = request.query_params.get("query", "")
-            zoom = request.query_params.get("zoom", 0)
-
-            if latitude is None or longitude is None:
-                return JsonResponse(
-                    {"detail": "Latitude and longitude parameters are required."},
-                    status=400,
-                )
-
-            # Convert latitude and longitude to floats
-            try:
-                latitude = float(latitude)
-                longitude = float(longitude)
-            except ValueError:
-                return JsonResponse(
-                    {"detail": "Latitude and longitude must be valid numbers."},
-                    status=400,
-                )
-
-            # Convert zoom to int
-            try:
-                zoom = int(zoom)
-            except ValueError:
-                zoom = 0  # default value
-
-            qr_image = generate_geo_qr(latitude, longitude, query, zoom)
-            return HttpResponse(qr_image, content_type="image/png")
-        except Exception as e:
-            logger.error(f"Error generating Geo QR Code via API: {e}")
-            return JsonResponse({"detail": "Error generating Geo QR Code."}, status=500)
+    def post(self, request):
+        return self.handle_qr_generation(request, generate_sms_qr, ["phone_number", "message"])
 
 
-class QrEventView(APIView):
-    @swagger_auto_schema(
-        operation_id="Calendar Event QR Code",
-        manual_parameters=[
-            openapi.Parameter(
-                "summary",
-                openapi.IN_QUERY,
-                description="Event summary or title",
-                type=openapi.TYPE_STRING,
-                required=True,
-            ),
-            openapi.Parameter(
-                "start_date",
-                openapi.IN_QUERY,
-                description="Event start date in YYYYMMDDTHHMMSSZ format",
-                type=openapi.TYPE_STRING,
-                required=True,
-            ),
-            openapi.Parameter(
-                "end_date",
-                openapi.IN_QUERY,
-                description="Event end date in YYYYMMDDTHHMMSSZ format",
-                type=openapi.TYPE_STRING,
-                required=True,
-            ),
-            openapi.Parameter(
-                "location",
-                openapi.IN_QUERY,
-                description="Event location",
-                type=openapi.TYPE_STRING,
-                required=False,
-            ),
-            openapi.Parameter(
-                "description",
-                openapi.IN_QUERY,
-                description="Event description",
-                type=openapi.TYPE_STRING,
-                required=False,
-            ),
-        ],
-        responses={200: openapi.Response("QR Code Image (PNG)")},
+class QrGeoView(BaseQrView):
+    @qr_swagger_decorator(
+        "Geolocation QR Code",
+        {
+            "latitude": openapi.Schema(type=openapi.TYPE_NUMBER, description='Latitude'),
+            "longitude": openapi.Schema(type=openapi.TYPE_NUMBER, description='Longitude'),
+            "query": openapi.Schema(type=openapi.TYPE_STRING, description='Query string'),
+            "zoom": openapi.Schema(type=openapi.TYPE_INTEGER, description='Zoom level'),
+        }
     )
-    def get(self, request):
-        logger.info("API Request to generate Event QR Code")
-        try:
-            summary = request.query_params.get("summary", "")
-            start_date = request.query_params.get("start_date", "")
-            end_date = request.query_params.get("end_date", "")
-            location = request.query_params.get("location", "")
-            description = request.query_params.get("description", "")
+    def post(self, request: Request):
+        return self.handle_qr_generation(request, generate_geo_qr, ["latitude", "longitude", "query", "zoom"])
 
-            if not summary or not start_date or not end_date:
-                return JsonResponse(
-                    {
-                        "detail": "summary, start_date, and end_date parameters are required."
-                    },
-                    status=400,
-                )
 
+class QrEventView(BaseQrView):
+    @qr_swagger_decorator(
+        "Event QR Code",
+        {
+            "summary": openapi.Schema(type=openapi.TYPE_STRING, description='Event summary'),
+            "start_date": openapi.Schema(type=openapi.TYPE_STRING, description='Start date (YYYYMMDD)'),
+            "end_date": openapi.Schema(type=openapi.TYPE_STRING, description='End date (YYYYMMDD)'),
+            "location": openapi.Schema(type=openapi.TYPE_STRING, description='Event location'),
+            "description": openapi.Schema(type=openapi.TYPE_STRING, description='Event description'),
+        }
+    )
+    def post(self, request):
+        def event_qr_wrapper(**kwargs):
             event_data = {
-                "summary": summary,
-                "start_date": start_date,
-                "end_date": end_date,
-                "location": location,
-                "description": description,
+                'summary': kwargs.pop('summary'),
+                'start_date': kwargs.pop('start_date'),
+                'end_date': kwargs.pop('end_date'),
+                'location': kwargs.pop('location'),
+                'description': kwargs.pop('description')
             }
+            return generate_event_qr(event_data=event_data, **kwargs)
 
-            qr_image = generate_event_qr(event_data)
-            return HttpResponse(qr_image, content_type="image/png")
-        except Exception as e:
-            logger.error(f"Error generating Event QR Code via API: {e}")
-            return JsonResponse(
-                {"detail": "Error generating Event QR Code."}, status=500
-            )
+        return self.handle_qr_generation(
+            request,
+            event_qr_wrapper,
+            ["summary", "start_date", "end_date", "location", "description"]
+        )
 
 
-class QrMeCardView(APIView):
-    @swagger_auto_schema(
-        operation_id="MECARD QR Code",
-        manual_parameters=[
-            openapi.Parameter(
-                "name",
-                openapi.IN_QUERY,
-                description="Name of the contact",
-                type=openapi.TYPE_STRING,
-                required=True,
-            ),
-            openapi.Parameter(
-                "reading",
-                openapi.IN_QUERY,
-                description="Phonetic reading of the name",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "tel",
-                openapi.IN_QUERY,
-                description="Telephone number",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "email",
-                openapi.IN_QUERY,
-                description="Email address",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "memo",
-                openapi.IN_QUERY,
-                description="Memo or note",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "birthday",
-                openapi.IN_QUERY,
-                description="Birthday in YYYYMMDD format",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "address",
-                openapi.IN_QUERY,
-                description="Address",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "url",
-                openapi.IN_QUERY,
-                description="Website URL",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "nickname",
-                openapi.IN_QUERY,
-                description="Nickname",
-                type=openapi.TYPE_STRING,
-            ),
-        ],
-        responses={200: openapi.Response("QR Code Image (PNG)")},
+class QrMeCardView(BaseQrView):
+    @qr_swagger_decorator(
+        "MECARD QR Code",
+        {
+            "name": openapi.Schema(type=openapi.TYPE_STRING, description='Name of the contact'),
+            "reading": openapi.Schema(type=openapi.TYPE_STRING, description='Phonetic reading of the name'),
+            "tel": openapi.Schema(type=openapi.TYPE_STRING, description='Telephone number'),
+            "email": openapi.Schema(type=openapi.TYPE_STRING, description='Email address'),
+            "memo": openapi.Schema(type=openapi.TYPE_STRING, description='Memo or note'),
+            "birthday": openapi.Schema(type=openapi.TYPE_STRING, description='Birthday in YYYYMMDD format'),
+            "address": openapi.Schema(type=openapi.TYPE_STRING, description='Address'),
+            "url": openapi.Schema(type=openapi.TYPE_STRING, description='Website URL'),
+            "nickname": openapi.Schema(type=openapi.TYPE_STRING, description='Nickname'),
+        }
     )
-    def get(self, request):
-        logger.info("API Request to generate MECARD QR Code")
-        try:
-            name = request.query_params.get("name", "")
-            if not name:
-                return JsonResponse(
-                    {"detail": "Name parameter is required."}, status=400
-                )
-
-            mecard_data = {
-                "name": name,
-                "reading": request.query_params.get("reading", ""),
-                "tel": request.query_params.get("tel", ""),
-                "email": request.query_params.get("email", ""),
-                "memo": request.query_params.get("memo", ""),
-                "birthday": request.query_params.get("birthday", ""),
-                "address": request.query_params.get("address", ""),
-                "url": request.query_params.get("url", ""),
-                "nickname": request.query_params.get("nickname", ""),
-            }
-
-            qr_image = generate_mecard_qr(mecard_data)
-            return HttpResponse(qr_image, content_type="image/png")
-        except Exception as e:
-            logger.error(f"Error generating MECARD QR Code via API: {e}")
-            return JsonResponse(
-                {"detail": "Error generating MECARD QR Code."}, status=500
-            )
+    def post(self, request):
+        return self.handle_qr_generation(
+            request,
+            generate_mecard_qr,
+            ["name", "reading", "tel", "email"]
+        )
 
 
-class QrWhatsAppView(APIView):
-    @swagger_auto_schema(
-        operation_id="WhatsApp QR Code",
-        manual_parameters=[
-            openapi.Parameter(
-                "phone_number",
-                openapi.IN_QUERY,
-                description="Recipient's phone number in international format",
-                type=openapi.TYPE_STRING,
-                required=True,
-            ),
-            openapi.Parameter(
-                "message",
-                openapi.IN_QUERY,
-                description="Message to send",
-                type=openapi.TYPE_STRING,
-            ),
-        ],
-        responses={200: openapi.Response("QR Code Image (PNG)")},
+class QrWhatsAppView(BaseQrView):
+    @qr_swagger_decorator(
+        "WhatsApp QR Code",
+        {
+            "phone_number": openapi.Schema(type=openapi.TYPE_STRING, description='Recipient\'s phone number in international format'),
+            "message": openapi.Schema(type=openapi.TYPE_STRING, description='Message to send'),
+        }
     )
-    def get(self, request):
-        logger.info("API Request to generate WhatsApp QR Code")
-        try:
-            print(request.query_params)
-            phone_number = request.query_params.get("phone_number", "")
-            message = request.query_params.get("message", "")
-
-            if not phone_number:
-                return JsonResponse(
-                    {"detail": "phone_number parameter is required."}, status=400
-                )
-
-            qr_image = generate_whatsapp_qr(phone_number, message)
-            return HttpResponse(qr_image, content_type="image/png")
-        except Exception as e:
-            logger.error(f"Error generating WhatsApp QR Code via API: {e}")
-            return JsonResponse(
-                {"detail": "Error generating WhatsApp QR Code."}, status=500
-            )
+    def post(self, request):
+        return self.handle_qr_generation(request, generate_whatsapp_qr, ["phone_number", "message"])
 
 
-class QrBitcoinView(APIView):
-    @swagger_auto_schema(
-        operation_id="Bitcoin Payment QR Code",
-        manual_parameters=[
-            openapi.Parameter(
-                "address",
-                openapi.IN_QUERY,
-                description="Bitcoin wallet address",
-                type=openapi.TYPE_STRING,
-                required=True,
-            ),
-            openapi.Parameter(
-                "amount",
-                openapi.IN_QUERY,
-                description="Amount in BTC",
-                type=openapi.TYPE_NUMBER,
-            ),
-            openapi.Parameter(
-                "label",
-                openapi.IN_QUERY,
-                description="Label for the payment",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "message",
-                openapi.IN_QUERY,
-                description="Message or note",
-                type=openapi.TYPE_STRING,
-            ),
-        ],
-        responses={200: openapi.Response("QR Code Image (PNG)")},
+class QrBitcoinView(BaseQrView):
+    @qr_swagger_decorator(
+        "Bitcoin Payment QR Code",
+        {
+            "address": openapi.Schema(type=openapi.TYPE_STRING, description='Bitcoin wallet address'),
+            "amount": openapi.Schema(type=openapi.TYPE_NUMBER, description='Amount in BTC'),
+            "label": openapi.Schema(type=openapi.TYPE_STRING, description='Label for the payment'),
+            "message": openapi.Schema(type=openapi.TYPE_STRING, description='Message or note'),
+        }
     )
-    def get(self, request):
-        logger.info("API Request to generate Bitcoin QR Code")
-        try:
-            address = request.query_params.get("address", "")
-            amount = request.query_params.get("amount", None)
-            label = request.query_params.get("label", "")
-            message = request.query_params.get("message", "")
-
-            if not address:
-                return JsonResponse(
-                    {"detail": "address parameter is required."}, status=400
-                )
-
-            # Convert amount to float if provided
-            if amount:
-                try:
-                    amount = float(amount)
-                except ValueError:
-                    return JsonResponse(
-                        {"detail": "amount must be a valid number."}, status=400
-                    )
-            else:
-                amount = None
-
-            qr_image = generate_bitcoin_qr(address, amount, label, message)
-            return HttpResponse(qr_image, content_type="image/png")
-        except Exception as e:
-            logger.error(f"Error generating Bitcoin QR Code via API: {e}")
-            return JsonResponse(
-                {"detail": "Error generating Bitcoin QR Code."}, status=500
-            )
+    def post(self, request):
+        return self.handle_qr_generation(
+            request, generate_bitcoin_qr, ["address", "amount", "label", "message"])
 
 
+## 테스트 뷰
 class HelloWorldView(APIView):
     @swagger_auto_schema(
         operation_description="This is a test view",
