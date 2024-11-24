@@ -93,7 +93,7 @@ def _convert_color_to_rgb(color: str) -> tuple:
 
 def create_qr_code(
     data: str, version: int = None,
-    error_correction=ERROR_CORRECT_L,
+    error_correction: int = ERROR_CORRECT_L,
     fill_color: str = "black",
     back_color: str = "white",
     style: Type[QRStyles] = QRStyles.SQUARE_MODULE,
@@ -104,7 +104,7 @@ def create_qr_code(
     try:
         qr = QRCode(
             version=version,
-            error_correction=error_correction,
+            error_correction=ERROR_CORRECT_H if embedded_image else error_correction,
             box_size=10,
             border=4,
         )
@@ -118,9 +118,8 @@ def create_qr_code(
         fill_color_rgb = _convert_color_to_rgb(fill_color)
         back_color_rgb = _convert_color_to_rgb(back_color)
 
-        if isinstance(color_mask_instance, SolidFillColorMask):
-            color_mask_instance.back_color = back_color_rgb
-            color_mask_instance.front_color = fill_color_rgb
+        color_mask_instance.back_color = back_color_rgb
+        color_mask_instance.front_color = fill_color_rgb
 
         img = qr.make_image(
             image_factory=StyledPilImage,
@@ -138,7 +137,15 @@ def create_qr_code(
         raise
 
 
-def generate_url_qr(url: str) -> bytes:
+def generate_url_qr(
+    url: str,
+    style: Type[QRStyles] = QRStyles.SQUARE_MODULE,
+    fill_color: str = "black",
+    back_color: str = "white",
+    color_mask: Type[QRColorMasks] = QRColorMasks.SOLID_FILL,
+    embedded_image: Image = None,
+    embedded_image_ratio: float = 0.25
+) -> bytes:
     """
     Generate a QR code for a URL.
 
@@ -148,10 +155,26 @@ def generate_url_qr(url: str) -> bytes:
     Returns:
         bytes: The generated QR code image in PNG format.
     """
-    return create_qr_code(url)
+    return create_qr_code(
+        url,
+        style=style,
+        fill_color=fill_color,
+        back_color=back_color,
+        color_mask=color_mask,
+        embedded_image=embedded_image,
+        embedded_image_ratio=embedded_image_ratio
+    )
 
 
-def generate_email_qr(email: str, subject: str = "", body: str = "") -> bytes:
+def generate_email_qr(
+    email: str, subject: str = "", body: str = "",
+    style: Type[QRStyles] = QRStyles.SQUARE_MODULE,
+    fill_color: str = "black",
+    back_color: str = "white",
+    color_mask: Type[QRColorMasks] = QRColorMasks.SOLID_FILL,
+    embedded_image: Image = None,
+    embedded_image_ratio: float = 0.25
+) -> bytes:
     """
     Generate a QR code for an Email.
 
@@ -172,7 +195,15 @@ def generate_email_qr(email: str, subject: str = "", body: str = "") -> bytes:
     if params:
         mailto += "?" + "&".join(params)
 
-    return create_qr_code(mailto)
+    return create_qr_code(
+        mailto,
+        style=style,
+        fill_color=fill_color,
+        back_color=back_color,
+        color_mask=color_mask,
+        embedded_image=embedded_image,
+        embedded_image_ratio=embedded_image_ratio
+    )
 
 
 def generate_text_qr(
@@ -211,7 +242,15 @@ def generate_text_qr(
     )
 
 
-def generate_phone_qr(phone_number: str) -> bytes:
+def generate_phone_qr(
+    phone_number: str,
+    style: Type[QRStyles] = QRStyles.SQUARE_MODULE,
+    fill_color: str = "black",
+    back_color: str = "white",
+    color_mask: Type[QRColorMasks] = QRColorMasks.SOLID_FILL,
+    embedded_image: Image = None,
+    embedded_image_ratio: float = 0.25
+) -> bytes:
     """
     Generate a QR code for a phone number.
 
@@ -221,21 +260,50 @@ def generate_phone_qr(phone_number: str) -> bytes:
         bytes: The generated QR code image in PNG format.
     """
     tel = f"tel:{phone_number}"
-    return create_qr_code(tel)
+    return create_qr_code(tel,
+        style=style,
+        fill_color=fill_color,
+        back_color=back_color,
+        color_mask=color_mask,
+        embedded_image=embedded_image,
+        embedded_image_ratio=embedded_image_ratio
+    )
 
 
-def generate_vcard_qr(vcard_data: Dict[str, str]) -> bytes:
-    """
-    Generate a QR code for a VCard.
-
-    Args:
-        vcard_data (Dict[str, str]): A dictionary containing VCard information.
-            Expected keys: first_name, last_name, email, mobile,
-                           organization, title, address, label, url, note
-
-    Returns:
-        bytes: The generated QR code image in PNG format.
-    """
+def generate_vcard_qr(
+    first_name: str,
+    last_name: str,
+    vcard_mobile: str = "",
+    vcard_email: str = "",
+    vcard_url: str = "",
+    organization: str = "",
+    job_title: str = "",
+    fax: str = "",
+    address: str = "",
+    zip: str = "",
+    country: str = "",
+    note: str = "",
+    style: Type[QRStyles] = QRStyles.SQUARE_MODULE,
+    fill_color: str = "black",
+    back_color: str = "white",
+    color_mask: Type[QRColorMasks] = QRColorMasks.SOLID_FILL,
+    embedded_image: Image = None,
+    embedded_image_ratio: float = 0.25) -> bytes:
+    # VCard 생성 로직
+    vcard_data = {
+        "first_name": first_name,
+        "last_name": last_name,
+        "vcard_mobile": vcard_mobile,
+        "vcard_email": vcard_email,
+        "vcard_url": vcard_url,
+        "organization": organization,
+        "job_title": job_title,
+        "fax": fax,
+        "address": address,
+        "zip": zip,
+        "country": country,
+        "note": note,
+    }
     try:
         vcard = "BEGIN:VCARD\nVERSION:3.0\n"
         vcard += (
@@ -267,14 +335,27 @@ def generate_vcard_qr(vcard_data: Dict[str, str]) -> bytes:
         vcard += "END:VCARD"
 
         return create_qr_code(
-            vcard, version=3, error_correction=qrcode.constants.ERROR_CORRECT_Q
+            vcard,
+            style=style,
+            fill_color=fill_color,
+            back_color=back_color,
+            color_mask=color_mask,
+            embedded_image=embedded_image,
+            embedded_image_ratio=embedded_image_ratio
         )
     except Exception as e:
         logger.error(f"Error creating VCard QR Code: {e}")
         raise
 
 
-def generate_wifi_qr(ssid: str, password: str, encryption: str = "WPA") -> bytes:
+def generate_wifi_qr(ssid: str, password: str, encryption: str = "WPA", hidden: bool = False,
+    style: Type[QRStyles] = QRStyles.SQUARE_MODULE,
+    fill_color: str = "black",
+    back_color: str = "white",
+    color_mask: Type[QRColorMasks] = QRColorMasks.SOLID_FILL,
+    embedded_image: Image = None,
+    embedded_image_ratio: float = 0.25
+) -> bytes:
     """
     Generate a QR code for WiFi configuration.
 
@@ -291,14 +372,30 @@ def generate_wifi_qr(ssid: str, password: str, encryption: str = "WPA") -> bytes
             wifi = f"WIFI:T:;S:{ssid};P:{password};;"
         else:
             wifi = f"WIFI:T:{encryption};S:{ssid};P:{password};;"
+        if hidden:
+            wifi += "H:true;"
 
-        return create_qr_code(wifi, version=2)
+        return create_qr_code(wifi, version=2,
+            style=style,
+            fill_color=fill_color,
+            back_color=back_color,
+            color_mask=color_mask,
+            embedded_image=embedded_image,
+            embedded_image_ratio=embedded_image_ratio
+        )
     except Exception as e:
         logger.error(f"Error creating WiFi QR Code: {e}")
         raise
 
 
-def generate_sms_qr(phone_number: str, message: str) -> bytes:
+def generate_sms_qr(phone_number: str, message: str,
+    style: Type[QRStyles] = QRStyles.SQUARE_MODULE,
+    fill_color: str = "black",
+    back_color: str = "white",
+    color_mask: Type[QRColorMasks] = QRColorMasks.SOLID_FILL,
+    embedded_image: Image = None,
+    embedded_image_ratio: float = 0.25
+) -> bytes:
     """
     Generate a QR code for an SMS message.
 
@@ -310,25 +407,41 @@ def generate_sms_qr(phone_number: str, message: str) -> bytes:
         bytes: The generated QR code image in PNG format.
     """
     sms = f"SMSTO:{phone_number}:{message}"
-    return create_qr_code(sms)
+    return create_qr_code(sms,
+        style=style,
+        fill_color=fill_color,
+        back_color=back_color,
+        color_mask=color_mask,
+        embedded_image=embedded_image,
+        embedded_image_ratio=embedded_image_ratio
+    )
 
 
 def generate_geo_qr(
-    latitude: float, longitude: float, query: str = "", zoom: int = 0
+    latitude: str, longitude: str, query: str = "", zoom: str = "0",
+    style: Type[QRStyles] = QRStyles.SQUARE_MODULE,
+    fill_color: str = "black",
+    back_color: str = "white",
+    color_mask: Type[QRColorMasks] = QRColorMasks.SOLID_FILL,
+    embedded_image: Image = None,
+    embedded_image_ratio: float = 0.25
 ) -> bytes:
     """
-    Generate a QR code for a geographical location.
+    Geographic QR Code 생성
 
     Args:
-        latitude (float): Latitude of the location.
-        longitude (float): Longitude of the location.
-        query (str, optional): Query parameter, e.g., place name. Defaults to ''.
-        zoom (int, optional): Zoom level. Defaults to 0.
+        latitude (float): 위치 위도(latitude)
+        longitude (float): 위치 경도(longitude)
+        query (str, optional): 쿼리 파라미터, 예: 장소 이름. Defaults to ''.
+        zoom (int, optional): 줌 레벨. Defaults to 0.
 
     Returns:
         bytes: The generated QR code image in PNG format.
     """
     try:
+        latitude = float(latitude)
+        longitude = float(longitude)
+        zoom = int(zoom)
         geo_uri = f"geo:{latitude},{longitude}"
         params = []
         if zoom > 0:
@@ -337,22 +450,36 @@ def generate_geo_qr(
             params.append(f"q={query}")
         if params:
             geo_uri += "?" + "&".join(params)
-        return create_qr_code(geo_uri)
+        return create_qr_code(geo_uri,
+            style=style,
+            fill_color=fill_color,
+            back_color=back_color,
+            color_mask=color_mask,
+            embedded_image=embedded_image,
+            embedded_image_ratio=embedded_image_ratio
+        )
     except Exception as e:
         logger.error(f"Error creating Geo QR Code: {e}")
         raise
 
 
-def generate_event_qr(event_data: Dict[str, str]) -> bytes:
+def generate_event_qr(event_data: Dict[str, str],
+    style: Type[QRStyles] = QRStyles.SQUARE_MODULE,
+    fill_color: str = "black",
+    back_color: str = "white",
+    color_mask: Type[QRColorMasks] = QRColorMasks.SOLID_FILL,
+    embedded_image: Image = None,
+    embedded_image_ratio: float = 0.25
+) -> bytes:
     """
-    Generate a QR code for a calendar event.
+    Calendar Event QR Code 생성
 
     Args:
-        event_data (Dict[str, str]): A dictionary containing event information.
-            Expected keys: summary, start_date, end_date, location, description
+        event_data (Dict[str, str]): 이벤트 정보를 포함하는 딕셔너리.
+            Required keys: summary, start_date, end_date, location, description
 
     Returns:
-        bytes: The generated QR code image in PNG format.
+        bytes: 생성된 QR 코드 이미지(PNG 포맷)
     """
     try:
         vcal = "BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\n"
@@ -364,60 +491,90 @@ def generate_event_qr(event_data: Dict[str, str]) -> bytes:
         if event_data.get("description"):
             vcal += f"DESCRIPTION:{event_data.get('description')}\n"
         vcal += "END:VEVENT\nEND:VCALENDAR"
-        return create_qr_code(vcal)
+        return create_qr_code(vcal,
+            style=style,
+            fill_color=fill_color,
+            back_color=back_color,
+            color_mask=color_mask,
+            embedded_image=embedded_image,
+            embedded_image_ratio=embedded_image_ratio
+        )
     except Exception as e:
         logger.error(f"Error creating Event QR Code: {e}")
         raise
 
 
-def generate_mecard_qr(mecard_data: Dict[str, str]) -> bytes:
+def generate_mecard_qr(
+    name: str, reading: str, tel: str, email: str,
+    memo: str = "", birthday: str = "", address: str = "", url: str = "", nickname: str = "",
+    style: Type[QRStyles] = QRStyles.SQUARE_MODULE,
+    fill_color: str = "black",
+    back_color: str = "white",
+    color_mask: Type[QRColorMasks] = QRColorMasks.SOLID_FILL,
+    embedded_image: Image = None,
+    embedded_image_ratio: float = 0.25
+) -> bytes:
     """
-    Generate a QR code in MECARD format.
+    MECARD QR Code 생성
 
     Args:
-        mecard_data (Dict[str, str]): A dictionary containing contact information.
-            Expected keys: name, reading, tel, email, memo, birthday, address, url, nickname
+        mecard_data (Dict[str, str]): 연락처 정보를 포함하는 딕셔너리.
+            필요한 키: name, reading, tel, email, memo, birthday, address, url, nickname
 
     Returns:
-        bytes: The generated QR code image in PNG format.
+        bytes: 생성된 QR 코드 이미지(PNG 포맷)
     """
     try:
         mecard = "MECARD:"
-        if mecard_data.get("name"):
-            mecard += f"N:{mecard_data.get('name')};"
-        if mecard_data.get("reading"):
-            mecard += f"SOUND:{mecard_data.get('reading')};"
-        if mecard_data.get("tel"):
-            mecard += f"TEL:{mecard_data.get('tel')};"
-        if mecard_data.get("email"):
-            mecard += f"EMAIL:{mecard_data.get('email')};"
-        if mecard_data.get("memo"):
-            mecard += f"NOTE:{mecard_data.get('memo')};"
-        if mecard_data.get("birthday"):
-            mecard += f"BDAY:{mecard_data.get('birthday')};"
-        if mecard_data.get("address"):
-            mecard += f"ADR:{mecard_data.get('address')};"
-        if mecard_data.get("url"):
-            mecard += f"URL:{mecard_data.get('url')};"
-        if mecard_data.get("nickname"):
-            mecard += f"NICKNAME:{mecard_data.get('nickname')};"
+        if name:
+            mecard += f"N:{name};"
+        if reading:
+            mecard += f"SOUND:{reading};"
+        if tel:
+            mecard += f"TEL:{tel};"
+        if email:
+            mecard += f"EMAIL:{email};"
+        if memo:
+            mecard += f"NOTE:{memo};"
+        if birthday:
+            mecard += f"BDAY:{birthday};"
+        if address:
+            mecard += f"ADR:{address};"
+        if url:
+            mecard += f"URL:{url};"
+        if nickname:
+            mecard += f"NICKNAME:{nickname};"
         mecard += ";"
-        return create_qr_code(mecard)
+        return create_qr_code(mecard,
+            style=style,
+            fill_color=fill_color,
+            back_color=back_color,
+            color_mask=color_mask,
+            embedded_image=embedded_image,
+            embedded_image_ratio=embedded_image_ratio
+        )
     except Exception as e:
         logger.error(f"Error creating MECARD QR Code: {e}")
         raise
 
 
-def generate_whatsapp_qr(phone_number: str, message: str = "") -> bytes:
+def generate_whatsapp_qr(phone_number: str, message: str = "",
+    style: Type[QRStyles] = QRStyles.SQUARE_MODULE,
+    fill_color: str = "black",
+    back_color: str = "white",
+    color_mask: Type[QRColorMasks] = QRColorMasks.SOLID_FILL,
+    embedded_image: Image = None,
+    embedded_image_ratio: float = 0.25
+) -> bytes:
     """
-    Generate a QR code for a WhatsApp message.
+    WhatsApp QR Code 생성
 
     Args:
-        phone_number (str): The recipient's phone number in international format.
-        message (str, optional): The message to send. Defaults to ''.
+        phone_number (str): 수신자의 전화번호(international format).
+        message (str, optional): 보낼 메시지. Defaults to ''.
 
     Returns:
-        bytes: The generated QR code image in PNG format.
+        bytes: 생성된 QR 코드 이미지(PNG 포맷)
     """
     try:
         whatsapp_uri = f"https://wa.me/{phone_number}"
@@ -425,26 +582,39 @@ def generate_whatsapp_qr(phone_number: str, message: str = "") -> bytes:
             query_params = {"text": message}
             encoded_params = urllib.parse.urlencode(query_params)
             whatsapp_uri += f"?{encoded_params}"
-        return create_qr_code(whatsapp_uri)
+        return create_qr_code(whatsapp_uri,
+            style=style,
+            fill_color=fill_color,
+            back_color=back_color,
+            color_mask=color_mask,
+            embedded_image=embedded_image,
+            embedded_image_ratio=embedded_image_ratio
+        )
     except Exception as e:
         logger.error(f"Error creating WhatsApp QR Code: {e}")
         raise
 
 
 def generate_bitcoin_qr(
-    address: str, amount: float = None, label: str = "", message: str = ""
+    address: str, amount: float = None, label: str = "", message: str = "",
+    style: Type[QRStyles] = QRStyles.SQUARE_MODULE,
+    fill_color: str = "black",
+    back_color: str = "white",
+    color_mask: Type[QRColorMasks] = QRColorMasks.SOLID_FILL,
+    embedded_image: Image = None,
+    embedded_image_ratio: float = 0.25
 ) -> bytes:
     """
-    Generate a QR code for a Bitcoin payment.
+    Bitcoin QR Code 생성
 
     Args:
-        address (str): The Bitcoin address.
-        amount (float, optional): The amount in BTC. Defaults to None.
-        label (str, optional): A label for the address. Defaults to ''.
-        message (str, optional): A message for the payment. Defaults to ''.
+        address (str): 비트코인 주소.
+        amount (float, optional): BTC 금액. Defaults to None.
+        label (str, optional): 주소에 대한 라벨. Defaults to ''.
+        message (str, optional): 결제에 대한 메시지. Defaults to ''.
 
     Returns:
-        bytes: The generated QR code image in PNG format.
+        bytes: 생성된 QR 코드 이미지(PNG 포맷)
     """
     try:
         bitcoin_uri = f"bitcoin:{address}"
@@ -457,7 +627,14 @@ def generate_bitcoin_qr(
             params.append(f"message={message}")
         if params:
             bitcoin_uri += "?" + "&".join(params)
-        return create_qr_code(bitcoin_uri)
+        return create_qr_code(bitcoin_uri,
+            style=style,
+            fill_color=fill_color,
+            back_color=back_color,
+            color_mask=color_mask,
+            embedded_image=embedded_image,
+            embedded_image_ratio=embedded_image_ratio
+        )
     except Exception as e:
         logger.error(f"Error creating Bitcoin QR Code: {e}")
         raise
