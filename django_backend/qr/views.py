@@ -236,7 +236,11 @@ class QrGeoView(BaseQrView):
         }
     )
     def post(self, request: Request):
-        return self.handle_qr_generation(request, generate_geo_qr, ["latitude", "longitude", "query", "zoom"])
+        return self.handle_qr_generation(
+            request,
+            generate_geo_qr,
+            ["latitude", "longitude", "query", "zoom"]
+        )
 
 
 class QrEventView(BaseQrView):
@@ -251,19 +255,9 @@ class QrEventView(BaseQrView):
         }
     )
     def post(self, request):
-        def event_qr_wrapper(**kwargs):
-            event_data = {
-                'summary': kwargs.pop('summary'),
-                'start_date': kwargs.pop('start_date'),
-                'end_date': kwargs.pop('end_date'),
-                'location': kwargs.pop('location'),
-                'description': kwargs.pop('description')
-            }
-            return generate_event_qr(event_data=event_data, **kwargs)
-
         return self.handle_qr_generation(
             request,
-            event_qr_wrapper,
+            generate_event_qr,
             ["summary", "start_date", "end_date", "location", "description"]
         )
 
