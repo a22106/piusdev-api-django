@@ -1,0 +1,39 @@
+# Core
+django
+python-dotenv
+str2bool
+pycountry
+phonenumbers
+
+
+# Swagger
+drf-yasg
+djangorestframework
+whitenoise
+# Django
+django-admin-berry
+django_plotly_dash
+django-bootstrap-v5
+django-qr-code
+django-debug-toolbar
+django-configurations
+django-cors-headers
+
+# Deployment
+whitenoise
+gunicorn
+
+# packages
+qrcode[pil]
+Pillow
+
+# Database
+dj-database-url
+psycopg2-binary
+
+# Test
+pytest
+pytest-django
+selenium
+webdriver-manager
+django_cypress

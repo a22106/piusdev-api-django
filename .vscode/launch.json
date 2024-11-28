@@ -5,15 +5,39 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python Debugger: Django",
-            "type": "debugpy",
+            "command": "npm start",
+            "name": "Run npm start",
             "request": "launch",
-            "args": [
-                "runserver"
+            "type": "node-terminal"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Program",
+            "skipFiles": [
+                "<node_internals>/**"
             ],
-            "django": true,
-            "autoStartBrowser": false,
-            "program": "${workspaceFolder}\\manage.py"
+            "program": "${file}"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Chrome against localhost",
+            "url": "http://localhost:5173",
+            "webRoot": "${workspaceFolder}/qrcode_frontend",
+            "sourceMaps": true,
+            "sourceMapPathOverrides": {
+                "/@fs/*": "*"
+            }
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Vite Dev Server",
+            "cwd": "${workspaceFolder}/qrcode_frontend",
+            "program": "${workspaceFolder}/qrcode_frontend/node_modules/vite/bin/vite.js",
+            "args": ["--port", "5173"],
+            "console": "integratedTerminal"
         }
     ]
 }
