@@ -16,7 +16,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 if not SECRET_KEY:
     SECRET_KEY = "".join(random.choice(string.ascii_lowercase) for i in range(32))
 
-DEBUG = os.environ.get("DEBUG", "True").lower() == "true"
+DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
 SITE_URL = "http://localhost:8000" if DEBUG else "https://qrcode.piusdev.com"
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -24,9 +24,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Database settings
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": os.environ.get("DB_ENGINE", "django.db.backends.postgresql"),
+        "NAME": os.environ.get("DB_NAME", "postgres"),
+        "USER": os.environ.get("DB_USER", "postgres"),
+        "PASSWORD": os.environ.get("DB_PASSWORD", "postgres"),
+        "HOST": os.environ.get("DB_HOST", "127.0.0.1"),
+        "PORT": os.environ.get("DB_PORT", "5432"),
     }
 }
 
@@ -240,13 +244,15 @@ INTERNAL_IPS = [
     '127.0.0.1',
 ]
 
-DATABASES = {
-    "default": {
-        "ENGINE": os.environ.get("DB_ENGINE", "django.db.backends.postgresql"),
-        "NAME": os.environ.get("DB_NAME", "postgres"),
-        "USER": os.environ.get("DB_USER", "postgres"),
-        "PASSWORD": os.environ.get("DB_PASSWORD", "postgres"),
-        "HOST": os.environ.get("DB_HOST", "127.0.0.1"),
-        "PORT": os.environ.get("DB_PORT", "5432"),
+# 500 에러 핸들링을 위한 설정 추가
+ADMINS = [('Admin Name', 'piushwang@piusdev.com')]
+SERVER_EMAIL = 'piushwang@piusdev.com'
+
+# 에러 발생 시 이메일 알림 설정
+if not DEBUG:
+    LOGGING['handlers']['mail_admins'] = {
+        'level': 'ERROR',
+        'class': 'django.utils.log.AdminEmailHandler',
+        'include_html': True,
     }
-}
+    LOGGING['loggers']['django']['handlers'].append('mail_admins')
