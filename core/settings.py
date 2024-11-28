@@ -256,3 +256,17 @@ if not DEBUG:
         'include_html': True,
     }
     LOGGING['loggers']['django']['handlers'].append('mail_admins')
+
+# Add or modify these settings
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# During testing, we should use a different storage backend
+import sys
+if 'test' in sys.argv:
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+else:
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'

@@ -4,6 +4,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import time
 import logging
 
@@ -37,8 +39,12 @@ class TestSignUp(StaticLiveServerTestCase):
     def test_signup(self):
         self.driver.get(f"{self.live_server_url}/auth/signup/")
 
+        # Wait up to 10 seconds for the email field to be present
+        email_field = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.NAME, "email"))
+        )
+
         # 폼 필드 찾기
-        email_field = self.driver.find_element(By.NAME, "email")
         password1_field = self.driver.find_element(By.NAME, "password1")
         password2_field = self.driver.find_element(By.NAME, "password2")
         submit_button = self.driver.find_element(By.XPATH, "//button[@type='submit']")
