@@ -25,6 +25,7 @@ schema_view = get_schema_view(
 urlpatterns = [
     path("pius_hwang/", admin.site.urls),
     path("", include("qr.urls", namespace="qr")),
+    path("", include("django_cypress.urls")),
     # API Documentation
     path("api/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
     path("auth/", include("accounts.urls", namespace="accounts")),

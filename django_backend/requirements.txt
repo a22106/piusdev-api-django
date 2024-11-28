@@ -36,3 +36,4 @@ pytest
 pytest-django
 selenium
 webdriver-manager
+django_cypress

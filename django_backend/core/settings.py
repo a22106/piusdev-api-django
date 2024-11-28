@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "debug_toolbar",
     "corsheaders",
+    "django_cypress",
 ]
 
 AUTHENTICATION_BACKENDS = [

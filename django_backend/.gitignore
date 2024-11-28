@@ -95,3 +95,8 @@ local_settings.py
 
 .env
 db.sqlite3
+
+# Cypress
+cypress/videos/
+cypress/screenshots/
+node_modules/
