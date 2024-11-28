@@ -42,7 +42,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:5085",
     'http://localhost:5173',
 ]
-DEBUG = True
+
 ALLOWED_HOSTS = [
     "piusdev-qrcode-9f0c9f745f56.herokuapp.com",
     "qrcode.piusdev.com",
