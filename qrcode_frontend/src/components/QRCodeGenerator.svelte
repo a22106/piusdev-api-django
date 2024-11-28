@@ -23,7 +23,8 @@
     }
   }
 
-  function handleTypeChange() {
+  function handleTypeChange(newType: string) {
+    selectedType = newType;
     formData = {};
     qrCodeImage = null;
     downloadEnabled = false;
@@ -43,76 +44,44 @@
 
 <div class="px-4 py-12 text-gray-800">
   <div class="container mx-auto">
-    <h1
+    <!-- <h1
       class="text-4xl font-bold mb-12 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600"
     >
       QR Code Generator
-    </h1>
+    </h1> -->
 
-    <!--  Tabs  -->
+    <!-- Tabs 요소로 변경된 QR Type Selection -->
+    <div class="max-w-5xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
 
-    <div
-      class="max-w-5xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden"
-    >
-      <div
-        class="text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700"
-      >
+      <!-- Tabs -->
+      <div class="text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700">
         <ul class="flex flex-wrap -mb-px">
-          <li class="me-2">
-            <a
-              href="#"
-              class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
-              >Types</a
-            >
-          </li>
-          <li class="me-2">
-            <a
-              href="#"
-              class="inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500"
-              aria-current="page">Styles</a
-            >
-          </li>
-          <li class="me-2">
-            <a
-              href="#"
-              class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
-              >Color</a
-            >
-          </li>
-          <li class="me-2">
-            <a
-              href="#"
-              class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
-              >Format</a
-            >
-          </li>
+          {#each QR_TYPES as type}
+            <li class="me-2">
+              <a
+                href="#"
+                class={`inline-block p-4 rounded-t-lg ${
+                  selectedType === type.value
+                    ? "text-blue-600 border-b-2 border-blue-600"
+                    : "border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
+                }`}
+                aria-current={selectedType === type.value ? "page" : undefined}
+                on:click|preventDefault={() => handleTypeChange(type.value)}
+              >
+                {type.label}
+              </a>
+            </li>
+          {/each}
         </ul>
       </div>
+
+
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8 p-8">
-        <!-- QR Type Selection -->
+        <!-- Styles and 기타 섹션 유지 -->
         <div class="md:col-span-2">
           <h2 class="text-2xl font-semibold mb-6 text-gray-700">
-            Select QR Code Type
+            Styles
           </h2>
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
-            {#each QR_TYPES as type}
-              <label
-                class="flex items-center space-x-2 cursor-pointer hover:bg-blue-50 p-2 rounded-lg transition-colors"
-              >
-                <input
-                  type="radio"
-                  name="qr_type"
-                  value={type.value}
-                  bind:group={selectedType}
-                  on:change={handleTypeChange}
-                  class="form-radio text-blue-600"
-                />
-                <span class="text-gray-700">{type.label}</span>
-              </label>
-            {/each}
-          </div>
-
-          <h2 class="text-2xl font-semibold mb-6 text-gray-700">Styles</h2>
           <!-- Styles custom radio -->
           <div class="flex space-x-4">
             <!-- Option 1 -->
@@ -154,7 +123,7 @@
             </label>
           </div>
 
-          <!-- Colors -->
+          <!-- Colors 섹션 유지 -->
           <h2 class="text-2xl font-semibold mb-6 text-gray-700">Colors</h2>
           <div class="space-y-5">
             <!-- Hex Color Input with Color Picker -->
@@ -183,7 +152,7 @@
 
             <!-- Predefined Colors -->
             <div class="grid grid-cols-4 gap-4">
-              {#each ["#000000", "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF"] as color}
+              {#each ["#000000", "#FFFFFF", "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF"] as color}
                 <label class="block cursor-pointer">
                   <input
                     type="radio"
@@ -201,8 +170,7 @@
             </div>
           </div>
 
-
-          <!-- Input Form -->
+          <!-- Input Form 섹션 유지 -->
           <form
             on:submit|preventDefault={handleGenerateQRCode}
             class="space-y-5"
@@ -264,8 +232,7 @@
           </form>
         </div>
 
-
-        <!-- QR Code Display -->
+        <!-- QR Code Display 섹션 유지 -->
         <div class="md:col-span-1">
           <div class="sticky top-4">
             <h2 class="text-2xl font-semibold mb-6 text-gray-700">

@@ -1,5 +1,6 @@
 <script lang="ts">
   import QRCodeGenerator from "./components/QRCodeGenerator.svelte";
+  import SampleQR from "./components/SampleQR.svelte";
 </script>
 
 <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -44,7 +45,8 @@
   </nav>
 
   <main>
-    <QRCodeGenerator />
+    <!-- <QRCodeGenerator /> -->
+    <SampleQR />
   </main>
 </div>
 

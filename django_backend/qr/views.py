@@ -4,6 +4,8 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from PIL import Image
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 import logging
 import pycountry
@@ -58,6 +60,7 @@ class IndexView(TemplateView):
 
         return context
 
+@method_decorator(csrf_exempt, name='dispatch')
 class BaseQrView(APIView):
     def validate_common_params(self, request: Request):
         style = request.data.get("style", "SQUARE_MODULE")
@@ -120,7 +123,17 @@ class BaseQrView(APIView):
                 **common_params,
                 embedded_image=embedded_image
             )
-            return HttpResponse(qr_image, content_type="image/png")
+
+            # QR 코드 생성 후 로깅 추가
+            logger.info(f"Generated QR code size: {len(qr_image)} bytes")
+            logger.debug(f"QR code parameters: {common_params}")
+
+            # 수정된 부분: Content-Length 헤더 추가
+            response = HttpResponse(qr_image, content_type="image/png")
+            response['Content-Length'] = len(qr_image)
+            response['Content-Disposition'] = 'inline; filename="qr-code.png"'
+            return response
+
         except ValueError as e:
             return JsonResponse({"detail": str(e)}, status=400)
         except Exception as e:

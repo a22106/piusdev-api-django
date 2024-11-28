@@ -365,70 +365,117 @@
             const $downloadPng = $("#download-png");
             const $downloadSvg = $("#download-svg");
 
-            $(`.country-code-select`).select2({
-                theme: `bootstrap-5`,
-                placeholder: `Select a country`,
+            // Initialize Select2 for country code select
+            $('.country-code-select').select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Select a country',
                 allowClear: true,
-                width: `resolve` // 필요에 따라 너비 조정
+                width: 'resolve'
             });
 
-            /**
-             * Show the relevant input section based on the selected QR code type.
-             * Hide all other input sections.
-             */
+            // Show the relevant input section based on the selected QR code type
             function showRelevantInput() {
+                // Hide all input sections first
+                $inputSections.hide();
+
+                // Get the selected QR type
                 const selectedType = $('input[name="qr_type"]:checked').val();
 
-                // Hide all input sections
-                $inputSections.hide();
-                $inputSections.find('input, select, textarea').prop('disabled', true);
+                // Show the corresponding input section
+                $(`#input-${selectedType}`).show();
 
-                // Show the input section corresponding to the selected QR code type
-                const $activeSection = $(`#input-${selectedType}`);
-                if ($activeSection.length) {
-                    $activeSection.show();
-                    $activeSection.find('input, select, textarea').prop('disabled', false);
-                    // Set required fields based on selected type
-                    $activeSection.find('input[required], textarea[required]').prop('required', true);
-                }
+                // Enable/disable form fields
+                $inputSections.find('input, select, textarea').prop('disabled', true);
+                $(`#input-${selectedType}`).find('input, select, textarea').prop('disabled', false);
+
+                // Set required fields
+                $(`#input-${selectedType}`).find('input[required], textarea[required]').prop('required', true);
+
+                console.log('Selected type:', selectedType); // Debug log
             }
 
-            $qrTypeRadios.change(showRelevantInput);
+            // Initial show/hide on page load
             showRelevantInput();
+
+            // Show/hide on radio button change
+            $qrTypeRadios.change(showRelevantInput);
+
+            // Setup CSRF token for AJAX requests
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            $.ajaxSetup({
+                beforeSend: function(xhr, settings) {
+                    if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                }
+            });
 
             // Handle form submission
             $form.submit(function(event) {
                 event.preventDefault();
                 const selectedType = $('input[name="qr_type"]:checked').val();
 
-                // Create FormData object to handle file upload
+                // Create FormData object
                 const formData = new FormData();
 
-                // Add all form fields to FormData
+                // Add CSRF token to FormData
+                formData.append('csrfmiddlewaretoken', csrftoken);
+
+                // Add all form fields from active section to FormData
                 const $activeSection = $(`#input-${selectedType}`);
+
+                // Debug log
+                console.log('Active section:', $activeSection);
+                console.log('Form fields:', $activeSection.find('input, select, textarea').length);
+
                 $activeSection.find('input:not([type="file"]), select, textarea').each(function() {
-                    formData.append(this.name, this.value);
+                    const fieldName = $(this).attr('name');
+                    const fieldValue = $(this).val();
+
+                    // Debug log
+                    console.log('Field:', fieldName, 'Value:', fieldValue);
+
+                    if (this.type === 'checkbox') {
+                        formData.append(fieldName, this.checked);
+                    } else if (fieldValue) {
+                        formData.append(fieldName, fieldValue);
+                    }
                 });
 
-                // Add checkbox values
-                $activeSection.find('input[type="checkbox"]').each(function() {
-                    data[this.name] = this.checked;
-                });
-
-                // country_code와 phone_number가 모두 있으면 phone_number에 country_code를 붙임
-                if (data['country_code'] && data['phone_number']) {
-                    const countryCode = data['country_code'].replace(/\+/g, '').replace(/\s+/g, '');
-                    const phoneNumber = data['phone_number'].replace(/\s+/g, '');
-                    data['phone_number'] = countryCode + phoneNumber;
-                    delete data['country_code'];
+                // Special handling for phone numbers
+                if ($activeSection.find('select[name="country_code"]').length) {
+                    const countryCode = $activeSection.find('select[name="country_code"]').val();
+                    const phoneNumber = $activeSection.find('input[name="phone_number"]').val();
+                    if (countryCode && phoneNumber) {
+                        const fullPhoneNumber = (countryCode + phoneNumber).replace(/[+\s-]/g, '');
+                        formData.append('phone_number', fullPhoneNumber);
+                    }
                 }
 
-                // Add file if present
+                // Handle file upload
                 const fileInput = $activeSection.find('input[type="file"]')[0];
                 if (fileInput && fileInput.files[0]) {
                     formData.append('embedded_image', fileInput.files[0]);
                 }
 
+                // Add style parameters
+                const style = $activeSection.find('select[name="style"]').val();
+                if (style) formData.append('style', style);
+
+                const fillColor = $activeSection.find('input[name="fill_color"]').val();
+                if (fillColor) formData.append('fill_color', fillColor);
+
+                const backColor = $activeSection.find('input[name="back_color"]').val();
+                if (backColor) formData.append('back_color', backColor);
+
+                const colorMask = $activeSection.find('select[name="color_mask"]').val();
+                if (colorMask) formData.append('color_mask', colorMask);
+
+                const embeddedImageRatio = $activeSection.find('input[name="embedded_image_ratio"]').val();
+                if (embeddedImageRatio) formData.append('embedded_image_ratio', embeddedImageRatio);
+
+                // Get appropriate API endpoint
                 let url = "";
                 switch (selectedType) {
                     case "url":
@@ -455,23 +502,24 @@
                     case "geo":
                         url = "{% url 'qr:qr_geo_v1' %}";
                         break;
-                    case "event":
-                        url = "{% url 'qr:qr_event_v1' %}";
-                        break;
-                    case "mecard":
-                        url = "{% url 'qr:qr_mecard_v1' %}";
-                        break;
                     case "whatsapp":
                         url = "{% url 'qr:qr_whatsapp_v1' %}";
-                        break;
-                    case "bitcoin":
-                        url = "{% url 'qr:qr_bitcoin_v1' %}";
                         break;
                     default:
                         alert("Invalid QR Code type selected.");
                         return;
                 }
 
+                // Debug log
+                console.log('API URL:', url);
+                console.log('FormData:', Array.from(formData.entries()));
+
+                // Show loading state
+                const $submitButton = $(this).find('button[type="submit"]');
+                const originalButtonText = $submitButton.text();
+                $submitButton.prop('disabled', true).text('Generating...');
+
+                // Make API request
                 $.ajax({
                     url: url,
                     type: "POST",
@@ -485,23 +533,44 @@
                         const imageUrl = URL.createObjectURL(blob);
                         $qrCodeImg.attr('src', imageUrl);
                         $qrResult.show();
-
-                        // Enable download buttons
                         $downloadPng.prop('disabled', false);
                         $downloadSvg.prop('disabled', false);
+
+                        // Track successful QR generation
+                        if (typeof gtag !== 'undefined') {
+                            gtag('event', 'generate_qr', {
+                                'event_category': 'QR Code',
+                                'event_label': selectedType
+                            });
+                        }
                     },
                     error: function(xhr, status, error) {
-                        console.error('Error:', error);
-                        alert(`Error generating QR Code: ${error}`);
+                        let errorMessage = "Error generating QR Code";
+                        if (xhr.status === 403) {
+                            errorMessage = "Permission denied. Please refresh the page and try again.";
+                        } else {
+                            try {
+                                const errorData = JSON.parse(xhr.responseText);
+                                errorMessage = errorData.detail || errorMessage;
+                            } catch (e) {
+                                console.error('Error parsing error response:', e);
+                            }
+                        }
+                        alert(errorMessage);
+                        console.error('Error details:', {status, error, xhr});
 
                         // Disable download buttons on error
                         $downloadPng.prop('disabled', true);
                         $downloadSvg.prop('disabled', true);
+                    },
+                    complete: function() {
+                        // Reset button state
+                        $submitButton.prop('disabled', false).text(originalButtonText);
                     }
                 });
             });
 
-            // Add event listener for embedded image ratio slider
+            // Handle embedded image ratio slider
             $('input[name="embedded_image_ratio"]').on('input', function() {
                 $('.embedded-image-ratio-value').text(`${Math.round(this.value * 100)}%`);
             });

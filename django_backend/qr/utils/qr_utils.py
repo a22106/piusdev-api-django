@@ -130,7 +130,7 @@ def create_qr_code(
         )
 
         buffer = BytesIO()
-        # img.save(buffer, format="PNG")
+        img.save(buffer, format="PNG")
         return buffer.getvalue()
     except Exception as e:
         logger.error(f"Error creating QR Code: {e}")
@@ -147,13 +147,13 @@ def generate_url_qr(
     embedded_image_ratio: float = 0.25
 ) -> bytes:
     """
-    Generate a QR code for a URL.
+    URL QR Code 생성
 
     Args:
-        url (str): The URL to encode in the QR code.
+        url (str): QR Code에 인코딩할 URL.
 
     Returns:
-        bytes: The generated QR code image in PNG format.
+        bytes: 생성된 QR 코드 이미지(PNG 포맷).
     """
     return create_qr_code(
         url,
@@ -176,15 +176,15 @@ def generate_email_qr(
     embedded_image_ratio: float = 0.25
 ) -> bytes:
     """
-    Generate a QR code for an Email.
+    Email QR Code 생성
 
     Args:
-        email (str): The recipient email address.
-        subject (str, optional): The email subject. Defaults to "".
-        body (str, optional): The email body. Defaults to "".
+        email (str): 수신자 이메일 주소.
+        subject (str, optional): 이메일 제목. 기본값은 "".
+        body (str, optional): 이메일 본문. 기본값은 "".
 
     Returns:
-        bytes: The generated QR code image in PNG format.
+        bytes: 생성된 QR 코드 이미지(PNG 포맷).
     """
     mailto = f"mailto:{email}"
     params = []
@@ -216,19 +216,19 @@ def generate_text_qr(
     embedded_image_ratio: float = 0.25
 ) -> bytes:
     """
-    Generate a QR code for plain text.
+    Plain Text QR Code 생성
 
     Args:
-        text (str): The text to encode in the QR code.
-        style (QRStyles): The style of the QR code.
-        fill_color (str): Color of the QR code pattern.
-        back_color (str): Background color.
-        color_mask (QRColorMasks): Color mask type for gradient effects.
-        embedded_image (PIL.Image): Optional image to embed in center of QR code.
-        embedded_image_ratio (float): Size ratio of embedded image (0.1-0.5).
+        text (str): QR Code에 인코딩할 텍스트.
+        style (QRStyles): QR Code의 스타일.
+        fill_color (str): QR Code 패턴의 색상.
+        back_color (str): 배경색.
+        color_mask (QRColorMasks): 그라데이션 효과를 위한 색상 마스크 유형.
+        embedded_image (PIL.Image): QR Code 중심에 삽입할 이미지(선택 사항).
+        embedded_image_ratio (float): 삽입된 이미지의 크기 비율(0.1-0.5).
 
     Returns:
-        bytes: The generated QR code image in PNG format.
+        bytes: 생성된 QR 코드 이미지(PNG 포맷).
     """
     return create_qr_code(
         text,
@@ -252,9 +252,10 @@ def generate_phone_qr(
     embedded_image_ratio: float = 0.25
 ) -> bytes:
     """
-    Generate a QR code for a phone number.
+    Phone Number QR Code 생성
 
-    :param phone_number: (+)1234567890 +는 필요하지 않음
+    Args:
+        phone_number: (+)1234567890 +는 필요하지 않음
 
     Returns:
         bytes: The generated QR code image in PNG format.

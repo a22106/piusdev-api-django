@@ -4,7 +4,14 @@
 
   async function fetchQRCode() {
     try {
-      const response = await fetch(`http://localhost:8000/v1/qr/text/?text=${text}`);
+      const response = await fetch('http://localhost:8000/v1/qr/text/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text }),
+      });
+
       if (!response.ok) throw new Error('Failed to fetch QR code');
       const blob = await response.blob();
       qrImage = URL.createObjectURL(blob);

@@ -6,10 +6,13 @@ export async function generateQRCode(selectedType: string, formData: FormData): 
     const endpoint = `${API_BASE_URL}/${selectedType === 'phone' ? 'phonenumber' : selectedType}/`;
     const adjustedFormData = adjustFormData(selectedType, formData);
 
-    const queryParams = new URLSearchParams(adjustedFormData).toString();
-    const fullUrl = `${endpoint}?${queryParams}`;
-
-    const response = await fetch(fullUrl);
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(adjustedFormData),
+    });
 
     if (!response.ok) {
       const errorText = await response.text();
