@@ -38,8 +38,16 @@ class TestSignIn(StaticLiveServerTestCase):
     def test_signin(self):
         self.driver.get(f"{self.live_server_url}/auth/signin/")
 
+        # Add wait for element to be present
+        from selenium.webdriver.support.ui import WebDriverWait
+        from selenium.webdriver.support import expected_conditions as EC
+
+        # Wait up to 10 seconds for the email field to be present
+        email_field = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.NAME, "email"))
+        )
+
         # 로그인 폼 필드 찾기
-        email_field = self.driver.find_element(By.NAME, "email")
         password_field = self.driver.find_element(By.NAME, "password")
         submit_button = self.driver.find_element(By.XPATH, "//button[@type='submit']")
 
