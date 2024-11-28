@@ -1,0 +1,12 @@
+{
+  "name": "django-cypress-test",
+  "version": "1.0.0",
+  "description": "Django Cypress Testing",
+  "scripts": {
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run"
+  },
+  "devDependencies": {
+    "cypress": "^13.7.0"
+  }
+}

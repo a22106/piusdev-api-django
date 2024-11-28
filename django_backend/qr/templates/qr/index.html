@@ -84,12 +84,64 @@
                     </p>
                     <form action="{% url 'qr:index' %}" method="post" id="qr-form" enctype="multipart/form-data">
                         {% csrf_token %}
+                        <!-- Common QR Style Options -->
+                        <div class="qr-style-options">
+                            <!-- First row with Style, Fill Color, and Background Color -->
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label w-100">
+                                        Style:
+                                        <select name="style" class="form-select">
+                                            <option value="SQUARE_MODULE">Square</option>
+                                            <option value="GAPPED_SQUARE_MODULE">Gapped Square</option>
+                                            <option value="CIRCLE_MODULE">Circle</option>
+                                            <option value="ROUNDED_MODULE">Rounded</option>
+                                            <option value="HORIZONTAL_BARS">Horizontal Bars</option>
+                                            <option value="VERTICAL_BARS">Vertical Bars</option>
+                                        </select>
+                                    </label>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label w-100">
+                                        Fill Color:
+                                        <input type="color" name="fill_color" value="#000000" class="form-control">
+                                    </label>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label w-100">
+                                        Background Color:
+                                        <input type="color" name="back_color" value="#FFFFFF" class="form-control">
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Second row with Embedded Image -->
+                            <div class="mb-3">
+                                <label class="form-label w-100">
+                                    Embedded Image:
+                                    <input type="file" name="embedded_image" class="form-control" accept="image/*">
+                                </label>
+                            </div>
+
+                            <!-- Third row with Embedded Image Size -->
+                            <div class="mb-3">
+                                <label class="form-label w-100">
+                                    Embedded Image Size (10-50%):
+                                    <input type="range" name="embedded_image_ratio" class="form-range" min="0.1" max="0.5" step="0.05" value="0.15">
+                                    <span class="embedded-image-ratio-value">15%</span>
+                                </label>
+                            </div>
+
+                            <input type="hidden" name="color_mask" value="SOLID_FILL">
+                        </div>
+
                         <!-- URL Input Section -->
                         <div id="input-url" class="input-section" style="display: none;">
                             <label class="form-label mb-3 w-100">
                                 <span class="text-danger">*</span> URL:
                                 <input type="text" name="url" placeholder="https://example.com" class="form-control w-100">
                             </label>
+                            <!-- Design Components will be moved here by JavaScript -->
                         </div>
 
                         <!-- Email Input Section -->
@@ -111,50 +163,7 @@
                                 <span class="text-danger">*</span>Text:
                                 <textarea type="text" name="text" placeholder="Enter Text" class="form-control w-100" rows="4"></textarea>
                             </label>
-
-                            <label class="form-label mb-3 w-100">
-                                Style:
-                                <select name="style" class="form-select">
-                                    <option value="SQUARE_MODULE">Square</option>
-                                    <option value="GAPPED_SQUARE_MODULE">Gapped Square</option>
-                                    <option value="CIRCLE_MODULE">Circle</option>
-                                    <option value="ROUNDED_MODULE">Rounded</option>
-                                    <option value="HORIZONTAL_BARS">Horizontal Bars</option>
-                                    <option value="VERTICAL_BARS">Vertical Bars</option>
-                                </select>
-                            </label>
-
-                            <label class="form-label mb-3 w-100">
-                                Fill Color:
-                                <input type="color" name="fill_color" value="#000000" class="form-control">
-                            </label>
-
-                            <label class="form-label mb-3 w-100">
-                                Background Color:
-                                <input type="color" name="back_color" value="#FFFFFF" class="form-control">
-                            </label>
-
-                            <label class="form-label mb-3 w-100">
-                                Color Mask:
-                                <select name="color_mask" class="form-select">
-                                    <option value="SOLID_FILL">Solid Fill</option>
-                                    <option value="RADIAL_GRADIANT">Radial Gradient</option>
-                                    <option value="SQUARE_GRADIANT">Square Gradient</option>
-                                    <option value="HORIZONTAL_GRADIANT">Horizontal Gradient</option>
-                                    <option value="VERTICAL_GRADIANT">Vertical Gradient</option>
-                                </select>
-                            </label>
-
-                            <label class="form-label mb-3 w-100">
-                                Embedded Image:
-                                <input type="file" name="embedded_image" class="form-control" accept="image/*">
-                            </label>
-
-                            <label class="form-label mb-3 w-100">
-                                Embedded Image Size (10-50%):
-                                <input type="range" name="embedded_image_ratio" class="form-range" min="0.1" max="0.5" step="0.05" value="0.25">
-                                <span class="embedded-image-ratio-value">25%</span>
-                            </label>
+                            <!-- Design Components will be moved here by JavaScript -->
                         </div>
 
                         <!-- Phone Number Input Section -->
@@ -334,7 +343,7 @@
                         </div>
 
                         <!-- Submit Button -->
-                        <button type="submit">Generate QR Code</button>
+                        <button type="submit" class="btn btn-primary">Generate QR Code</button>
                     </form>
                 </div>
             </div>
@@ -384,14 +393,29 @@
                 // Show the corresponding input section
                 $(`#input-${selectedType}`).show();
 
-                // Enable/disable form fields
-                $inputSections.find('input, select, textarea').prop('disabled', true);
-                $(`#input-${selectedType}`).find('input, select, textarea').prop('disabled', false);
+                // Enable/disable form fields (excluding design components)
+                $inputSections.find('input:not([name^="style"]):not([name="fill_color"]):not([name="back_color"]):not([name="embedded_image"]):not([name="embedded_image_ratio"]), select:not([name="style"]), textarea').prop('disabled', true);
+                $(`#input-${selectedType}`).find('input:not([name^="style"]):not([name="fill_color"]):not([name="back_color"]):not([name="embedded_image"]):not([name="embedded_image_ratio"]), select:not([name="style"]), textarea').prop('disabled', false);
 
                 // Set required fields
                 $(`#input-${selectedType}`).find('input[required], textarea[required]').prop('required', true);
 
+                // Move design components
+                moveDesignComponents();
+
                 console.log('Selected type:', selectedType); // Debug log
+            }
+
+            // Function to move design components
+            function moveDesignComponents() {
+                const $designComponents = $('.qr-style-options');
+                const $activeSection = $(`#input-${$('input[name="qr_type"]:checked').val()}`);
+
+                // Ensure design components are enabled
+                $designComponents.find('input, select').prop('disabled', false);
+
+                // Move the components
+                $designComponents.appendTo($activeSection);
             }
 
             // Initial show/hide on page load

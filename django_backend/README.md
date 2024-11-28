@@ -24,3 +24,9 @@ pip install -r requirements.txt
 ## Test
 
 - run integration tests: `python test/run_integration_tests.py`
+
+### Cypress
+
+- cypress 설치: `npm install cypress --save-dev`
+1. django 서버를 실행한다.(`python manage.py runserver`)
+2. cypress 실행한다. `npx cypress open`
