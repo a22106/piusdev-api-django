@@ -349,7 +349,11 @@ def generate_vcard_qr(
         raise
 
 
-def generate_wifi_qr(ssid: str, password: str, encryption: str = "WPA", hidden: bool = False,
+def generate_wifi_qr(
+    ssid: str,
+    password: str = "",
+    encryption: str = "WPA",
+    hidden: bool = False,
     style: Type[QRStyles] = QRStyles.SQUARE_MODULE,
     fill_color: str = "black",
     back_color: str = "white",
@@ -358,25 +362,52 @@ def generate_wifi_qr(ssid: str, password: str, encryption: str = "WPA", hidden: 
     embedded_image_ratio: float = 0.25
 ) -> bytes:
     """
-    Generate a QR code for WiFi configuration.
+    WiFi 설정을 위한 QR 코드 생성
 
     Args:
-        ssid (str): The WiFi SSID.
-        password (str): The WiFi password.
-        encryption (str, optional): The encryption type ('WPA', 'WEP', 'none'). Defaults to "WPA".
+        ssid (str): WiFi SSID
+        password (str, optional): WiFi 비밀번호. 기본값은 ""
+        encryption (str, optional): 암호화 유형 ('WPA', 'WEP', 'none'). 기본값은 "WPA"
+        hidden (bool, optional): 숨겨진 네트워크 여부. 기본값은 False
+        style (QRStyles): QR 코드 스타일
+        fill_color (str): QR 코드 패턴 색상
+        back_color (str): 배경색
+        color_mask (QRColorMasks): 색상 마스크 유형
+        embedded_image (PIL.Image): 중앙에 삽입할 이미지
+        embedded_image_ratio (float): 삽입 이미지 크기 비율
 
     Returns:
-        bytes: The generated QR code image in PNG format.
+        bytes: 생성된 QR 코드 이미지(PNG 포맷)
     """
     try:
-        if encryption.lower() == "none":
-            wifi = f"WIFI:T:;S:{ssid};P:{password};;"
-        else:
-            wifi = f"WIFI:T:{encryption};S:{ssid};P:{password};;"
-        if hidden:
-            wifi += "H:true;"
+        # WiFi 문자열 생성
+        wifi_string = "WIFI:"
 
-        return create_qr_code(wifi, version=2,
+        # 암호화 설정
+        if encryption.lower() == "none":
+            wifi_string += "T:nopass;"
+        else:
+            wifi_string += f"T:{encryption};"
+
+        # SSID 추가
+        wifi_string += f"S:{ssid};"
+
+        # 비밀번호가 있는 경우에만 추가
+        if password:
+            wifi_string += f"P:{password};"
+
+        # 숨겨진 네트워크 설정
+        if hidden:
+            wifi_string += "H:true;"
+
+        # 마지막 세미콜론 추가
+        wifi_string += ";"
+
+        logger.debug(f"Generated WiFi string: {wifi_string}")  # 디버깅용 로그
+
+        return create_qr_code(
+            wifi_string,
+            version=2,
             style=style,
             fill_color=fill_color,
             back_color=back_color,
@@ -389,7 +420,9 @@ def generate_wifi_qr(ssid: str, password: str, encryption: str = "WPA", hidden: 
         raise
 
 
-def generate_sms_qr(phone_number: str, message: str,
+def generate_sms_qr(
+    phone_number: str,
+    message: str = "",  # message를 선택적 매개변수로 변경
     style: Type[QRStyles] = QRStyles.SQUARE_MODULE,
     fill_color: str = "black",
     back_color: str = "white",
@@ -401,21 +434,38 @@ def generate_sms_qr(phone_number: str, message: str,
     Generate a QR code for an SMS message.
 
     Args:
-        phone_number (str): The phone number.
-        message (str): The SMS message.
+        phone_number (str): 전화번호
+        message (str, optional): SMS 메시지. 기본값은 ""
+        style (QRStyles): QR 코드 스타일
+        fill_color (str): QR 코드 패턴 색상
+        back_color (str): 배경색
+        color_mask (QRColorMasks): 색상 마스크 유형
+        embedded_image (PIL.Image): 중앙에 삽입할 이미지
+        embedded_image_ratio (float): 삽입 이미지 크기 비율
 
     Returns:
-        bytes: The generated QR code image in PNG format.
+        bytes: 생성된 QR 코드 이미지(PNG 포맷)
     """
-    sms = f"SMSTO:{phone_number}:{message}"
-    return create_qr_code(sms,
-        style=style,
-        fill_color=fill_color,
-        back_color=back_color,
-        color_mask=color_mask,
-        embedded_image=embedded_image,
-        embedded_image_ratio=embedded_image_ratio
-    )
+    try:
+        # SMS 문자열 생성
+        sms = f"SMSTO:{phone_number}"
+        if message:  # 메시지가 있는 경우에만 추가
+            sms += f":{message}"
+
+        logger.debug(f"Generated SMS string: {sms}")  # 디버깅용 로그
+
+        return create_qr_code(
+            sms,
+            style=style,
+            fill_color=fill_color,
+            back_color=back_color,
+            color_mask=color_mask,
+            embedded_image=embedded_image,
+            embedded_image_ratio=embedded_image_ratio
+        )
+    except Exception as e:
+        logger.error(f"Error creating SMS QR Code: {e}")
+        raise
 
 
 def generate_geo_qr(

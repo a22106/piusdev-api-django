@@ -63,32 +63,37 @@ class IndexView(TemplateView):
 @method_decorator(csrf_exempt, name='dispatch')
 class BaseQrView(APIView):
     def validate_common_params(self, request: Request):
-        style = request.data.get("style", "SQUARE_MODULE")
-        fill_color = request.data.get("fill_color", "black")
-        back_color = request.data.get("back_color", "white")
-        color_mask = request.data.get("color_mask", "SOLID_FILL")
-        embedded_image_ratio = float(request.data.get("embedded_image_ratio", 0.25))
-
-        if not (0.1 <= embedded_image_ratio <= 0.5):
-            raise ValueError("embedded_image_ratio must be between 0.1 and 0.5")
-
+        """공통 파라미터 검증"""
         try:
-            style = QRStyles[style]
-        except KeyError:
-            raise ValueError("Invalid style parameter.")
+            style = request.data.get("style", "SQUARE_MODULE")
+            fill_color = request.data.get("fill_color", "black")
+            back_color = request.data.get("back_color", "white")
+            color_mask = request.data.get("color_mask", "SOLID_FILL")
+            embedded_image_ratio = float(request.data.get("embedded_image_ratio", 0.25))
 
-        try:
-            color_mask = QRColorMasks[color_mask]
-        except KeyError:
-            raise ValueError("Invalid color_mask parameter.")
+            if not (0.1 <= embedded_image_ratio <= 0.5):
+                raise ValueError("embedded_image_ratio must be between 0.1 and 0.5")
 
-        return {
-            "style": style,
-            "fill_color": fill_color,
-            "back_color": back_color,
-            "color_mask": color_mask,
-            "embedded_image_ratio": embedded_image_ratio
-        }
+            try:
+                style = QRStyles[style]
+            except KeyError:
+                raise ValueError(f"Invalid style parameter: {style}")
+
+            try:
+                color_mask = QRColorMasks[color_mask]
+            except KeyError:
+                raise ValueError(f"Invalid color_mask parameter: {color_mask}")
+
+            return {
+                "style": style,
+                "fill_color": fill_color,
+                "back_color": back_color,
+                "color_mask": color_mask,
+                "embedded_image_ratio": embedded_image_ratio
+            }
+        except Exception as e:
+            logger.error(f"Parameter validation error: {str(e)}")
+            raise ValueError(str(e))
 
     def process_embedded_image(self, request: Request):
         embedded_image = None
@@ -103,42 +108,62 @@ class BaseQrView(APIView):
     def handle_qr_generation(self, request: Request, generator_func, required_params):
         """QR 코드 생성 템플릿 메서드"""
         try:
+            # 요청 데이터 로깅
+            logger.debug(f"Request data: {request.data}")
+
             # 1. 필요 파라미터 검증
-            for param in required_params:
-                if not request.data.get(param):
-                    return JsonResponse(
-                        {"detail": f"{param} parameter is required."},
-                        status=400
-                    )
+            missing_params = [param for param in required_params if not request.data.get(param)]
+            if missing_params:
+                return JsonResponse(
+                    {"detail": f"Missing required parameters: {', '.join(missing_params)}"},
+                    status=400
+                )
 
             # 2. 공통 파라미터
-            common_params = self.validate_common_params(request)
+            try:
+                common_params = self.validate_common_params(request)
+            except ValueError as e:
+                return JsonResponse({"detail": str(e)}, status=400)
 
             # 3. 임베드 이미지
-            embedded_image = self.process_embedded_image(request)
+            try:
+                embedded_image = self.process_embedded_image(request)
+            except ValueError as e:
+                return JsonResponse({"detail": str(e)}, status=400)
 
-            # 4. QR 코드 생성
-            qr_image = generator_func(
-                **{k: request.data.get(k) for k in required_params},
-                **common_params,
-                embedded_image=embedded_image
-            )
+            # 4. 요청 파라미터 준비
+            generator_params = {k: request.data.get(k) for k in required_params}
+            generator_params.update(common_params)
+            generator_params['embedded_image'] = embedded_image
 
-            # QR 코드 생성 후 로깅 추가
-            logger.info(f"Generated QR code size: {len(qr_image)} bytes")
-            logger.debug(f"QR code parameters: {common_params}")
+            # 파라미터 로깅
+            logger.debug(f"Generator parameters: {generator_params}")
 
-            # 수정된 부분: Content-Length 헤더 추가
+            # 5. QR 코드 생성
+            qr_image = generator_func(**generator_params)
+
+            if not qr_image:
+                raise ValueError("Failed to generate QR code")
+
+            # 6. 응답 생성
             response = HttpResponse(qr_image, content_type="image/png")
             response['Content-Length'] = len(qr_image)
             response['Content-Disposition'] = 'inline; filename="qr-code.png"'
+
+            # 성공 로깅
+            logger.info(f"Successfully generated QR code: {len(qr_image)} bytes")
+
             return response
 
         except ValueError as e:
+            logger.error(f"Validation error: {str(e)}")
             return JsonResponse({"detail": str(e)}, status=400)
         except Exception as e:
-            logger.error(f"Error generating QR Code: {e}")
-            return JsonResponse({"detail": "Error generating QR Code."}, status=500)
+            logger.error(f"Unexpected error generating QR Code: {str(e)}")
+            return JsonResponse(
+                {"detail": "An unexpected error occurred while generating the QR Code."},
+                status=500
+            )
 
 class QrVcardView(BaseQrView):
     @qr_swagger_decorator(
@@ -187,7 +212,7 @@ class QrEmailView(BaseQrView):
         }
     )
     def post(self, request):
-        return self.handle_qr_generation(request, generate_email_qr, ["email", "subject", "body"])
+        return self.handle_qr_generation(request, generate_email_qr, ["email"])
 
 
 class QrTextView(BaseQrView):
@@ -223,7 +248,7 @@ class QrWifiView(BaseQrView):
         }
     )
     def post(self, request):
-        return self.handle_qr_generation(request, generate_wifi_qr, ["ssid", "password", "encryption"])
+        return self.handle_qr_generation(request, generate_wifi_qr, ["ssid"])
 
 
 class QrSmsView(BaseQrView):
@@ -235,7 +260,7 @@ class QrSmsView(BaseQrView):
         }
     )
     def post(self, request):
-        return self.handle_qr_generation(request, generate_sms_qr, ["phone_number", "message"])
+        return self.handle_qr_generation(request, generate_sms_qr, ["phone_number"])
 
 
 class QrGeoView(BaseQrView):
@@ -248,11 +273,11 @@ class QrGeoView(BaseQrView):
             "zoom": openapi.Schema(type=openapi.TYPE_INTEGER, description='Zoom level'),
         }
     )
-    def post(self, request: Request):
+    def post(self, request):
         return self.handle_qr_generation(
             request,
             generate_geo_qr,
-            ["latitude", "longitude", "query", "zoom"]
+            ["latitude", "longitude"]
         )
 
 
@@ -307,7 +332,7 @@ class QrWhatsAppView(BaseQrView):
         }
     )
     def post(self, request):
-        return self.handle_qr_generation(request, generate_whatsapp_qr, ["phone_number", "message"])
+        return self.handle_qr_generation(request, generate_whatsapp_qr, ["phone_number"])
 
 
 class QrBitcoinView(BaseQrView):
@@ -322,7 +347,8 @@ class QrBitcoinView(BaseQrView):
     )
     def post(self, request):
         return self.handle_qr_generation(
-            request, generate_bitcoin_qr, ["address", "amount", "label", "message"])
+            request, generate_bitcoin_qr, ["address", "amount", "label", "message"]
+        )
 
 
 ## 테스트 뷰
