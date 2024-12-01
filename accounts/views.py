@@ -154,3 +154,11 @@ class VerifyEmailView(View):
         else:
             messages.error(request, "Email verification failed.")
             return redirect("/")
+
+class CheckAuthStatusView(View):
+    def get(self, request: HttpRequest):
+        print(request.user)
+        return JsonResponse({
+            "is_authenticated": request.user.is_authenticated,
+            "user_email": request.user.email if request.user.is_authenticated else None,
+        })
