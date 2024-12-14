@@ -266,7 +266,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # During testing, we should use a different storage backend
 import sys
-if 'test' in sys.argv:
+if 'test' in sys.argv or DEBUG:
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 else:
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
