@@ -14,8 +14,8 @@ from rest_framework.request import Request
 
 from rest_framework.views import APIView
 
-from qr.decorators import qr_swagger_decorator
-from qr.utils.qr_utils import (
+from apps.qr.decorators import qr_swagger_decorator
+from apps.qr.utils.qr_utils import (
     QRColorMasks,
     QRStyles,
     generate_url_qr,

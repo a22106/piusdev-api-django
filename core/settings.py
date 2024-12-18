@@ -65,8 +65,9 @@ DEFAULT_FROM_EMAIL = "no-reply@piusdev.com"
 # Application definition
 INSTALLED_APPS = [
     "core",
-    "accounts",
-    "qr",
+    "apps.accounts",
+    "apps.qr",
+    "apps.home",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -81,7 +82,7 @@ INSTALLED_APPS = [
 ]
 
 AUTHENTICATION_BACKENDS = [
-    'accounts.backends.CustomAuthBackend',
+    'apps.accounts.backends.CustomAuthBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
 
@@ -89,7 +90,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
-    "accounts.middleware.AuthMiddleware",
+    "apps.accounts.middleware.AuthMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
