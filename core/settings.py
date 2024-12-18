@@ -217,9 +217,6 @@ except OperationalError:
     print("데이터베이스 연결 실패")
     sys.exit(1)
 
-# Whitenoise configuration for serving static files
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
 # Session settings
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", "False") == "True"
@@ -265,7 +262,8 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # During testing, we should use a different storage backend
 import sys
-if 'test' in sys.argv:
+if 'test' in sys.argv or DEBUG:
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 else:
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
