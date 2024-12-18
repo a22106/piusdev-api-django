@@ -24,11 +24,13 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path("pius_hwang/", admin.site.urls),
-    path("", include("apps.qr.urls", namespace="qr")),
-    path("", include("django_cypress.urls")),
+    path("", include("apps.home.urls", namespace="home")),
+    path("qr/", include("apps.qr.urls", namespace="qr")),
     # API Documentation
     path("api/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
     path("auth/", include("apps.accounts.urls", namespace="accounts")),
+    # 통합 테스트
+    path("", include("django_cypress.urls")),
 ]
 
 if settings.DEBUG:
