@@ -22,5 +22,5 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path("api/", schema_view.with_ui("redoc", cache_timeout=0), name="api"),
-    path("", views.IndexView.as_view(), name="index"),
+    path("", views.HomeView.as_view(), name="index"),
 ]

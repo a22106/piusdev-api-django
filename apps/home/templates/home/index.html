@@ -205,7 +205,8 @@
                 </div>
                 <div class="card-body text-center">
                     <div id="qr-preview">
-                        <p class="text-muted">QR code will appear here</p>
+                        <!-- 초기 QR 코드 이미지 표시 -->
+                        <img src="{% static 'images/initial_qrcode.png' %}" class="img-fluid" alt="Initial QR Code">
                     </div>
                     <div class="mt-3">
                         <a id="download-png" class="btn btn-primary d-none" download="qr-code.png">

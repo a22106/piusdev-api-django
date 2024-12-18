@@ -1,6 +1,5 @@
 # qr/views.py
-from django.views.generic import TemplateView
-from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse
 from PIL import Image
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -31,7 +30,6 @@ from apps.qr.utils.qr_utils import (
     generate_event_qr,
     generate_geo_qr,
 )
-
 
 logger = logging.getLogger(__name__)
 
