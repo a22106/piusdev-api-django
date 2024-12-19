@@ -13,7 +13,6 @@ whitenoise
 # Django
 django-admin-berry
 django_plotly_dash
-django-bootstrap-v5
 django-qr-code
 django-debug-toolbar
 django-configurations

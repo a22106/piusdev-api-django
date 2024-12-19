@@ -1,10 +1,19 @@
 venv/
 .pytest_cache/
 config/*.py
+staticfiles/
 
 tests/*.ipynb
 tests/*.png
 
+!staticfiles/.gitkeep
+!staticfiles/staticfiles.json
+
+# Test
+## Cypress
+cypress/videos/
+cypress/screenshots/
+node_modules/
 
 # Created by https://www.gitignore.io
 
@@ -95,8 +104,3 @@ local_settings.py
 
 .env
 db.sqlite3
-
-# Cypress
-cypress/videos/
-cypress/screenshots/
-node_modules/
