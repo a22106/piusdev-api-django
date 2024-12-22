@@ -2,6 +2,7 @@
 from enum import Enum
 from io import BytesIO
 import logging
+import traceback
 import urllib.parse
 from PIL import Image, ImageColor
 
@@ -45,10 +46,10 @@ class QRStyles(Enum):
 
 class QRColorMasks(Enum):
     SOLID_FILL = 1
-    RADIAL_GRADIENT = 2
-    SQUARE_GRADIENT = 3
-    HORIZONTAL_GRADIENT = 4
-    VERTICAL_GRADIENT = 5
+    RADIAL_GRADIANT = 2
+    SQUARE_GRADIANT = 3
+    HORIZONTAL_GRADIANT = 4
+    VERTICAL_GRADIANT = 5
 
 
 def _get_module_drawer(style: Type[QRStyles]):
@@ -66,14 +67,14 @@ def _get_module_drawer(style: Type[QRStyles]):
 
 def _get_color_mask(mask_type: Type[QRColorMasks]):
     mask_map = {
-        QRColorMasks.SOLID_FILL: SolidFillColorMask(),
-        QRColorMasks.RADIAL_GRADIENT: RadialGradiantColorMask(),
-        QRColorMasks.SQUARE_GRADIENT: SquareGradiantColorMask(),
-        QRColorMasks.HORIZONTAL_GRADIENT: HorizontalGradiantColorMask(),
-        QRColorMasks.VERTICAL_GRADIENT: VerticalGradiantColorMask(),
+        QRColorMasks.SOLID_FILL: SolidFillColorMask,
+        QRColorMasks.RADIAL_GRADIANT: RadialGradiantColorMask,
+        QRColorMasks.SQUARE_GRADIANT: SquareGradiantColorMask,
+        QRColorMasks.HORIZONTAL_GRADIANT: HorizontalGradiantColorMask,
+        QRColorMasks.VERTICAL_GRADIANT: VerticalGradiantColorMask,
     }
 
-    result = mask_map.get(mask_type, SolidFillColorMask())
+    result = mask_map.get(mask_type, SolidFillColorMask)
     return result
 
 
@@ -111,16 +112,41 @@ def create_qr_code(
         qr.add_data(data)
         qr.make(fit=True)  # fit=True: QR code Version(size)를 자동으로 조절
 
+        # 색상을 RGB 튜플로 변환
+        fill_rgb = _convert_color_to_rgb(fill_color)
+        back_rgb = _convert_color_to_rgb(back_color)
+        mask_class = _get_color_mask(color_mask)
+
+        # Color Mask 인스턴스 생성 로직 수정
+        if color_mask == QRColorMasks.SOLID_FILL:
+            color_mask_instance = SolidFillColorMask(
+                front_color=fill_rgb,
+                back_color=back_rgb
+            )
+        elif color_mask ==QRColorMasks.HORIZONTAL_GRADIANT:
+            color_mask_instance = mask_class(
+                back_color=back_rgb,
+                left_color=fill_rgb,
+                right_color=back_rgb
+            )
+        elif color_mask == QRColorMasks.VERTICAL_GRADIANT:
+            color_mask_instance = mask_class(
+                back_color=back_rgb,
+                bottom_color=fill_rgb,
+                top_color=back_rgb
+            )
+        else:  # RADIAL_GRADIANT, SQUARE_GRADIANT
+            mask_class = RadialGradiantColorMask if color_mask == QRColorMasks.RADIAL_GRADIANT else SquareGradiantColorMask
+            color_mask_instance = mask_class(
+                back_color=back_rgb,
+                center_color=fill_rgb,
+                edge_color=back_rgb
+            )
+
+
+
+        # QR 코드 이미지 생성
         module_drawer = _get_module_drawer(style)
-        color_mask_instance = _get_color_mask(color_mask)
-
-        # 색상 문자열을 RGB 튜플로 변환
-        fill_color_rgb = _convert_color_to_rgb(fill_color)
-        back_color_rgb = _convert_color_to_rgb(back_color)
-
-        color_mask_instance.back_color = back_color_rgb
-        color_mask_instance.front_color = fill_color_rgb
-
         img = qr.make_image(
             image_factory=StyledPilImage,
             module_drawer=module_drawer,
@@ -129,10 +155,13 @@ def create_qr_code(
             embeded_image_ratio=embedded_image_ratio if embedded_image else 0,
         )
 
+        # 이미지를 바이트로 변환
         buffer = BytesIO()
         img.save(buffer, format="PNG")
         return buffer.getvalue()
+
     except Exception as e:
+        traceback.print_exc()
         logger.error(f"Error creating QR Code: {e}")
         raise
 
