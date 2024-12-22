@@ -5,6 +5,23 @@
 <div class="container mt-4">
     <div class="row">
         <div class="col-md-8">
+            <!-- QR Common Options Card -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#commonQrOptions">
+                        QR Code Options
+                    </button>
+                </div>
+                <div id="commonQrOptions" class="collapse">
+                    <div class="card-body">
+                        <form id="commonOptionsForm">
+                            {% include 'home/qr_common_fields.html' with form=url_form %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main QR Code Card -->
             <div class="card">
                 <div class="card-header">
                     <ul class="nav nav-tabs card-header-tabs" role="tablist">
@@ -42,9 +59,8 @@
                                 {% csrf_token %}
                                 <div class="mb-3">
                                     <label class="form-label"><span class="text-danger">*</span> URL:</label>
-                                    <input type="url" name="url" class="form-control" placeholder="https://example.com" required>
+                                    {{ url_form.url }}
                                 </div>
-                                {% include 'home/qr_common_options.html' %}
                                 <button type="submit" class="btn btn-primary">Generate QR Code</button>
                             </form>
                         </div>
@@ -55,9 +71,8 @@
                                 {% csrf_token %}
                                 <div class="mb-3">
                                     <label class="form-label"><span class="text-danger">*</span> Text:</label>
-                                    <textarea name="text" class="form-control" rows="3" required></textarea>
+                                    {{ text_form.text }}
                                 </div>
-                                {% include 'home/qr_common_options.html' %}
                                 <button type="submit" class="btn btn-primary">Generate QR Code</button>
                             </form>
                         </div>
@@ -68,17 +83,16 @@
                                 {% csrf_token %}
                                 <div class="mb-3">
                                     <label class="form-label"><span class="text-danger">*</span> Email:</label>
-                                    <input type="email" name="email" class="form-control" required>
+                                    {{ email_form.email }}
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Subject:</label>
-                                    <input type="text" name="subject" class="form-control">
+                                    {{ email_form.subject }}
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Body:</label>
-                                    <textarea name="body" class="form-control" rows="3"></textarea>
+                                    {{ email_form.body }}
                                 </div>
-                                {% include 'home/qr_common_options.html' %}
                                 <button type="submit" class="btn btn-primary">Generate QR Code</button>
                             </form>
                         </div>
@@ -87,12 +101,10 @@
                         <div class="tab-pane fade" id="phone" role="tabpanel">
                             <form action="{% url 'qr:qr_phone_number_v1' %}" method="post" enctype="multipart/form-data" class="qr-form">
                                 {% csrf_token %}
-                                <div class="col-md mb-3">
-                                    <label class="form-label w-100">
-                                        <span class="text-danger">*</span> Phone Number: <input type="text" name="phone_number" placeholder="+11001001000" class="form-control w-100" required>
-                                    </label>
+                                <div class="mb-3">
+                                    <label class="form-label"><span class="text-danger">*</span> Phone Number:</label>
+                                    {{ phone_form.phone_number }}
                                 </div>
-                                {% include 'home/qr_common_options.html' %}
                                 <button type="submit" class="btn btn-primary">Generate QR Code</button>
                             </form>
                         </div>
@@ -101,16 +113,14 @@
                         <div class="tab-pane fade" id="sms" role="tabpanel">
                             <form action="{% url 'qr:qr_sms_v1' %}" method="post" enctype="multipart/form-data" class="qr-form">
                                 {% csrf_token %}
-                                <div class="col-md mb-3">
-                                    <label class="form-label w-100">
-                                        <span class="text-danger">*</span> Phone Number: <input type="text" name="phone_number" placeholder="+11001001000" class="form-control w-100" required>
-                                    </label>
+                                <div class="mb-3">
+                                    <label class="form-label"><span class="text-danger">*</span> Phone Number:</label>
+                                    {{ sms_form.phone_number }}
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Message:</label>
-                                    <textarea name="message" class="form-control" rows="3"></textarea>
+                                    {{ sms_form.message }}
                                 </div>
-                                {% include 'home/qr_common_options.html' %}
                                 <button type="submit" class="btn btn-primary">Generate QR Code</button>
                             </form>
                         </div>
@@ -119,16 +129,14 @@
                         <div class="tab-pane fade" id="whatsapp" role="tabpanel">
                             <form action="{% url 'qr:qr_whatsapp_v1' %}" method="post" enctype="multipart/form-data" class="qr-form">
                                 {% csrf_token %}
-                                <div class="col-md mb-3">
-                                    <label class="form-label w-100">
-                                        <span class="text-danger">*</span> Phone Number: <input type="text" name="phone_number" placeholder="+11001001000" class="form-control w-100" required>
-                                    </label>
+                                <div class="mb-3">
+                                    <label class="form-label"><span class="text-danger">*</span> Phone Number:</label>
+                                    {{ whatsapp_form.phone_number }}
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Message:</label>
-                                    <textarea name="message" class="form-control" rows="3"></textarea>
+                                    {{ whatsapp_form.message }}
                                 </div>
-                                {% include 'home/qr_common_options.html' %}
                                 <button type="submit" class="btn btn-primary">Generate QR Code</button>
                             </form>
                         </div>
@@ -139,29 +147,24 @@
                                 {% csrf_token %}
                                 <div class="mb-3">
                                     <label class="form-label"><span class="text-danger">*</span> Network Name (SSID):</label>
-                                    <input type="text" name="ssid" class="form-control" required>
+                                    {{ wifi_form.ssid }}
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Password:</label>
-                                    <input type="password" name="password" class="form-control">
+                                    {{ wifi_form.password }}
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Encryption:</label>
-                                    <select name="encryption" class="form-select">
-                                        <option value="WPA">WPA/WPA2</option>
-                                        <option value="WEP">WEP</option>
-                                        <option value="nopass">None</option>
-                                    </select>
+                                    {{ wifi_form.encryption }}
                                 </div>
                                 <div class="mb-3">
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="hidden" value="true" id="hidden">
-                                        <label class="form-check-label" for="hidden">
+                                        {{ wifi_form.hidden }}
+                                        <label class="form-check-label" for="{{ wifi_form.hidden.id_for_label }}">
                                             Hidden Network
                                         </label>
                                     </div>
                                 </div>
-                                {% include 'home/qr_common_options.html' %}
                                 <button type="submit" class="btn btn-primary">Generate QR Code</button>
                             </form>
                         </div>
@@ -173,34 +176,33 @@
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label"><span class="text-danger">*</span> First Name:</label>
-                                        <input type="text" name="first_name" class="form-control" required>
+                                        {{ vcard_form.first_name }}
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label"><span class="text-danger">*</span> Last Name:</label>
-                                        <input type="text" name="last_name" class="form-control" required>
+                                        {{ vcard_form.last_name }}
                                     </div>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label"><span class="text-danger">*</span> Email:</label>
-                                    <input type="email" name="vcard_email" class="form-control" required>
+                                    {{ vcard_form.vcard_email }}
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label"><span class="text-danger">*</span> Phone:</label>
-                                    <input type="tel" name="vcard_mobile" class="form-control" required>
+                                    {{ vcard_form.vcard_mobile }}
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Company:</label>
-                                    <input type="text" name="organization" class="form-control">
+                                    {{ vcard_form.organization }}
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Job Title:</label>
-                                    <input type="text" name="job_title" class="form-control">
+                                    {{ vcard_form.job_title }}
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Website:</label>
-                                    <input type="url" name="vcard_url" class="form-control">
+                                    {{ vcard_form.vcard_url }}
                                 </div>
-                                {% include 'home/qr_common_options.html' %}
                                 <button type="submit" class="btn btn-primary">Generate QR Code</button>
                             </form>
                         </div>
