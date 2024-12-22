@@ -16,8 +16,9 @@ class HomeView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-                # 국가 코드 리스트
 
-        context["countries"] = countries
+
+
+        context["countries"] = get_country_choices()
         context['debug'] = settings.DEBUG
         return context

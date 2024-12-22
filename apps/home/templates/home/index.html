@@ -38,33 +38,33 @@
                     <div class="tab-content">
                         <!-- URL QR Code -->
                         <div class="tab-pane fade show active" id="url" role="tabpanel">
-                            <form action="{% url 'qr:url' %}" method="post" enctype="multipart/form-data" class="qr-form">
+                            <form action="{% url 'qr:qr_url_v1' %}" method="post" enctype="multipart/form-data" class="qr-form">
                                 {% csrf_token %}
                                 <div class="mb-3">
                                     <label class="form-label"><span class="text-danger">*</span> URL:</label>
                                     <input type="url" name="url" class="form-control" placeholder="https://example.com" required>
                                 </div>
-                                {% include 'home/qr_common_options.html' %}
+                                {% include 'qr/qr_common_options.html' %}
                                 <button type="submit" class="btn btn-primary">Generate QR Code</button>
                             </form>
                         </div>
 
                         <!-- Text QR Code -->
                         <div class="tab-pane fade" id="text" role="tabpanel">
-                            <form action="{% url 'qr:text' %}" method="post" enctype="multipart/form-data" class="qr-form">
+                            <form action="{% url 'qr:qr_text_v1' %}" method="post" enctype="multipart/form-data" class="qr-form">
                                 {% csrf_token %}
                                 <div class="mb-3">
                                     <label class="form-label"><span class="text-danger">*</span> Text:</label>
                                     <textarea name="text" class="form-control" rows="3" required></textarea>
                                 </div>
-                                {% include 'home/qr_common_options.html' %}
+                                {% include 'qr/qr_common_options.html' %}
                                 <button type="submit" class="btn btn-primary">Generate QR Code</button>
                             </form>
                         </div>
 
                         <!-- Email QR Code -->
                         <div class="tab-pane fade" id="email" role="tabpanel">
-                            <form action="{% url 'qr:email' %}" method="post" enctype="multipart/form-data" class="qr-form">
+                            <form action="{% url 'qr:qr_email_v1' %}" method="post" enctype="multipart/form-data" class="qr-form">
                                 {% csrf_token %}
                                 <div class="mb-3">
                                     <label class="form-label"><span class="text-danger">*</span> Email:</label>
@@ -78,52 +78,52 @@
                                     <label class="form-label">Body:</label>
                                     <textarea name="body" class="form-control" rows="3"></textarea>
                                 </div>
-                                {% include 'home/qr_common_options.html' %}
+                                {% include 'qr/qr_common_options.html' %}
                                 <button type="submit" class="btn btn-primary">Generate QR Code</button>
                             </form>
                         </div>
 
                         <!-- Phone QR Code -->
                         <div class="tab-pane fade" id="phone" role="tabpanel">
-                            <form action="{% url 'qr:phone' %}" method="post" enctype="multipart/form-data" class="qr-form">
+                            <form action="{% url 'qr:qr_phone_number_v1' %}" method="post" enctype="multipart/form-data" class="qr-form">
                                 {% csrf_token %}
-                                {% include 'home/input_phone.html' %}
-                                {% include 'home/qr_common_options.html' %}
+                                {% include 'qr/input_phone.html' %}
+                                {% include 'qr/qr_common_options.html' %}
                                 <button type="submit" class="btn btn-primary">Generate QR Code</button>
                             </form>
                         </div>
 
                         <!-- SMS QR Code -->
                         <div class="tab-pane fade" id="sms" role="tabpanel">
-                            <form action="{% url 'qr:sms' %}" method="post" enctype="multipart/form-data" class="qr-form">
+                            <form action="{% url 'qr:qr_sms_v1' %}" method="post" enctype="multipart/form-data" class="qr-form">
                                 {% csrf_token %}
-                                {% include 'home/input_phone.html' %}
+                                {% include 'qr/input_phone.html' %}
                                 <div class="mb-3">
                                     <label class="form-label">Message:</label>
                                     <textarea name="message" class="form-control" rows="3"></textarea>
                                 </div>
-                                {% include 'home/qr_common_options.html' %}
+                                {% include 'qr/qr_common_options.html' %}
                                 <button type="submit" class="btn btn-primary">Generate QR Code</button>
                             </form>
                         </div>
 
                         <!-- WhatsApp QR Code -->
                         <div class="tab-pane fade" id="whatsapp" role="tabpanel">
-                            <form action="{% url 'qr:whatsapp' %}" method="post" enctype="multipart/form-data" class="qr-form">
+                            <form action="{% url 'qr:qr_whatsapp_v1' %}" method="post" enctype="multipart/form-data" class="qr-form">
                                 {% csrf_token %}
-                                {% include 'home/input_phone.html' %}
+                                {% include 'qr/input_phone.html' %}
                                 <div class="mb-3">
                                     <label class="form-label">Message:</label>
                                     <textarea name="message" class="form-control" rows="3"></textarea>
                                 </div>
-                                {% include 'home/qr_common_options.html' %}
+                                {% include 'qr/qr_common_options.html' %}
                                 <button type="submit" class="btn btn-primary">Generate QR Code</button>
                             </form>
                         </div>
 
                         <!-- WiFi QR Code -->
                         <div class="tab-pane fade" id="wifi" role="tabpanel">
-                            <form action="{% url 'qr:wifi' %}" method="post" enctype="multipart/form-data" class="qr-form">
+                            <form action="{% url 'qr:qr_wifi_v1' %}" method="post" enctype="multipart/form-data" class="qr-form">
                                 {% csrf_token %}
                                 <div class="mb-3">
                                     <label class="form-label"><span class="text-danger">*</span> Network Name (SSID):</label>
@@ -149,14 +149,14 @@
                                         </label>
                                     </div>
                                 </div>
-                                {% include 'home/qr_common_options.html' %}
+                                {% include 'qr/qr_common_options.html' %}
                                 <button type="submit" class="btn btn-primary">Generate QR Code</button>
                             </form>
                         </div>
 
                         <!-- VCard QR Code -->
                         <div class="tab-pane fade" id="vcard" role="tabpanel">
-                            <form action="{% url 'qr:vcard' %}" method="post" enctype="multipart/form-data" class="qr-form">
+                            <form action="{% url 'qr:qr_vcard_v1' %}" method="post" enctype="multipart/form-data" class="qr-form">
                                 {% csrf_token %}
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
@@ -188,7 +188,7 @@
                                     <label class="form-label">Website:</label>
                                     <input type="url" name="vcard_url" class="form-control">
                                 </div>
-                                {% include 'home/qr_common_options.html' %}
+                                {% include 'qr/qr_common_options.html' %}
                                 <button type="submit" class="btn btn-primary">Generate QR Code</button>
                             </form>
                         </div>
@@ -206,7 +206,8 @@
                 <div class="card-body text-center">
                     <div id="qr-preview">
                         <!-- 초기 QR 코드 이미지 표시 -->
-                        <img src="{% static 'images/initial_qrcode.png' %}" class="img-fluid" alt="Initial QR Code">
+                        <img id="qr-code-preview" src="{% static 'images/initial_qrcode.png' %}" class="img-fluid" alt="Initial QR Code">
+                        <img id="qr-code" alt="QR Code" class="d-none" src="">
                     </div>
                     <div class="mt-3">
                         <a id="download-png" class="btn btn-primary d-none" download="qr-code.png">
@@ -223,94 +224,6 @@
 </div>
 
 {% block extra_js %}
-<script>
-$(document).ready(function() {
-    // Select2 초기화
-    $('.country-code-select').select2({
-        theme: 'bootstrap-5'
-    });
-
-    // QR 코드 생성 폼 제출 처리
-    $('.qr-form').on('submit', function(e) {
-        e.preventDefault();
-        var form = $(this);
-        var formData = new FormData(this);
-
-        $.ajax({
-            url: form.attr('action'),
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            xhrFields: {
-                responseType: 'blob'
-            },
-            success: function(response) {
-                // QR 코드 이미지를 Base64로 변환하여 표시
-                var imageUrl = URL.createObjectURL(new Blob([response], {type: 'image/png'}));
-                $('#qr-preview').html('<img src="' + imageUrl + '" class="img-fluid" alt="QR Code">');
-
-                // 다운로드 버튼 표시
-                $('#download-png, #download-svg').removeClass('d-none');
-            },
-            error: function(xhr, status, error) {
-                var errorMessage = xhr.responseJSON ? xhr.responseJSON.detail : 'An error occurred';
-                alert('Error: ' + errorMessage);
-
-                // 에러 발생 시 다운로드 버튼 숨김
-                $('#download-png, #download-svg').addClass('d-none');
-            }
-        });
-    });
-
-    // PNG 다운로드 처리
-    $('#download-png').click(function() {
-        var qrImage = $('#qr-preview img');
-        if (qrImage.length) {
-            var link = document.createElement('a');
-            link.href = qrImage.attr('src');
-            link.download = `qr-code-${Date.now()}.png`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-    });
-
-    // SVG 다운로드 처리
-    $('#download-svg').click(function() {
-        var qrImage = $('#qr-preview img');
-        if (qrImage.length) {
-            // PNG를 SVG로 변환
-            var img = new Image();
-            img.onload = function() {
-                var canvas = document.createElement('canvas');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                var ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0);
-
-                // SVG 생성
-                var svg = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="${img.width}" height="${img.height}">
-                        <image href="${canvas.toDataURL('image/png')}" width="${img.width}" height="${img.height}"/>
-                    </svg>
-                `;
-
-                // SVG 다운로드
-                var blob = new Blob([svg], { type: 'image/svg+xml' });
-                var url = URL.createObjectURL(blob);
-                var link = document.createElement('a');
-                link.href = url;
-                link.download = `qr-code-${Date.now()}.svg`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-            };
-            img.src = qrImage.attr('src');
-        }
-    });
-});
-</script>
+<script src="{% static 'home/js/index.js' %}"></script>
 {% endblock %}
 {% endblock %}
