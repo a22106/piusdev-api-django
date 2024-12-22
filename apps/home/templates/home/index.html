@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <!-- QR Common Options Card -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#commonQrOptions">
+                        QR Code Options
+                    </button>
+                </div>
+                <div id="commonQrOptions" class="collapse">
+                    <div class="card-body">
+                        <form id="commonOptionsForm">
+                            {% include 'home/qr_common_fields.html' with form=url_form %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main QR Code Card -->
+            <div class="card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#url" role="tab">URL</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#text" role="tab">Text</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#email" role="tab">Email</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#phone" role="tab">Phone</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#sms" role="tab">SMS</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#whatsapp" role="tab">WhatsApp</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#wifi" role="tab">WiFi</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#vcard" role="tab">VCard</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content">
+                        <!-- URL QR Code -->
+                        <div class="tab-pane fade show active" id="url" role="tabpanel">
+                            <form action="{% url 'qr:qr_url_v1' %}" method="post" enctype="multipart/form-data" class="qr-form">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label class="form-label"><span class="text-danger">*</span> URL:</label>
+                                    {{ url_form.url }}
+                                </div>
+                                <button type="submit" class="btn btn-primary">Generate QR Code</button>
+                            </form>
+                        </div>
+
+                        <!-- Text QR Code -->
+                        <div class="tab-pane fade" id="text" role="tabpanel">
+                            <form action="{% url 'qr:qr_text_v1' %}" method="post" enctype="multipart/form-data" class="qr-form">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label class="form-label"><span class="text-danger">*</span> Text:</label>
+                                    {{ text_form.text }}
+                                </div>
+                                <button type="submit" class="btn btn-primary">Generate QR Code</button>
+                            </form>
+                        </div>
+
+                        <!-- Email QR Code -->
+                        <div class="tab-pane fade" id="email" role="tabpanel">
+                            <form action="{% url 'qr:qr_email_v1' %}" method="post" enctype="multipart/form-data" class="qr-form">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label class="form-label"><span class="text-danger">*</span> Email:</label>
+                                    {{ email_form.email }}
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Subject:</label>
+                                    {{ email_form.subject }}
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Body:</label>
+                                    {{ email_form.body }}
+                                </div>
+                                <button type="submit" class="btn btn-primary">Generate QR Code</button>
+                            </form>
+                        </div>
+
+                        <!-- Phone QR Code -->
+                        <div class="tab-pane fade" id="phone" role="tabpanel">
+                            <form action="{% url 'qr:qr_phone_number_v1' %}" method="post" enctype="multipart/form-data" class="qr-form">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label class="form-label"><span class="text-danger">*</span> Phone Number:</label>
+                                    {{ phone_form.phone_number }}
+                                </div>
+                                <button type="submit" class="btn btn-primary">Generate QR Code</button>
+                            </form>
+                        </div>
+
+                        <!-- SMS QR Code -->
+                        <div class="tab-pane fade" id="sms" role="tabpanel">
+                            <form action="{% url 'qr:qr_sms_v1' %}" method="post" enctype="multipart/form-data" class="qr-form">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label class="form-label"><span class="text-danger">*</span> Phone Number:</label>
+                                    {{ sms_form.phone_number }}
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Message:</label>
+                                    {{ sms_form.message }}
+                                </div>
+                                <button type="submit" class="btn btn-primary">Generate QR Code</button>
+                            </form>
+                        </div>
+
+                        <!-- WhatsApp QR Code -->
+                        <div class="tab-pane fade" id="whatsapp" role="tabpanel">
+                            <form action="{% url 'qr:qr_whatsapp_v1' %}" method="post" enctype="multipart/form-data" class="qr-form">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label class="form-label"><span class="text-danger">*</span> Phone Number:</label>
+                                    {{ whatsapp_form.phone_number }}
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Message:</label>
+                                    {{ whatsapp_form.message }}
+                                </div>
+                                <button type="submit" class="btn btn-primary">Generate QR Code</button>
+                            </form>
+                        </div>
+
+                        <!-- WiFi QR Code -->
+                        <div class="tab-pane fade" id="wifi" role="tabpanel">
+                            <form action="{% url 'qr:qr_wifi_v1' %}" method="post" enctype="multipart/form-data" class="qr-form">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label class="form-label"><span class="text-danger">*</span> Network Name (SSID):</label>
+                                    {{ wifi_form.ssid }}
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Password:</label>
+                                    {{ wifi_form.password }}
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Encryption:</label>
+                                    {{ wifi_form.encryption }}
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        {{ wifi_form.hidden }}
+                                        <label class="form-check-label" for="{{ wifi_form.hidden.id_for_label }}">
+                                            Hidden Network
+                                        </label>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Generate QR Code</button>
+                            </form>
+                        </div>
+
+                        <!-- VCard QR Code -->
+                        <div class="tab-pane fade" id="vcard" role="tabpanel">
+                            <form action="{% url 'qr:qr_vcard_v1' %}" method="post" enctype="multipart/form-data" class="qr-form">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label"><span class="text-danger">*</span> First Name:</label>
+                                        {{ vcard_form.first_name }}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label"><span class="text-danger">*</span> Last Name:</label>
+                                        {{ vcard_form.last_name }}
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label"><span class="text-danger">*</span> Email:</label>
+                                    {{ vcard_form.vcard_email }}
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label"><span class="text-danger">*</span> Phone:</label>
+                                    {{ vcard_form.vcard_mobile }}
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Company:</label>
+                                    {{ vcard_form.organization }}
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Job Title:</label>
+                                    {{ vcard_form.job_title }}
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Website:</label>
+                                    {{ vcard_form.vcard_url }}
+                                </div>
+                                <button type="submit" class="btn btn-primary">Generate QR Code</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QR Code Preview -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">QR Code Preview</h5>
+                </div>
+                <div class="card-body text-center">
+                    <div id="qr-preview">
+                        <!-- 초기 QR 코드 이미지 표시 -->
+                        <img id="qr-code-preview" src="{% static 'images/initial_qrcode.png' %}" class="img-fluid" alt="Initial QR Code">
+                        <img id="qr-code" alt="QR Code" class="d-none" src="">
+                    </div>
+                    <div class="mt-3">
+                        <a id="download-png" class="btn btn-primary d-none" download="qr-code.png">
+                            Download PNG
+                        </a>
+                        <button id="download-svg" class="btn btn-outline-primary d-none">
+                            Download SVG
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="{% static 'home/js/index.js' %}"></script>
+{% endblock %}
+{% endblock %}

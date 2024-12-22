@@ -65,8 +65,9 @@ DEFAULT_FROM_EMAIL = "no-reply@piusdev.com"
 # Application definition
 INSTALLED_APPS = [
     "core",
-    "accounts",
-    "qr",
+    "apps.accounts",
+    "apps.qr",
+    "apps.home",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -81,7 +82,7 @@ INSTALLED_APPS = [
 ]
 
 AUTHENTICATION_BACKENDS = [
-    'accounts.backends.CustomAuthBackend',
+    'apps.accounts.backends.CustomAuthBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
 
@@ -89,7 +90,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
-    "accounts.middleware.AuthMiddleware",
+    "apps.accounts.middleware.AuthMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -217,16 +218,13 @@ except OperationalError:
     print("데이터베이스 연결 실패")
     sys.exit(1)
 
-# Whitenoise configuration for serving static files
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
 # Session settings
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", "False") == "True"
 SESSION_COOKIE_HTTPONLY = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_COOKIE_SAMESITE = 'Lax'
-SESSION_COOKIE_AGE = 60 * 60 * 24 * 7  # 7일
+SESSION_COOKIE_AGE = 1209600  # 2주
 
 # CORS settings
 CORS_ALLOW_ALL_ORIGINS = True
@@ -265,7 +263,8 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # During testing, we should use a different storage backend
 import sys
-if 'test' in sys.argv:
+if 'test' in sys.argv or DEBUG:
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 else:
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+

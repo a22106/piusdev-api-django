@@ -101,6 +101,12 @@ target/
 *.pyc
 __pycache__/
 local_settings.py
+/staticfiles/
 
 .env
 db.sqlite3
+
+# Cypress
+cypress/videos/
+cypress/screenshots/
+node_modules/

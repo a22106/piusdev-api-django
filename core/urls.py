@@ -18,22 +18,22 @@ schema_view = get_schema_view(
     public=True,
     permission_classes=[permissions.AllowAny],
     patterns=[
-        path("", include("qr.urls")),
+        path("", include("apps.qr.urls")),
     ],
 )
 
 urlpatterns = [
     path("pius_hwang/", admin.site.urls),
-    path("", include("qr.urls", namespace="qr")),
-    path("", include("django_cypress.urls")),
+    path("", include("apps.home.urls", namespace="home")),
+    path("qr/", include("apps.qr.urls", namespace="qr")),
     # API Documentation
     path("api/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
-    path("auth/", include("accounts.urls", namespace="accounts")),
+    path("auth/", include("apps.accounts.urls", namespace="accounts")),
+    # 통합 테스트
+    path("", include("django_cypress.urls")),
 ]
 
 if settings.DEBUG:
-    import debug_toolbar
-
     # Debug Toolbar addition
     urlpatterns += [path("__debug__/", include('debug_toolbar.urls'))]
 
