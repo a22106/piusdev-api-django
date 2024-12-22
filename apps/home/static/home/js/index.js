@@ -8,66 +8,51 @@ $(document).ready(function() {
     // Select2 초기화
     $('.country-code-select').select2({
         theme: 'bootstrap-5',
-        placeholder: 'Select Country Code',
+        placeholder: 'Select a country',
         allowClear: true,
         width: 'resolve'
     });
 
-    // CSRF 토큰 설정
-    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-    $.ajaxSetup({
-        beforeSend: function(xhr, settings) {
-            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-                xhr.setRequestHeader("X-CSRFToken", csrftoken);
-            }
-        }
-    });
-
-    // 폼 제출 이벤트 처리
+    // QR 코드 생성 폼 제출 처리
     $('.qr-form').on('submit', function(e) {
         e.preventDefault();
-
-        const $form = $(this);
-        const formData = new FormData(this);
-
-        // 전화번호 처리 (있는 경우)
-        const $countryCode = $form.find('select[name="country_code"]');
-        const $phoneNumber = $form.find('input[name="phone_number"]');
-
-        if ($countryCode.length && $phoneNumber.length) {
-            const fullNumber = ($countryCode.val() + $phoneNumber.val()).replace(/[+\s-]/g, '');
-            formData.set('phone_number', fullNumber);
-        }
+        var form = $(this);
+        var formData = new FormData(this);
 
         $.ajax({
-            url: $form.attr('action'),
+            url: form.attr('action'),
             type: 'POST',
             data: formData,
             processData: false,
             contentType: false,
+            xhrFields: {
+                responseType: 'blob'
+            },
             success: function(response) {
-                // QR 코드 이미지 업데이트
-                $qrCodePreview.addClass('d-none');
-                $qrCode.attr('src', 'data:image/png;base64,' + response.image)
-                       .removeClass('d-none');
+                // QR 코드 이미지를 Base64로 변환하여 표시
+                var imageUrl = URL.createObjectURL(new Blob([response], {type: 'image/png'}));
+                $('#qr-preview').html('<img src="' + imageUrl + '" class="img-fluid" alt="QR Code">');
 
-                // 다운로드 버튼 활성화
-                $downloadPng.removeClass('d-none');
-                $downloadSvg.removeClass('d-none');
+                // 다운로드 버튼 표시
+                $('#download-png, #download-svg').removeClass('d-none');
             },
             error: function(xhr, status, error) {
-                alert('Error generating QR code: ' + error);
+                var errorMessage = xhr.responseJSON ? xhr.responseJSON.detail : 'An error occurred';
+                alert('Error: ' + errorMessage);
+
+                // 에러 발생 시 다운로드 버튼 숨김
+                $('#download-png, #download-svg').addClass('d-none');
             }
         });
     });
 
     // PNG 다운로드 처리
-    $downloadPng.click(function() {
-        if ($qrCode.attr('src')) {
-            const link = document.createElement('a');
-            link.href = $qrCode.attr('src');
-            link.download = 'qr-code.png';
+    $('#download-png').click(function() {
+        var qrImage = $('#qr-preview img');
+        if (qrImage.length) {
+            var link = document.createElement('a');
+            link.href = qrImage.attr('src');
+            link.download = `qr-code-${Date.now()}.png`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -75,7 +60,37 @@ $(document).ready(function() {
     });
 
     // SVG 다운로드 처리
-    $downloadSvg.click(function() {
-        // SVG 다운로드 로직 구현
+    $('#download-svg').click(function() {
+        var qrImage = $('#qr-preview img');
+        if (qrImage.length) {
+            // PNG를 SVG로 변환
+            var img = new Image();
+            img.onload = function() {
+                var canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                var ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+
+                // SVG 생성
+                var svg = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="${img.width}" height="${img.height}">
+                        <image href="${canvas.toDataURL('image/png')}" width="${img.width}" height="${img.height}"/>
+                    </svg>
+                `;
+
+                // SVG 다운로드
+                var blob = new Blob([svg], { type: 'image/svg+xml' });
+                var url = URL.createObjectURL(blob);
+                var link = document.createElement('a');
+                link.href = url;
+                link.download = `qr-code-${Date.now()}.svg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            };
+            img.src = qrImage.attr('src');
+        }
     });
 });

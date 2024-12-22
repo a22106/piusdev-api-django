@@ -44,7 +44,7 @@
                                     <label class="form-label"><span class="text-danger">*</span> URL:</label>
                                     <input type="url" name="url" class="form-control" placeholder="https://example.com" required>
                                 </div>
-                                {% include 'qr/qr_common_options.html' %}
+                                {% include 'home/qr_common_options.html' %}
                                 <button type="submit" class="btn btn-primary">Generate QR Code</button>
                             </form>
                         </div>
@@ -57,7 +57,7 @@
                                     <label class="form-label"><span class="text-danger">*</span> Text:</label>
                                     <textarea name="text" class="form-control" rows="3" required></textarea>
                                 </div>
-                                {% include 'qr/qr_common_options.html' %}
+                                {% include 'home/qr_common_options.html' %}
                                 <button type="submit" class="btn btn-primary">Generate QR Code</button>
                             </form>
                         </div>
@@ -78,7 +78,7 @@
                                     <label class="form-label">Body:</label>
                                     <textarea name="body" class="form-control" rows="3"></textarea>
                                 </div>
-                                {% include 'qr/qr_common_options.html' %}
+                                {% include 'home/qr_common_options.html' %}
                                 <button type="submit" class="btn btn-primary">Generate QR Code</button>
                             </form>
                         </div>
@@ -87,8 +87,12 @@
                         <div class="tab-pane fade" id="phone" role="tabpanel">
                             <form action="{% url 'qr:qr_phone_number_v1' %}" method="post" enctype="multipart/form-data" class="qr-form">
                                 {% csrf_token %}
-                                {% include 'qr/input_phone.html' %}
-                                {% include 'qr/qr_common_options.html' %}
+                                <div class="col-md mb-3">
+                                    <label class="form-label w-100">
+                                        <span class="text-danger">*</span> Phone Number: <input type="text" name="phone_number" placeholder="+11001001000" class="form-control w-100" required>
+                                    </label>
+                                </div>
+                                {% include 'home/qr_common_options.html' %}
                                 <button type="submit" class="btn btn-primary">Generate QR Code</button>
                             </form>
                         </div>
@@ -97,12 +101,16 @@
                         <div class="tab-pane fade" id="sms" role="tabpanel">
                             <form action="{% url 'qr:qr_sms_v1' %}" method="post" enctype="multipart/form-data" class="qr-form">
                                 {% csrf_token %}
-                                {% include 'qr/input_phone.html' %}
+                                <div class="col-md mb-3">
+                                    <label class="form-label w-100">
+                                        <span class="text-danger">*</span> Phone Number: <input type="text" name="phone_number" placeholder="+11001001000" class="form-control w-100" required>
+                                    </label>
+                                </div>
                                 <div class="mb-3">
                                     <label class="form-label">Message:</label>
                                     <textarea name="message" class="form-control" rows="3"></textarea>
                                 </div>
-                                {% include 'qr/qr_common_options.html' %}
+                                {% include 'home/qr_common_options.html' %}
                                 <button type="submit" class="btn btn-primary">Generate QR Code</button>
                             </form>
                         </div>
@@ -111,12 +119,16 @@
                         <div class="tab-pane fade" id="whatsapp" role="tabpanel">
                             <form action="{% url 'qr:qr_whatsapp_v1' %}" method="post" enctype="multipart/form-data" class="qr-form">
                                 {% csrf_token %}
-                                {% include 'qr/input_phone.html' %}
+                                <div class="col-md mb-3">
+                                    <label class="form-label w-100">
+                                        <span class="text-danger">*</span> Phone Number: <input type="text" name="phone_number" placeholder="+11001001000" class="form-control w-100" required>
+                                    </label>
+                                </div>
                                 <div class="mb-3">
                                     <label class="form-label">Message:</label>
                                     <textarea name="message" class="form-control" rows="3"></textarea>
                                 </div>
-                                {% include 'qr/qr_common_options.html' %}
+                                {% include 'home/qr_common_options.html' %}
                                 <button type="submit" class="btn btn-primary">Generate QR Code</button>
                             </form>
                         </div>
@@ -149,7 +161,7 @@
                                         </label>
                                     </div>
                                 </div>
-                                {% include 'qr/qr_common_options.html' %}
+                                {% include 'home/qr_common_options.html' %}
                                 <button type="submit" class="btn btn-primary">Generate QR Code</button>
                             </form>
                         </div>
@@ -188,7 +200,7 @@
                                     <label class="form-label">Website:</label>
                                     <input type="url" name="vcard_url" class="form-control">
                                 </div>
-                                {% include 'qr/qr_common_options.html' %}
+                                {% include 'home/qr_common_options.html' %}
                                 <button type="submit" class="btn btn-primary">Generate QR Code</button>
                             </form>
                         </div>
