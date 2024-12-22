@@ -50,12 +50,14 @@ class BaseQrView(APIView):
             try:
                 style = QRStyles[style]
             except KeyError:
-                raise ValueError(f"Invalid style parameter: {style}")
+                logger.error(f"Invalid style parameter: {style}")
+                raise ValueError(f"Invalid style. Valid options are: {', '.join(QRStyles.__members__.keys())}")
 
             try:
                 color_mask = QRColorMasks[color_mask]
             except KeyError:
-                raise ValueError(f"Invalid color_mask parameter: {color_mask}")
+                logger.error(f"Invalid color_mask parameter: {color_mask}")
+                raise ValueError(f"Invalid color mask. Valid options are: {', '.join(QRColorMasks.__members__.keys())}")
 
             return {
                 "style": style,

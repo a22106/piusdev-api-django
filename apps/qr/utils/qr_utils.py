@@ -45,10 +45,10 @@ class QRStyles(Enum):
 
 class QRColorMasks(Enum):
     SOLID_FILL = 1
-    RADIAL_GRADIANT = 2
-    SQUARE_GRADIANT = 3
-    HORIZONTAL_GRADIANT = 4
-    VERTICAL_GRADIANT = 5
+    RADIAL_GRADIENT = 2
+    SQUARE_GRADIENT = 3
+    HORIZONTAL_GRADIENT = 4
+    VERTICAL_GRADIENT = 5
 
 
 def _get_module_drawer(style: Type[QRStyles]):
@@ -67,10 +67,10 @@ def _get_module_drawer(style: Type[QRStyles]):
 def _get_color_mask(mask_type: Type[QRColorMasks]):
     mask_map = {
         QRColorMasks.SOLID_FILL: SolidFillColorMask(),
-        QRColorMasks.RADIAL_GRADIANT: RadialGradiantColorMask(),
-        QRColorMasks.SQUARE_GRADIANT: SquareGradiantColorMask(),
-        QRColorMasks.HORIZONTAL_GRADIANT: HorizontalGradiantColorMask(),
-        QRColorMasks.VERTICAL_GRADIANT: VerticalGradiantColorMask(),
+        QRColorMasks.RADIAL_GRADIENT: RadialGradiantColorMask(),
+        QRColorMasks.SQUARE_GRADIENT: SquareGradiantColorMask(),
+        QRColorMasks.HORIZONTAL_GRADIENT: HorizontalGradiantColorMask(),
+        QRColorMasks.VERTICAL_GRADIENT: VerticalGradiantColorMask(),
     }
 
     result = mask_map.get(mask_type, SolidFillColorMask())

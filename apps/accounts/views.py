@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 class SignUpView(FormView):
     form_class = SignUpForm
     template_name = "accounts/signup_form.html"
-    success_url = reverse_lazy("qr:index")
+    success_url = reverse_lazy("home:index")
 
     def form_valid(self, form: SignUpForm):
         try:
@@ -73,7 +73,7 @@ class SignUpView(FormView):
 class SignInView(FormView):
     form_class = SignInForm
     template_name = "accounts/signin_form.html"
-    success_url = reverse_lazy("qr:index")
+    success_url = reverse_lazy("home:index")
 
     def form_valid(self, form: SignInForm):
         username = form.cleaned_data["email"]
