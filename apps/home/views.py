@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.views import View
+from django.views.generic import TemplateView
 import phonenumbers
 from phonenumbers.data import _COUNTRY_CODE_TO_REGION_CODE
 import pycountry
@@ -10,10 +11,13 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-class HomeView(View):
-    def get(self, request):
-        context = {
-            'countries': get_country_choices(),
-            'debug': settings.DEBUG,
-        }
-        return render(request, 'home/index.html', context)
+class HomeView(TemplateView):
+    template_name = 'home/index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+                # 국가 코드 리스트
+
+        context["countries"] = countries
+        context['debug'] = settings.DEBUG
+        return context
