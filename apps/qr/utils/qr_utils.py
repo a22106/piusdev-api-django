@@ -51,6 +51,20 @@ class QRColorMasks(Enum):
     HORIZONTAL_GRADIANT = 4
     VERTICAL_GRADIANT = 5
 
+class QREyeStyles(Enum):
+    SQUARE = 1
+    CIRCLE = 2
+    ROUNDED = 3
+
+def _get_eye_style(style: Type[QREyeStyles]):
+    style_map = {
+        QREyeStyles.SQUARE: None,
+        QREyeStyles.CIRCLE: CircleModuleDrawer(),
+        QREyeStyles.ROUNDED: RoundedModuleDrawer(),
+    }
+    result = style_map.get(style, None)
+    return result
+
 
 def _get_module_drawer(style: Type[QRStyles]):
     style_map = {
@@ -95,6 +109,7 @@ def _convert_color_to_rgb(color: str) -> tuple:
 def create_qr_code(
     data: str, version: int = None,
     error_correction: int = ERROR_CORRECT_L,
+    eye_style: Type[QREyeStyles] = None,
     fill_color: str = "black",
     back_color: str = "white",
     style: Type[QRStyles] = QRStyles.SQUARE_MODULE,
@@ -147,6 +162,7 @@ def create_qr_code(
 
         # QR 코드 이미지 생성
         module_drawer = _get_module_drawer(style)
+        eye_style = _get_eye_style(eye_style)
         img = qr.make_image(
             image_factory=StyledPilImage,
             module_drawer=module_drawer,
