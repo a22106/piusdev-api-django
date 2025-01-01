@@ -13,7 +13,7 @@ jobs:
   deploy:
     # "Django CI/CD" 워크플로우가 성공적으로 완료된 경우에만 실행
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
       - uses: akhileshns/heroku-deploy@v3.13.15
