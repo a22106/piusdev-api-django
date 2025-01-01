@@ -1,0 +1,23 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: ["Django CI/CD"]
+    types:
+      - completed
+    branches:
+      - main
+      - test/*
+
+jobs:
+  deploy:
+    # "Django CI/CD" 워크플로우가 성공적으로 완료된 경우에만 실행
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: akhileshns/heroku-deploy@v3.13.15
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: ${{secrets.HEROKU_APP_NAME}}
+          heroku_email: bk22106@gmail.com
