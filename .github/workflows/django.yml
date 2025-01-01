@@ -1,10 +1,11 @@
-name: Django CI
+name: Django CI/CD
 
 on:
   pull_request:
     branches: [ "main" ]
   push:
-    branches: [ "main", "test/ci" ]
+    branches: [ "main", "test/*" ]
+  workflow_dispatch:
 
 jobs:
   build:
