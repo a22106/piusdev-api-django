@@ -1,0 +1,44 @@
+[run]
+source = apps
+branch = True
+omit =
+    */migrations/*
+    */tests/*
+    */admin.py
+    */apps.py
+    */__init__.py
+    */management/*
+    */constants.py
+    */urls.py
+    */wsgi.py
+    */asgi.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    def __str__
+    if settings.DEBUG
+    if __name__ == .__main__.:
+    raise NotImplementedError
+    pass
+    raise ImportError
+    except ImportError:
+    except Exception as e:
+    except ValidationError:
+    logger\.
+    logging\.
+    
+# pytest-cov 관련 설정 추가
+show_missing = True
+skip_covered = True
+fail_under = 30
+
+[paths]
+source =
+    apps/
+    */site-packages/apps/
+
+[html]
+directory = coverage_html_report
+title = Coverage Report

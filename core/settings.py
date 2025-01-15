@@ -212,6 +212,18 @@ LOGGING = {
     },
 }
 
+# Logging configuration
+if not DEBUG:
+    LOGGING['handlers'].update({
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'include_html': True,
+        }
+    })
+    LOGGING['loggers']['django']['handlers'].append('mail_admins')
+
+
 try:
     connections["default"].cursor()
 except OperationalError:
@@ -254,14 +266,14 @@ if not DEBUG:
     }
     LOGGING['loggers']['django']['handlers'].append('mail_admins')
 
-# Add or modify these settings
+# Static 파일 설정
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# During testing, we should use a different storage backend
+# STATICFILES_STORAGE 설정
 import sys
 if 'test' in sys.argv or DEBUG:
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'

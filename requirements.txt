@@ -33,6 +33,10 @@ psycopg2-binary
 # Test
 pytest
 pytest-django
+pytest-cov
+pytest-playwright
+playwright
+coverage
+coverage-badge
 selenium
-webdriver-manager
 django_cypress

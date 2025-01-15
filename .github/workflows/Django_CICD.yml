@@ -11,6 +11,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      DB_ENGINE: django.db.backends.postgresql
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DJANGO_SETTINGS_MODULE: core.settings
+
     services:
       postgres:
         image: postgres:latest
@@ -25,15 +34,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-
-    env:
-      DB_ENGINE: django.db.backends.postgresql
-      DB_NAME: ${{ secrets.DB_NAME }}
-      DB_USER: ${{ secrets.DB_USER }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      DB_HOST: ${{ secrets.DB_HOST }}
-      DB_PORT: ${{ secrets.DB_PORT }}
-      DJANGO_SETTINGS_MODULE: core.settings
 
     strategy:
       max-parallel: 4
