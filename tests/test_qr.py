@@ -143,9 +143,9 @@ class QRCodeAdvancedGenerationTest(TestCase):
         """이벤트 QR 코드 생성 테스트"""
         url = reverse('qr:qr_event_v1')
         data = {
-            "summary": "Test Event",
-            "start_date": "20240101",
-            "end_date": "20240102",
+            "title": "Test Event",
+            "start": "20240101",
+            "end": "20240102",
             "location": "Test Location",
             "description": "Test Description",
             **self.common_params
