@@ -17,15 +17,21 @@ if not SECRET_KEY:
     SECRET_KEY = "".join(random.choice(string.ascii_lowercase) for i in range(32))
 
 DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
-SITE_URL = "http://localhost:8000" if DEBUG else "https://qrcode.piusdev.com"
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Database settings
-DATABASES = {
-    "default": {
-        "ENGINE": os.environ.get("DB_ENGINE", "django.db.backends.postgresql"),
+if DEBUG:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": os.environ.get("DB_ENGINE", "django.db.backends.postgresql"),
         "NAME": os.environ.get("DB_NAME", "postgres"),
         "USER": os.environ.get("DB_USER", "postgres"),
         "PASSWORD": os.environ.get("DB_PASSWORD", "postgres"),
@@ -41,6 +47,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8000",
     "http://127.0.0.1:5085",
     'http://localhost:5173',
+    "https://qrcode.piusdev.com",
 ]
 
 ALLOWED_HOSTS = [
@@ -246,6 +253,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5174",
     "http://127.0.0.1:5173",
     "http://127.0.0.1:5174",
+    "https://qrcode.piusdev.com",
 ]
 
 # Internal IPs
@@ -273,10 +281,59 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# STATICFILES_STORAGE 설정
-import sys
-if 'test' in sys.argv or DEBUG:
+if DEBUG:
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 else:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+import sys
+if 'pytest' in sys.argv[0]:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+        }
+    }
+    
+    # 테스트 시 정적 파일 처리 설정
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+    STATIC_URL = '/static/'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    STATICFILES_DIRS = [
+        os.path.join(BASE_DIR, 'static'),
+    ]
+    
+    # 테스트 시 미디어 파일 설정
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    
+    # 테스트 시 보안 설정 완화
+    PASSWORD_HASHERS = [
+        'django.contrib.auth.hashers.MD5PasswordHasher',
+    ]
+    
+    # 테스트 시 이메일 백엔드 설정
+    EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
+    
+
+# 커스텀 유저 모델 설정
+AUTH_USER_MODEL = 'accounts.User'
+
+# 로그인/로그아웃 관련 URL 설정
+LOGIN_URL = 'accounts:signin'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+# Admin 사이트 설정
+ADMIN_URL = 'admin/'  # admin URL 설정
+ADMIN_SITE_HEADER = "Mapsea Research 관리자"
+ADMIN_SITE_TITLE = "Mapsea Research 관리자"
+ADMIN_INDEX_TITLE = "관리자 대시보드"
+
+# CSRF 설정
+CSRF_COOKIE_NAME = 'csrftoken'
+CSRF_HEADER_NAME = 'HTTP_X_CSRFTOKEN'
+CSRF_USE_SESSIONS = False
+CSRF_COOKIE_HTTPONLY = False  # JavaScript에서 접근 가능하도록 설정
+
 

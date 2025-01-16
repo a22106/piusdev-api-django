@@ -1,7 +1,7 @@
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
-def qr_swagger_decorator(operation_id, required_params):
+def qr_swagger_decorator(operation_id, required_params, tags=["QR Code"]):
     """QR코드 생성 엔드포인트에 사용되는 Swagger 데코레이터"""
     def decorator(func):
         common_properties = {
@@ -43,6 +43,7 @@ def qr_swagger_decorator(operation_id, required_params):
                 properties={**required_params, **common_properties},
                 required=list(required_params.keys())
             ),
+            tags=tags,
             responses={
                 200: openapi.Response("QR Code Image (PNG)"),
                 400: openapi.Response("Bad Request"),

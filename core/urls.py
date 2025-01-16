@@ -17,14 +17,11 @@ schema_view = get_schema_view(
     ),
     public=True,
     permission_classes=[permissions.AllowAny],
-    patterns=[
-        path("", include("apps.qr.urls")),
-    ],
 )
 
 urlpatterns = [
-    path("pius_hwang/", admin.site.urls),
     path("", include("apps.home.urls", namespace="home")),
+    path("pius_hwang/", admin.site.urls),
     path("qr/", include("apps.qr.urls", namespace="qr")),
     # API Documentation
     path("api/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),

@@ -141,6 +141,7 @@ class BaseQrView(APIView):
             )
 
 class QrVcardView(BaseQrView):
+    
     @qr_swagger_decorator(
         "VCard QR Code",
         {
