@@ -18,6 +18,13 @@ if not SECRET_KEY:
 
 DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
 
+# HTTPS 설정 추가
+SECURE_SSL_REDIRECT = not DEBUG  # DEBUG가 False일 때 HTTPS 리다이렉션 활성화
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_HSTS_SECONDS = 31536000  # 1년
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Database settings
@@ -239,7 +246,7 @@ except OperationalError:
 
 # Session settings
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", "False") == "True"
+SESSION_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_HTTPONLY = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_COOKIE_SAMESITE = 'Lax'
@@ -331,6 +338,7 @@ ADMIN_SITE_TITLE = "Mapsea Research 관리자"
 ADMIN_INDEX_TITLE = "관리자 대시보드"
 
 # CSRF 설정
+CSRF_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_NAME = 'csrftoken'
 CSRF_HEADER_NAME = 'HTTP_X_CSRFTOKEN'
 CSRF_USE_SESSIONS = False
