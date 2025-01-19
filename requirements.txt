@@ -40,3 +40,8 @@ coverage
 coverage-badge
 selenium
 django_cypress
+
+# E2E Testing
+playwright==1.41.1
+pytest-playwright==0.4.3
+pytest-django==4.7.0

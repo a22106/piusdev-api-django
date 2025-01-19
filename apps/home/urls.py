@@ -5,5 +5,5 @@ app_name = "home"
 
 urlpatterns = [
     # 홈페이지 메인 뷰
-    path("", views.HomeView.as_view(), name="home"),
+    path("", views.HomeView.as_view(), name="index"),
 ]
