@@ -559,7 +559,12 @@ def generate_geo_qr(
         raise
 
 
-def generate_event_qr(event_data: Dict[str, str],
+def generate_event_qr(
+    title: str,
+    start: str,
+    end: str,
+    location: str,
+    description: str,
     style: Type[QRStyles] = QRStyles.SQUARE_MODULE,
     fill_color: str = "black",
     back_color: str = "white",
@@ -579,13 +584,13 @@ def generate_event_qr(event_data: Dict[str, str],
     """
     try:
         vcal = "BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\n"
-        vcal += f"SUMMARY:{event_data.get('summary', '')}\n"
-        vcal += f"DTSTART:{event_data.get('start_date', '')}\n"
-        vcal += f"DTEND:{event_data.get('end_date', '')}\n"
-        if event_data.get("location"):
-            vcal += f"LOCATION:{event_data.get('location')}\n"
-        if event_data.get("description"):
-            vcal += f"DESCRIPTION:{event_data.get('description')}\n"
+        vcal += f"SUMMARY:{title}\n"
+        vcal += f"DTSTART:{start}\n"
+        vcal += f"DTEND:{end}\n"
+        if location:
+            vcal += f"LOCATION:{location}\n"
+        if description:
+            vcal += f"DESCRIPTION:{description}\n"
         vcal += "END:VEVENT\nEND:VCALENDAR"
         return create_qr_code(vcal,
             style=style,
@@ -601,8 +606,7 @@ def generate_event_qr(event_data: Dict[str, str],
 
 
 def generate_mecard_qr(
-    name: str, reading: str, tel: str, email: str,
-    memo: str = "", birthday: str = "", address: str = "", url: str = "", nickname: str = "",
+    name: str, reading: str, tel: str, email: str, memo: str = "", birthday: str = "", address: str = "", url: str = "", nickname: str = "",
     style: Type[QRStyles] = QRStyles.SQUARE_MODULE,
     fill_color: str = "black",
     back_color: str = "white",
