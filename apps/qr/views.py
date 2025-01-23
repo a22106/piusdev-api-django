@@ -141,6 +141,7 @@ class BaseQrView(APIView):
             )
 
 class QrVcardView(BaseQrView):
+    
     @qr_swagger_decorator(
         "VCard QR Code",
         {
@@ -260,18 +261,38 @@ class QrEventView(BaseQrView):
     @qr_swagger_decorator(
         "Event QR Code",
         {
-            "summary": openapi.Schema(type=openapi.TYPE_STRING, description='Event summary'),
-            "start_date": openapi.Schema(type=openapi.TYPE_STRING, description='Start date (YYYYMMDD)'),
-            "end_date": openapi.Schema(type=openapi.TYPE_STRING, description='End date (YYYYMMDD)'),
-            "location": openapi.Schema(type=openapi.TYPE_STRING, description='Event location'),
-            "description": openapi.Schema(type=openapi.TYPE_STRING, description='Event description'),
+            "title": openapi.Schema(
+                type=openapi.TYPE_STRING, 
+                description='Event title',
+                example='2024 Tech Conference'
+            ),
+            "start": openapi.Schema(
+                type=openapi.TYPE_STRING, 
+                description='Start date (YYYYMMDD)',
+                example='20240510'
+            ),
+            "end": openapi.Schema(
+                type=openapi.TYPE_STRING, 
+                description='End date (YYYYMMDD)',
+                example='20240512'
+            ),
+            "location": openapi.Schema(
+                type=openapi.TYPE_STRING, 
+                description='Event location',
+                example='COEX Convention Center, Seoul'
+            ),
+            "description": openapi.Schema(
+                type=openapi.TYPE_STRING, 
+                description='Event description',
+                example='Annual technology conference featuring the latest innovations in AI and blockchain'
+            ),
         }
     )
     def post(self, request):
         return self.handle_qr_generation(
             request,
             generate_event_qr,
-            ["summary", "start_date", "end_date", "location", "description"]
+            ["title", "start", "end", "location", "description"]
         )
 
 

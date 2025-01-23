@@ -11,10 +11,10 @@ class QRCommonOptionsForm(forms.Form):
 
     COLOR_MASK_CHOICES = [
         ('SOLID_FILL', 'Solid Fill'),
-        ('RADIAL_GRADIENT', 'Radial Gradient'),
-        ('SQUARE_GRADIENT', 'Square Gradient'),
-        ('HORIZONTAL_GRADIENT', 'Horizontal Gradient'),
-        ('VERTICAL_GRADIENT', 'Vertical Gradient'),
+        ('RADIAL_GRADIANT', 'Radial Gradiant'),
+        ('SQUARE_GRADIANT', 'Square Gradiant'),
+        ('HORIZONTAL_GRADIANT', 'Horizontal Gradiant'),
+        ('VERTICAL_GRADIANT', 'Vertical Gradiant'),
     ]
 
     style = forms.ChoiceField(
