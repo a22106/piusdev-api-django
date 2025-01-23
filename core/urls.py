@@ -9,10 +9,9 @@ from drf_yasg import openapi
 schema_view = get_schema_view(
     openapi.Info(
         title="QR Code Generator API",
-        default_version="v1",
+        default_version="v0.0.1",
         description="A simple QR Code generator API",
-        terms_of_service="https://www.google.com/policies/terms/",
-        contact=openapi.Contact(email="bk22106@piusdev.com"),
+        contact=openapi.Contact(email="piushwang@piusdev.com"),
         license=openapi.License(name="BSD License"),
     ),
     public=True,
@@ -22,7 +21,9 @@ schema_view = get_schema_view(
 urlpatterns = [
     path("", include("apps.home.urls", namespace="home")),
     path("pius_hwang/", admin.site.urls),
+    
     path("qr/", include("apps.qr.urls", namespace="qr")),
+    
     # API Documentation
     path("api/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
     path("auth/", include("apps.accounts.urls", namespace="accounts")),
