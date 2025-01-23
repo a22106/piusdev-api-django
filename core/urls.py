@@ -22,11 +22,15 @@ urlpatterns = [
     path("", include("apps.home.urls", namespace="home")),
     path("pius_hwang/", admin.site.urls),
     
-    path("qr/", include("apps.qr.urls", namespace="qr")),
+    # API v1 엔드포인트
+    path('api/v1/', include([
+        path('qr/', include('apps.qr.urls')),
+        path('auth/', include('apps.accounts.urls', namespace='accounts')),
+    ])),
     
     # API Documentation
-    path("api/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
-    path("auth/", include("apps.accounts.urls", namespace="accounts")),
+    path("docs/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
+    
     # 통합 테스트
     path("", include("django_cypress.urls")),
 ]
