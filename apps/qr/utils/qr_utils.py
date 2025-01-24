@@ -31,30 +31,10 @@ from qrcode.image.styles.colormasks import (
     ImageColorMask,
 )
 
+from ..constants import QRStyles, QRColorMasks, QREyeStyles
+
 
 logger = logging.getLogger(__name__)
-
-
-class QRStyles(Enum):
-    SQUARE_MODULE = 1
-    GAPPED_SQUARE_MODULE = 2
-    CIRCLE_MODULE = 3
-    ROUNDED_MODULE = 4
-    HORIZONTAL_BARS = 5
-    VERTICAL_BARS = 6
-
-
-class QRColorMasks(Enum):
-    SOLID_FILL = 1
-    RADIAL_GRADIANT = 2
-    SQUARE_GRADIANT = 3
-    HORIZONTAL_GRADIANT = 4
-    VERTICAL_GRADIANT = 5
-
-class QREyeStyles(Enum):
-    SQUARE = 1
-    CIRCLE = 2
-    ROUNDED = 3
 
 def _get_eye_style(style: Type[QREyeStyles]):
     style_map = {
