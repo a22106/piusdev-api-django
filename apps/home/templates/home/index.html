@@ -221,15 +221,15 @@
                     <div id="qr-preview">
                         <!-- 초기 QR 코드 이미지 표시 -->
                         <img id="qr-code-preview" src="{% static 'images/initial_qrcode.png' %}" class="img-fluid" alt="Initial QR Code">
-                        <img id="qr-code" alt="QR Code" class="d-none" src="">
+                        <img id="qr-code" alt="QR Code" class="img-fluid d-none" src="">
                     </div>
-                    <div class="mt-3"> <!-- TODO: 다운로드 기능 다시 활성화 -->
-                        <a id="download-png" class="btn btn-primary d-none" download="qr-code.png">
+                    <div class="mt-3">
+                        <a id="download-png" class="btn btn-primary d-none" href="#" download="qr-code.png">
                             Download PNG
                         </a>
-                        <button id="download-svg" class="btn btn-outline-primary d-none">
+                        <a id="download-svg" class="btn btn-outline-primary d-none" href="#" download="qr-code.svg">
                             Download SVG
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>

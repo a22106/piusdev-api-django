@@ -1,20 +1,28 @@
 from django import forms
 
+from apps.qr.constants.enums import QRStyles, QRColorMasks, QREyeStyles
+
 class QRCommonOptionsForm(forms.Form):
     """QR 코드 공통 옵션을 위한 폼"""
     STYLE_CHOICES = [
-        ('SQUARE_MODULE', 'Square'),
-        ('ROUNDED_MODULE', 'Rounded'),
-        ('VERTICAL_BARS', 'Vertical Bars'),
-        ('HORIZONTAL_BARS', 'Horizontal Bars'),
+        (QRStyles.SQUARE_MODULE.value, 'Square'),
+        (QRStyles.ROUNDED_MODULE.value, 'Rounded'),
+        (QRStyles.VERTICAL_BARS.value, 'Vertical Bars'),
+        (QRStyles.HORIZONTAL_BARS.value, 'Horizontal Bars'),
     ]
 
     COLOR_MASK_CHOICES = [
-        ('SOLID_FILL', 'Solid Fill'),
-        ('RADIAL_GRADIANT', 'Radial Gradiant'),
-        ('SQUARE_GRADIANT', 'Square Gradiant'),
-        ('HORIZONTAL_GRADIANT', 'Horizontal Gradiant'),
-        ('VERTICAL_GRADIANT', 'Vertical Gradiant'),
+        (QRColorMasks.SOLID_FILL.value, 'Solid Fill'),
+        (QRColorMasks.RADIAL_GRADIANT.value, 'Radial Gradiant'),
+        (QRColorMasks.SQUARE_GRADIANT.value, 'Square Gradiant'),
+        (QRColorMasks.HORIZONTAL_GRADIANT.value, 'Horizontal Gradiant'),
+        (QRColorMasks.VERTICAL_GRADIANT.value, 'Vertical Gradiant'),
+    ]
+
+    EYE_STYLE_CHOICES = [
+        (QREyeStyles.SQUARE.value, 'Square'),
+        (QREyeStyles.CIRCLE.value, 'Circle'),
+        (QREyeStyles.ROUNDED.value, 'Rounded'),
     ]
 
     style = forms.ChoiceField(
