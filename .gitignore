@@ -3,7 +3,7 @@ venv/
 config/*.py
 staticfiles/
 
-tests/*.ipynb
+*.ipynb
 tests/*.png
 
 !staticfiles/.gitkeep

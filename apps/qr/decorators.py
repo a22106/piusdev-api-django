@@ -1,14 +1,52 @@
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework import serializers
 
-def qr_swagger_decorator(operation_id, required_params, tags=["QR Code"]):
+from apps.qr.constants.enums import QRStyles, QRColorMasks
+
+def qr_swagger_decorator(operation_id, serializer_class, tags=["QR Code"]):
     """QR코드 생성 엔드포인트에 사용되는 Swagger 데코레이터"""
     def decorator(func):
+        # 시리얼라이저의 필드들을 스키마로 변환
+        serializer_fields = {}
+        for field_name, field in serializer_class().get_fields().items():
+            if isinstance(field, serializers.ChoiceField):
+                schema = openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    enum=field.choices,
+                    default=field.default if field.default != serializers.empty else None
+                )
+            elif isinstance(field, serializers.BooleanField):
+                schema = openapi.Schema(
+                    type=openapi.TYPE_BOOLEAN,
+                    default=field.default if field.default != serializers.empty else None
+                )
+            elif isinstance(field, serializers.IntegerField):
+                schema = openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    default=field.default if field.default != serializers.empty else None
+                )
+            elif isinstance(field, serializers.FloatField):
+                schema = openapi.Schema(
+                    type=openapi.TYPE_NUMBER,
+                    default=field.default if field.default != serializers.empty else None
+                )
+            elif isinstance(field, serializers.ImageField):
+                schema = openapi.Schema(
+                    type=openapi.TYPE_FILE,
+                )
+            else:
+                schema = openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    default=field.default if field.default != serializers.empty else None
+                )
+            serializer_fields[field_name] = schema
+
         common_properties = {
             'style': openapi.Schema(
                 type=openapi.TYPE_STRING,
-                description='QR code style (SQUARE_MODULE, GAPPED_SQUARE_MODULE, CIRCLE_MODULE, ROUNDED_MODULE, HORIZONTAL_BARS, VERTICAL_BARS)',
-                default='SQUARE_MODULE'
+                description='QR code style  {}'.format(', '.join([style.name for style in QRStyles])),
+                default=QRStyles.SQUARE_MODULE.value
             ),
             'fill_color': openapi.Schema(
                 type=openapi.TYPE_STRING,
@@ -22,8 +60,8 @@ def qr_swagger_decorator(operation_id, required_params, tags=["QR Code"]):
             ),
             'color_mask': openapi.Schema(
                 type=openapi.TYPE_STRING,
-                description='Color mask type (SOLID_FILL, RADIAL_GRADIANT, SQUARE_GRADIANT, HORIZONTAL_GRADIANT, VERTICAL_GRADIANT)',
-                default='SOLID_FILL'
+                description='Color mask type {}'.format(', '.join([mask.name for mask in QRColorMasks])),
+                default=QRColorMasks.SOLID_FILL.value
             ),
             'embedded_image': openapi.Schema(
                 type=openapi.TYPE_FILE,
@@ -40,8 +78,9 @@ def qr_swagger_decorator(operation_id, required_params, tags=["QR Code"]):
             operation_id=operation_id,
             request_body=openapi.Schema(
                 type=openapi.TYPE_OBJECT,
-                properties={**required_params, **common_properties},
-                required=list(required_params.keys())
+                properties={**serializer_fields, **common_properties},
+                required=[field_name for field_name, field in serializer_class().get_fields().items() 
+                         if field.required]
             ),
             tags=tags,
             responses={
