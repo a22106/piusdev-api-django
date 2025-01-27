@@ -4,18 +4,21 @@
 <head>
     <title>{% block title %}{{ SITE_TITLE }}{% endblock %}</title>
 
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-N7LQ5KW108"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-N7LQ5KW108');
-    </script>
-    <!-- End Google tag (gtag.js) -->
-    <!-- Google Adsense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3196239618793814"
-            crossorigin="anonymous"></script>
+    <!-- Google Analytics는 production 환경에서만 로드 -->
+    {% if request.get_host == 'qrcode.piusdev.com' %}
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-N7LQ5KW108"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-N7LQ5KW108');
+        </script>
+        <!-- End Google tag (gtag.js) -->
+        <!-- Google Adsense -->
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3196239618793814"
+                crossorigin="anonymous"></script>
+    {% endif %}
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
