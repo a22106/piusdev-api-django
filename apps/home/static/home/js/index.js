@@ -38,9 +38,15 @@ $(document).ready(function() {
     // 페이지 로드 시 공통 옵션 복원
     restoreCommonOptions();
 
+    // QR 코드 이미지 데이터를 저장할 변수
+    let currentQRImageBlob = null;
+
     function handleQRCodeResponse(response) {
         if (response.ok) {
             return response.blob().then(blob => {
+                // QR 코드 이미지 데이터 저장
+                currentQRImageBlob = blob;
+                
                 // QR 코드 이미지 표시
                 const qrImage = document.getElementById('qr-code');
                 const url = URL.createObjectURL(blob);
@@ -55,14 +61,16 @@ $(document).ready(function() {
                 pngButton.classList.remove('d-none');
                 pngButton.href = url;
                 
-                // SVG 변환 및 다운로드 버튼 설정
+                // SVG 다운로드 버튼 설정
                 const svgButton = document.getElementById('download-svg');
                 svgButton.classList.remove('d-none');
                 
                 // SVG 다운로드 버튼 클릭 이벤트
                 svgButton.addEventListener('click', function(e) {
                     e.preventDefault();
-                    convertToSVG(url);
+                    if (currentQRImageBlob) {
+                        convertToSVG(currentQRImageBlob);
+                    }
                 });
             });
         } else {
@@ -71,35 +79,41 @@ $(document).ready(function() {
     }
 
     // PNG를 SVG로 변환하는 함수
-    async function convertToSVG(pngUrl) {
+    async function convertToSVG(blob) {
         try {
-            const img = new Image();
-            img.src = pngUrl;
-            await img.decode(); // 이미지 로딩 대기
-            
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = img.width;
-            canvas.height = img.height;
-            ctx.drawImage(img, 0, 0);
-            
-            // Canvas 데이터를 SVG로 변환
-            const svgString = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="${img.width}" height="${img.height}">
-                    <image href="${pngUrl}" width="${img.width}" height="${img.height}"/>
-                </svg>
-            `;
-            
-            // SVG 다운로드
-            const blob = new Blob([svgString], { type: 'image/svg+xml' });
+            // Blob을 Data URL로 변환
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'qr-code.svg';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            const img = new Image();
+            
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+
+                // Canvas 데이터를 SVG로 변환
+                const svgString = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="${img.width}" height="${img.height}">
+                        <image href="${canvas.toDataURL('image/png')}" width="${img.width}" height="${img.height}"/>
+                    </svg>`;
+                
+                // SVG 다운로드
+                const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
+                const svgUrl = URL.createObjectURL(svgBlob);
+                const a = document.createElement('a');
+                a.href = svgUrl;
+                a.download = 'qr-code.svg';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                // 메모리 정리
+                URL.revokeObjectURL(svgUrl);
+            };
+
+            img.src = url;
+            
         } catch (error) {
             console.error('SVG 변환 실패:', error);
             alert('SVG 변환에 실패했습니다.');
