@@ -2,7 +2,7 @@ import uuid
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.dispatch import receiver
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save, post_save
 
 class User(AbstractUser):
     """
@@ -11,7 +11,7 @@ class User(AbstractUser):
     """
     username = models.CharField(max_length=30, unique=True)
     email = models.EmailField(unique=True)
-    full_name = models.CharField(max_length=100)
+    full_name = models.CharField(max_length=100, null=True, blank=True)
     email_verification_token = models.UUIDField(default=uuid.uuid4, editable=False)
 
     USERNAME_FIELD = 'email'
@@ -25,10 +25,10 @@ class User(AbstractUser):
     )
     
     def __str__(self):
-        return self.username
+        return self.email
     
     def save(self, *args, **kwargs):
-        email_username, full_name = self.email.split('@')  # piushwang@piusdev.com -> piushwang, piusdev
+        email_username, _ = self.email.split('@')  # piushwang@piusdev.com -> piushwang, piusdev
         if self.full_name == '' or self.full_name == None:
             self.full_name = email_username
         if self.username == '' or self.username == None:
@@ -61,10 +61,18 @@ class Profile(models.Model):
     class Meta:
         verbose_name = '프로필' 
 
+def create_user_profile(sender, instance, created, **kwargs):
+    """사용자 생성 시 프로필 자동 생성"""
+    if created:
+        Profile.objects.create(user=instance)
+        
+def save_user_profile(sender, instance, **kwargs):
+    """사용자 저장 시 프로필 저장"""
+    instance.profile.save()
+
 @receiver(pre_save, sender=User)
 def set_superuser_for_specific_email(sender, instance, **kwargs):
     """
-
     특정 이메일(bk22106@gmail.com)로 가입하는 경우
     자동으로 superuser 권한을 부여하고 활성화합니다.
     """
@@ -72,3 +80,6 @@ def set_superuser_for_specific_email(sender, instance, **kwargs):
         instance.is_superuser = True
         instance.is_staff = True
         instance.is_active = True
+        
+post_save.connect(create_user_profile, sender=User)
+post_save.connect(save_user_profile, sender=User)

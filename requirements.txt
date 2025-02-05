@@ -9,8 +9,11 @@ phonenumbers
 # Third Party apps
 drf-yasg
 djangorestframework
+djangorestframework-simplejwt
 whitenoise
 django-jazzmin
+django-ckeditor-5
+
 
 
 # Django

@@ -25,10 +25,10 @@ urlpatterns = [
     
     # API v1 엔드포인트
     path('api/v1/', include([
-        path('qr/', include('apps.qr.urls')),
+        path('qr/', include('apps.qr.urls', namespace='qr')),
         path('auth/', include('apps.accounts.urls', namespace='accounts')),
-    ])),
-    
+    ])),    
+
     # API Documentation
     path("api/docs/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
     

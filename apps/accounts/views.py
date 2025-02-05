@@ -13,11 +13,23 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth import get_user_model
+from rest_framework import generics
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.permissions import AllowAny
+from apps.accounts import serializer
+from apps.accounts.models import User
 from .forms import SignUpForm, SignInForm, DeleteUserForm
 from .tokens import email_verification_token
 
 logger = logging.getLogger(__name__)
 
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = serializer.MyTokenObtainPairSerializer
+
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    permission_classes = [AllowAny]
+    serializer_class = serializer.RegisterSerializer
 
 class SignUpView(FormView):
     form_class = SignUpForm
