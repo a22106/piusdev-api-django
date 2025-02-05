@@ -1,4 +1,3 @@
-import uuid
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.dispatch import receiver
@@ -12,7 +11,9 @@ class User(AbstractUser):
     username = models.CharField(max_length=30, unique=True)
     email = models.EmailField(unique=True)
     full_name = models.CharField(max_length=100, null=True, blank=True)
-    email_verification_token = models.UUIDField(default=uuid.uuid4, editable=False)
+    otp = models.CharField(max_length=6, null=True, blank=True)
+    refresh_token = models.CharField(max_length=1000, null=True, blank=True)
+
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']

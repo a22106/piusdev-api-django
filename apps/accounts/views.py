@@ -1,4 +1,6 @@
 import logging
+import random
+import string
 
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
@@ -10,17 +12,20 @@ from django.views import View
 from django.urls import reverse_lazy
 from django.views.generic import FormView
 from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
 from django.contrib import messages
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth import get_user_model
 from rest_framework import generics
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.response import Response
+from rest_framework import status
 from apps.accounts import serializer
 from apps.accounts.models import User
 from .forms import SignUpForm, SignInForm, DeleteUserForm
 from .tokens import email_verification_token
-
 logger = logging.getLogger(__name__)
 
 class MyTokenObtainPairView(TokenObtainPairView):
@@ -166,3 +171,64 @@ class VerifyEmailView(View):
         else:
             messages.error(request, "Email verification failed.")
             return redirect("/")
+
+def generate_random_otp(length=6):
+    otp = "".join(str(random.randint(0, 9)) for _ in range(length))
+    return otp
+
+class PasswordResetEmailView(generics.RetrieveAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = serializer.UserSerializer
+    
+    def get_object(self):
+        email = self.kwargs.get("email")
+        user = User.objects.filter(email=email).first()
+        
+        if user:
+            uuidb64 = user.pk
+            refresh = RefreshToken.for_user(user)
+            refresh_token = str(refresh.access_token)
+            
+            user.refresh_token = refresh_token
+            user.otp = generate_random_otp()
+            user.save()
+            
+            link = f"{settings.FRONTEND_URL}/password-reset/{uuidb64}/{user.otp}"
+            logger.info(f"Password reset link: {link}")
+            
+            context = {
+                "link": link,
+                "username": user.username,
+            }
+            
+            subject = "Password Reset"
+            text_body = render_to_string("accounts/password_reset_email.txt", context)
+            html_body = render_to_string("accounts/password_reset_email.html", context)
+            
+            from_email = settings.DEFAULT_FROM_EMAIL
+            
+            msg = EmailMultiAlternatives(subject, text_body, from_email, [user.email])
+            msg.attach_alternative(html_body, "text/html")
+            msg.send()
+            
+            return user
+        else:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+class PasswordChangeView(generics.UpdateAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = serializer.UserSerializer
+    
+    def create(self, request: HttpRequest, *args, **kwargs):
+        otp = request.data.get("otp")
+        uuidb64 = request.data.get("uuidb64")
+        password = request.data.get("password")
+        
+        user = User.objects.get(id=uuidb64, otp=otp)
+        if user:
+            user.set_password(password)
+            user.otp = ""
+            user.save()
+            return Response({"message": "Password changed successfully"}, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "Invalid OTP"}, status=status.HTTP_400_BAD_REQUEST)

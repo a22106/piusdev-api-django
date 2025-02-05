@@ -12,12 +12,14 @@ from django.db.utils import OperationalError
 
 load_dotenv()
 
+
 # Security settings
 SECRET_KEY = os.environ.get("SECRET_KEY")
 if not SECRET_KEY:
     SECRET_KEY = "".join(random.choice(string.ascii_lowercase) for i in range(32))
 
 DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
+FRONTEND_URL = "https://qrcode.piusdev.com" if not DEBUG else "http://localhost:8000"
 
 # HTTPS 설정 추가
 SECURE_SSL_REDIRECT = not DEBUG  # DEBUG가 False일 때 HTTPS 리다이렉션 활성화
