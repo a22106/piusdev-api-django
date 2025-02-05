@@ -10,7 +10,7 @@ phonenumbers
 drf-yasg
 djangorestframework
 whitenoise
-jazzmin
+django-jazzmin
 
 
 # Django
