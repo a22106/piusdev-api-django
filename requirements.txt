@@ -6,10 +6,13 @@ pycountry
 phonenumbers
 
 
-# Swagger
+# Third Party apps
 drf-yasg
 djangorestframework
 whitenoise
+jazzmin
+
+
 # Django
 django-admin-berry
 django_plotly_dash

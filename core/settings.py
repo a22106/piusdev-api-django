@@ -78,16 +78,22 @@ DEFAULT_FROM_EMAIL = "no-reply@piusdev.com"
 
 # Application definition
 INSTALLED_APPS = [
+    # My apps
     "core",
     "apps.accounts",
     "apps.qr",
     "apps.home",
+    
+    # Django apps
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    
+    # Third Party apps
+    "jazzmin",
     "drf_yasg",
     "rest_framework",
     "debug_toolbar",
@@ -306,10 +312,7 @@ if 'pytest' in sys.argv[0]:
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
     STATIC_URL = '/static/'
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-    STATICFILES_DIRS = [
-        os.path.join(BASE_DIR, 'static'),
-    ]
-    
+    STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
     # 테스트 시 미디어 파일 설정
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -439,3 +442,12 @@ if DEBUG:
     LOGGING['loggers']['django.request']['handlers'].append('file')
     LOGGING['loggers']['django.db.backends']['handlers'].append('file')
     LOGGING['loggers']['apps']['handlers'].append('file')
+
+# Jazzmin settings
+JAZZMIN_SETTINGS = {
+    # title of the window (Will default to current_admin_site.site_title if absent or None)
+    "site_title": "Library Admin",
+    "site_header": "Library",
+    "site_brand": "Library",
+    "show_ui_builder": True,
+}

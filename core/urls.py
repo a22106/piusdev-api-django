@@ -4,6 +4,7 @@ from django.urls import path, include, re_path
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from django.conf.urls.static import static
 
 
 schema_view = get_schema_view(
@@ -34,6 +35,8 @@ urlpatterns = [
     # 통합 테스트
     path("", include("django_cypress.urls")),
 ]
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if settings.DEBUG:
     # Debug Toolbar addition
