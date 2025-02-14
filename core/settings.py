@@ -1,3 +1,4 @@
+from datetime import timedelta
 import os
 import random
 import string
@@ -11,12 +12,14 @@ from django.db.utils import OperationalError
 
 load_dotenv()
 
+
 # Security settings
 SECRET_KEY = os.environ.get("SECRET_KEY")
 if not SECRET_KEY:
     SECRET_KEY = "".join(random.choice(string.ascii_lowercase) for i in range(32))
 
 DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
+FRONTEND_URL = "https://qrcode.piusdev.com" if not DEBUG else "http://localhost:8000"
 
 # HTTPS 설정 추가
 SECURE_SSL_REDIRECT = not DEBUG  # DEBUG가 False일 때 HTTPS 리다이렉션 활성화
@@ -58,7 +61,7 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 ALLOWED_HOSTS = [
-    "piusdev-qrcode-9f0c9f745f56.herokuapp.com",
+    os.environ.get("HEROKU_URL"),
     "qrcode.piusdev.com",
     "localhost",
     "127.0.0.1",
@@ -78,21 +81,29 @@ DEFAULT_FROM_EMAIL = "no-reply@piusdev.com"
 
 # Application definition
 INSTALLED_APPS = [
+    # My apps
     "core",
     "apps.accounts",
     "apps.qr",
     "apps.home",
+    
+    # Django apps
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    
+    # Third Party apps
+    "jazzmin",
     "drf_yasg",
     "rest_framework",
-    "debug_toolbar",
+    "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
+    "debug_toolbar",
     "django_cypress",
+    "django_ckeditor_5",
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -287,13 +298,15 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 if DEBUG:
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 else:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-import sys
+
 if 'pytest' in sys.argv[0]:
     DATABASES = {
         'default': {
@@ -306,13 +319,7 @@ if 'pytest' in sys.argv[0]:
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
     STATIC_URL = '/static/'
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-    STATICFILES_DIRS = [
-        os.path.join(BASE_DIR, 'static'),
-    ]
-    
-    # 테스트 시 미디어 파일 설정
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
     
     # 테스트 시 보안 설정 완화
     PASSWORD_HASHERS = [
@@ -439,3 +446,44 @@ if DEBUG:
     LOGGING['loggers']['django.request']['handlers'].append('file')
     LOGGING['loggers']['django.db.backends']['handlers'].append('file')
     LOGGING['loggers']['apps']['handlers'].append('file')
+
+# Jazzmin settings
+JAZZMIN_SETTINGS = {
+    # title of the window (Will default to current_admin_site.site_title if absent or None)
+    "site_title": "Library Admin",
+    "site_header": "Library",
+    "site_brand": "Library",
+    "show_ui_builder": True,
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=50),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': False,
+
+    'ALGORITHM': 'HS256',
+
+    'VERIFYING_KEY': None,
+    'AUDIENCE': None,
+    'ISSUER': None,
+    'JWK_URL': None,
+    'LEEWAY': 0,
+
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+    'USER_AUTHENTICATION_RULE': 'rest_framework_simplejwt.authentication.default_user_authentication_rule',
+
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+    'TOKEN_USER_CLASS': 'rest_framework_simplejwt.models.TokenUser',
+
+    'JTI_CLAIM': 'jti',
+
+    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
+    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+}
