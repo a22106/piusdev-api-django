@@ -31,6 +31,8 @@ from qrcode.image.styles.colormasks import (
     ImageColorMask,
 )
 
+from apps.qr.serializers import BaseQRSerializer
+
 from ..constants import QRStyles, QRColorMasks, QREyeStyles
 
 
@@ -73,10 +75,7 @@ def _get_color_mask(mask_type: Type[QRColorMasks]):
 
 
 def _convert_color_to_rgb(color: str) -> tuple:
-    """
-    Convert color string to RGB tuple.
-    Supports color names ('red', 'blue') and hex values ('#FF0000').
-    """
+    """문자열 색상을 RGB 튜플로 변환. 색상명 ('red', 'blue')과 16진수 값 ('#FF0000')을 지원."""
     try:
         # ImageColor.getrgb는 'red', '#FF0000' 같은 색상명을 RGB 튜플로 변환
         return ImageColor.getrgb(color)
@@ -232,13 +231,13 @@ def generate_email_qr(
 
 
 def generate_text_qr(
-    text: str,
+    text: str,  # text를 필수 매개변수로 변경
     style: Type[QRStyles] = QRStyles.SQUARE_MODULE,
     fill_color: str = "black",
     back_color: str = "white",
     color_mask: Type[QRColorMasks] = QRColorMasks.SOLID_FILL,
     embedded_image: Image = None,
-    embedded_image_ratio: float = 0.25
+    embedded_image_ratio: float = 0.25,
 ) -> bytes:
     """
     Plain Text QR Code 생성
@@ -255,6 +254,9 @@ def generate_text_qr(
     Returns:
         bytes: 생성된 QR 코드 이미지(PNG 포맷).
     """
+    if text is None:
+        raise ValueError("Text content is required")
+
     return create_qr_code(
         text,
         style=style,
@@ -718,3 +720,14 @@ def generate_bitcoin_qr(
     except Exception as e:
         logger.error(f"Error creating Bitcoin QR Code: {e}")
         raise
+
+def list_of_properties_of_serializer(serializer: Type[BaseQRSerializer]):
+    """
+    시리얼라이저에서 필수 필드만 추출
+    BaseQRSerializer의 공통 필드를 제외하고 required=True인 필드만 반환
+    """
+    return [
+        field for field, field_instance in serializer._declared_fields.items()
+        if field not in BaseQRSerializer._declared_fields.keys()
+        and field_instance.required
+    ]

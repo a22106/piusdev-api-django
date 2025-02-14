@@ -1,4 +1,6 @@
 # qr/views.py
+import traceback
+from typing import Callable, List
 from django.http import HttpResponse, JsonResponse
 from PIL import Image
 from drf_yasg import openapi
@@ -9,6 +11,8 @@ from django.utils.decorators import method_decorator
 import logging
 from rest_framework.request import Request
 from rest_framework.views import APIView
+from rest_framework.generics import GenericAPIView
+from rest_framework.response import Response
 
 from apps.qr.constants import QRStyles, QRColorMasks, QREyeStyles
 
@@ -26,13 +30,18 @@ from apps.qr.utils.qr_utils import (
     generate_mecard_qr,
     generate_event_qr,
     generate_geo_qr,
+    list_of_properties_of_serializer,
 )
 from apps.qr.serializers import *
 
 logger = logging.getLogger(__name__)
 
 @method_decorator(csrf_exempt, name='dispatch')
-class BaseQrView(APIView):
+class BaseQrView(GenericAPIView):
+    # GenericAPIView의 기능을 활용하기 위한 속성 설정
+    serializer_class = None  # 각 하위 클래스에서 정의
+    required_params = []
+    
     def validate_common_params(self, request: Request):
         """공통 파라미터 검증"""
         try:
@@ -78,7 +87,19 @@ class BaseQrView(APIView):
                 raise ValueError("Invalid embedded image file.")
         return embedded_image
 
-    def handle_qr_generation(self, request: Request, generator_func, required_params):
+    def post(self, request: Request, *args, **kwargs):
+        """QR 코드 생성을 위한 POST 메서드"""
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=400)
+            
+        return self.handle_qr_generation(
+            request,
+            self.generator_func,
+            self.required_params
+        )
+
+    def handle_qr_generation(self, request: Request, generator_func: Callable, required_params: List[str]):
         """QR 코드 생성 템플릿 메서드"""
         try:
             # 요청 데이터 로깅
@@ -133,133 +154,151 @@ class BaseQrView(APIView):
             return JsonResponse({"detail": str(e)}, status=400)
         except Exception as e:
             logger.error(f"Unexpected error generating QR Code: {str(e)}")
+            traceback.print_exc()
             return JsonResponse(
                 {"detail": "An unexpected error occurred while generating the QR Code."},
                 status=500
             )
 
 class QrVcardView(BaseQrView):
+    serializer_class = VCardQRSerializer
+    required_params = list_of_properties_of_serializer(VCardQRSerializer)
     
     @qr_swagger_decorator(
         "VCard QR Code",
         VCardQRSerializer
     )
     def post(self, request):
-        return self.handle_qr_generation(
-            request,
-            generate_vcard_qr,
-            ["first_name", "last_name", "vcard_mobile", "vcard_email"]
-        )
+        return self.handle_qr_generation(request, generate_vcard_qr, self.required_params)
 
 
 class QrUrlView(BaseQrView):
+    serializer_class = URLQRSerializer
+    required_params = list_of_properties_of_serializer(URLQRSerializer)
+    
     @qr_swagger_decorator(
         "URL QR Code",
         URLQRSerializer
     )
     def post(self, request: Request):
-        return self.handle_qr_generation(request, generate_url_qr, ["url"])
+        return self.handle_qr_generation(request, generate_url_qr, self.required_params)
 
 
 class QrEmailView(BaseQrView):
+    serializer_class = EmailQRSerializer
+    required_params = list_of_properties_of_serializer(EmailQRSerializer)
+    
     @qr_swagger_decorator(
         "Email QR Code",
         EmailQRSerializer
     )
     def post(self, request):
-        return self.handle_qr_generation(request, generate_email_qr, ["email"])
+        return self.handle_qr_generation(request, generate_email_qr, self.required_params)
 
 
 class QrTextView(BaseQrView):
+    serializer_class = TextQRSerializer
+    required_params = list_of_properties_of_serializer(TextQRSerializer)
+    
     @qr_swagger_decorator(
         "Text QR Code",
         TextQRSerializer
     )
     def post(self, request):
-        return self.handle_qr_generation(request, generate_text_qr, ["text"])
+        return self.handle_qr_generation(request, generate_text_qr, self.required_params)
 
 
 class QrPhoneNumberView(BaseQrView):
+    serializer_class = PhoneQRSerializer
+    required_params = list_of_properties_of_serializer(PhoneQRSerializer)
+    
     @qr_swagger_decorator(
         "Phone Number QR Code",
         PhoneQRSerializer
     )
     def post(self, request):
-        return self.handle_qr_generation(request, generate_phone_qr, ["phone_number"])
+        return self.handle_qr_generation(request, generate_phone_qr, self.required_params)
 
 
 class QrWifiView(BaseQrView):
+    serializer_class = WiFiQRSerializer
+    required_params = list_of_properties_of_serializer(WiFiQRSerializer)
+    
     @qr_swagger_decorator(
         "WiFi QR Code",
         WiFiQRSerializer
     )
     def post(self, request):
-        return self.handle_qr_generation(request, generate_wifi_qr, ["ssid"])
+        return self.handle_qr_generation(request, generate_wifi_qr, self.required_params)
 
 
 class QrSmsView(BaseQrView):
+    serializer_class = SMSQRSerializer
+    required_params = list_of_properties_of_serializer(SMSQRSerializer)
+    
     @qr_swagger_decorator(
         "SMS QR Code",
         SMSQRSerializer
     )
     def post(self, request):
-        return self.handle_qr_generation(request, generate_sms_qr, ["phone_number"])
+        return self.handle_qr_generation(request, generate_sms_qr, self.required_params)
 
 
 class QrGeoView(BaseQrView):
+    serializer_class = GeoQRSerializer
+    required_params = list_of_properties_of_serializer(GeoQRSerializer)
+    
     @qr_swagger_decorator(
         "Geolocation QR Code",
         GeoQRSerializer
     )
     def post(self, request):
-        return self.handle_qr_generation(
-            request,
-            generate_geo_qr,
-            ["latitude", "longitude"]
-        )
+        return self.handle_qr_generation(request, generate_geo_qr, self.required_params)
 
 
 class QrEventView(BaseQrView):
+    serializer_class = EventQRSerializer
+    required_params = list_of_properties_of_serializer(EventQRSerializer)
+    
     @qr_swagger_decorator(
         "Event QR Code",
         EventQRSerializer
     )
     def post(self, request):
-        return self.handle_qr_generation(
-            request,
-            generate_event_qr,
-            ["title", "start", "end", "location", "description"]
-        )
+        return self.handle_qr_generation(request, generate_event_qr, self.required_params)
 
 
 class QrMeCardView(BaseQrView):
+    serializer_class = MeCardQRSerializer
+    required_params = list_of_properties_of_serializer(MeCardQRSerializer)
+    
     @qr_swagger_decorator(
         "MECARD QR Code",
         MeCardQRSerializer
     )
     def post(self, request):
-        return self.handle_qr_generation(
-            request,
-            generate_mecard_qr,
-            ["name", "reading", "tel", "email"]
-        )
+        return self.handle_qr_generation(request, generate_mecard_qr, self.required_params)
 
 
 class QrWhatsAppView(BaseQrView):
+    serializer_class = WhatsAppQRSerializer
+    required_params = list_of_properties_of_serializer(WhatsAppQRSerializer)
+    
     @qr_swagger_decorator(
         "WhatsApp QR Code",
         WhatsAppQRSerializer
     )
     def post(self, request):
-        return self.handle_qr_generation(request, generate_whatsapp_qr, ["phone_number"])
+        return self.handle_qr_generation(request, generate_whatsapp_qr, self.required_params)
 
 
 class QrBitcoinView(BaseQrView):
+    serializer_class = BitcoinQRSerializer
+    required_params = list_of_properties_of_serializer(BitcoinQRSerializer)
+    
     @qr_swagger_decorator(
         "Bitcoin Payment QR Code",
         BitcoinQRSerializer
     )
     def post(self, request):
-        return self.handle_qr_generation(
-            request, generate_bitcoin_qr, ["address", "amount", "label", "message"]
-        )
+        return self.handle_qr_generation(request, generate_bitcoin_qr, self.required_params)

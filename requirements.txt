@@ -13,7 +13,7 @@ djangorestframework-simplejwt
 whitenoise
 django-jazzmin
 django-ckeditor-5
-
+VerbalExpressions
 
 
 # Django
