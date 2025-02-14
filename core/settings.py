@@ -59,10 +59,12 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
     "https://qrcode.piusdev.com",
     f"https://{os.environ.get('HEROKU_URL')}",
+    f"https://{os.environ.get('HOST_URL')}",
 ]
 
 ALLOWED_HOSTS = [
     os.environ.get("HEROKU_URL"),
+    os.environ.get("HOST_URL"),
     "qrcode.piusdev.com",
     "localhost",
     "127.0.0.1",
