@@ -32,9 +32,6 @@ urlpatterns = [
 
     # API Documentation
     path("api/docs/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
-    
-    # 통합 테스트
-    path("", include("django_cypress.urls")),
 ]
 
 if settings.DEBUG:

@@ -20,6 +20,7 @@ if not SECRET_KEY:
 
 DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
 FRONTEND_URL = "https://qrcode.piusdev.com" if not DEBUG else "http://localhost:8000"
+print(f"DEBUG: {DEBUG}")
 
 # HTTPS 설정 추가
 SECURE_SSL_REDIRECT = not DEBUG  # DEBUG가 False일 때 HTTPS 리다이렉션 활성화
@@ -99,7 +100,6 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
     "debug_toolbar",
-    "django_cypress",
     "django_ckeditor_5",
     
     # Django apps
