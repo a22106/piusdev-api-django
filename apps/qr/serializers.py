@@ -1,5 +1,7 @@
+import re
 from PIL import ImageColor
 
+import phonenumbers
 from rest_framework import serializers
 
 from apps.qr.constants.enums import *
@@ -39,7 +41,15 @@ class BaseQRSerializer(serializers.Serializer):
         """back_color 검증"""
         self._color_validator(value)
         return value
-
+    
+    def validate_email(self, value):
+        """이메일 검증"""
+        if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', value):
+            raise serializers.ValidationError("Invalid email format")
+        return value
+    
+    # TODO: 전화번호, 이메일, URL 검증 추가
+    
 
 class UrlQRSerializer(BaseQRSerializer):
     """URL QR 코드 생성 Serializer"""
@@ -73,17 +83,53 @@ class QrErrorResponseSerializer(serializers.Serializer):
 class EmailQRSerializer(BaseQRSerializer):
     """이메일 QR 코드 생성 Serializer"""
     email = serializers.EmailField()
-    subject = serializers.CharField(required=False, allow_blank=True)
-    body = serializers.CharField(required=False, allow_blank=True)
+    subject = serializers.CharField(required=False, allow_blank=True, max_length=255)
+    body = serializers.CharField(required=False, allow_blank=True, max_length=3000)
 
 class TextQRSerializer(BaseQRSerializer):
     """텍스트 QR 코드 생성 Serializer"""
-    text = serializers.CharField()
+    text = serializers.CharField(max_length=3000)
 
 class PhoneQRSerializer(BaseQRSerializer):
     """전화번호 QR 코드 생성 Serializer"""
     country_code = serializers.CharField(required=False, allow_blank=True, default='+1')
-    phone_number = serializers.CharField()
+    phone_number = serializers.CharField(max_length=15)
+    
+    def validate_country_code(self, value):
+        """국가 코드 검증
+        - phonenumbers 패키지를 사용하여 유효한 국가 코드인지 검증
+        - + 기호가 없는 경우 추가
+        """
+        if not value.startswith('+'):
+            value = f'+{value}'
+            
+        try:
+            # 임시 전화번호를 만들어 국가 코드 검증
+            test_number = f"{value}1234567890"
+            parsed_number: phonenumbers.PhoneNumber = phonenumbers.parse(test_number)
+            if parsed_number.country_code != int(value[1:]):
+                raise serializers.ValidationError(f"Invalid country code: {value}")
+        except phonenumbers.NumberParseException:
+            raise serializers.ValidationError(f"Invalid country code format: {value}")
+            
+        return value
+    
+    def validate_phone_number(self, value):
+        """전화번호 검증
+        - phonenumbers 패키지를 사용하여 유효한 전화번호인지 검증
+        """
+        try:
+            phone_number = phonenumbers.parse(value)
+            if not phonenumbers.is_valid_number(phone_number):
+                raise serializers.ValidationError(f"Invalid phone number: {value[len(self.initial_data['country_code']):]}")
+        except phonenumbers.NumberParseException as e:
+            raise serializers.ValidationError(f"Invalid phone number format: {value[len(self.initial_data['country_code']):]}")
+        
+        return value
+    
+    def to_internal_value(self, data):
+        data['phone_number'] = data['country_code'] + data['phone_number'].replace('-', '')
+        return super().to_internal_value(data)
 
 class VCardQRSerializer(BaseQRSerializer):
     """VCard QR 코드 생성 Serializer"""
@@ -99,7 +145,9 @@ class VCardQRSerializer(BaseQRSerializer):
     zip = serializers.CharField(required=False, allow_blank=True)
     country = serializers.CharField(required=False, allow_blank=True)
     note = serializers.CharField(required=False, allow_blank=True)
+    # TODO: 전화번호, 이메일, URL 검증 추가
 
+    
 class WiFiQRSerializer(BaseQRSerializer):
     """WiFi QR 코드 생성 Serializer"""
     ssid = serializers.CharField()
