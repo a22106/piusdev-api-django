@@ -15,7 +15,6 @@ django-jazzmin
 django-ckeditor-5
 VerbalExpressions
 
-
 # Django
 django-admin-berry
 django_plotly_dash
@@ -31,6 +30,7 @@ gunicorn
 # packages
 qrcode[pil]
 Pillow
+seavoyage
 
 # Database
 dj-database-url
@@ -51,6 +51,3 @@ django_cypress
 playwright==1.41.1
 pytest-playwright==0.4.3
 pytest-django==4.7.0
-
-# Sea Voyage
-git+https://github.com/a22106/sea_voyage.git
