@@ -11,11 +11,12 @@ from django.utils.decorators import method_decorator
 import logging
 from rest_framework.request import Request
 from rest_framework.views import APIView
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, CreateAPIView
 from rest_framework.response import Response
 
 from apps.qr.constants import QRStyles, QRColorMasks, QREyeStyles
 
+from apps.qr.constants.error_codes import QRErrorCodes, QRErrorMessages
 from apps.qr.decorators import qr_swagger_decorator
 from apps.qr.utils.qr_utils import (
     generate_url_qr,
@@ -37,45 +38,10 @@ from apps.qr.serializers import *
 logger = logging.getLogger(__name__)
 
 @method_decorator(csrf_exempt, name='dispatch')
-class BaseQrView(GenericAPIView):
+class BaseQrView(CreateAPIView):
     # GenericAPIView의 기능을 활용하기 위한 속성 설정
     serializer_class = None  # 각 하위 클래스에서 정의
     required_params = []
-    
-    def validate_common_params(self, request: Request):
-        """공통 파라미터 검증"""
-        try:
-            style = request.data.get("style", QRStyles.SQUARE_MODULE)
-            fill_color = request.data.get("fill_color", "black")
-            back_color = request.data.get("back_color", "white")
-            color_mask = request.data.get("color_mask", QRColorMasks.SOLID_FILL)
-            embedded_image_ratio = float(request.data.get("embedded_image_ratio", 0.25))
-
-            if not (0.1 <= embedded_image_ratio <= 0.5):
-                raise ValueError("embedded_image_ratio must be between 0.1 and 0.5")
-
-            try:
-                style = QRStyles(style)
-            except ValueError:
-                logger.error(f"Invalid style parameter: {style}")
-                raise ValueError(f"Invalid style. Valid options are: {', '.join(QRStyles.__members__.keys())}")
-
-            try:
-                color_mask = QRColorMasks(color_mask)
-            except ValueError:
-                logger.error(f"Invalid color_mask parameter: {color_mask}")
-                raise ValueError(f"Invalid color mask. Valid options are: {', '.join(QRColorMasks.__members__.keys())}")
-
-            return {
-                "style": style,
-                "fill_color": fill_color,
-                "back_color": back_color,
-                "color_mask": color_mask,
-                "embedded_image_ratio": embedded_image_ratio
-            }
-        except Exception as e:
-            logger.error(f"Parameter validation error: {str(e)}")
-            raise ValueError(str(e))
 
     def process_embedded_image(self, request: Request):
         embedded_image = None
@@ -84,15 +50,27 @@ class BaseQrView(GenericAPIView):
                 image_file = request.FILES['embedded_image']
                 embedded_image = Image.open(image_file)
             except Exception as e:
-                raise ValueError("Invalid embedded image file.")
+                raise Response(
+                    {
+                        'detail': "Invalid embedded image file.",
+                        'error_code': QRErrorCodes.INVALID_PARAMETERS
+                    },
+                    status=400
+                )
         return embedded_image
 
     def post(self, request: Request, *args, **kwargs):
         """QR 코드 생성을 위한 POST 메서드"""
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
-            return Response(serializer.errors, status=400)
-            
+            return Response(
+                {
+                    'detail': serializer.errors,
+                    'error_code': QRErrorCodes.INVALID_PARAMETERS
+                },
+                status=400
+            )
+        
         return self.handle_qr_generation(
             request,
             self.generator_func,
@@ -104,42 +82,48 @@ class BaseQrView(GenericAPIView):
         try:
             # 요청 데이터 로깅
             logger.debug(f"Request data: {request.data}")
-
-            # 1. 필요 파라미터 검증
-            missing_params = [param for param in required_params if not request.data.get(param)]
-            if missing_params:
-                return JsonResponse(
-                    {"detail": f"Missing required parameters: {', '.join(missing_params)}"},
+            serializer = self.get_serializer(data=request.data)
+            if not serializer.is_valid():
+                return Response(
+                    {
+                        'detail': serializer.errors,
+                        'error_code': QRErrorCodes.INVALID_PARAMETERS
+                    },
                     status=400
                 )
 
-            # 2. 공통 파라미터
-            try:
-                common_params = self.validate_common_params(request)
-            except ValueError as e:
-                return JsonResponse({"detail": str(e)}, status=400)
-
-            # 3. 임베드 이미지
+            # 임베드 이미지 검증
             try:
                 embedded_image = self.process_embedded_image(request)
             except ValueError as e:
-                return JsonResponse({"detail": str(e)}, status=400)
+                return Response(
+                    {
+                        'detail': str(e),
+                        'error_code': QRErrorCodes.INVALID_IMAGE
+                    },
+                    status=400
+                )
 
-            # 4. 요청 파라미터 준비
+            # 요청 파라미터 준비
             generator_params = {k: request.data.get(k) for k in required_params}
-            generator_params.update(common_params)
             generator_params['embedded_image'] = embedded_image
 
             # 파라미터 로깅
             logger.debug(f"Generator parameters: {generator_params}")
 
-            # 5. QR 코드 생성
+            # QR 코드 생성
             qr_image = generator_func(**generator_params)
 
             if not qr_image:
-                raise ValueError("Failed to generate QR code")
+                raise Response(
+                    {
+                        'detail': "Failed to generate QR code",
+                        'error_code': QRErrorCodes.GENERATION_FAILED
+                    },
+                    status=500
+                )
 
-            # 6. 응답 생성
+            # 응답 생성
             response = HttpResponse(qr_image, content_type="image/png")
             response['Content-Length'] = len(qr_image)
             response['Content-Disposition'] = 'inline; filename="qr-code.png"'
@@ -149,18 +133,31 @@ class BaseQrView(GenericAPIView):
 
             return response
 
-        except ValueError as e:
-            logger.error(f"Validation error: {str(e)}")
-            return JsonResponse({"detail": str(e)}, status=400)
         except Exception as e:
             logger.error(f"Unexpected error generating QR Code: {str(e)}")
             traceback.print_exc()
-            return JsonResponse(
-                {"detail": "An unexpected error occurred while generating the QR Code."},
+            return Response(
+                {
+                    'detail': QRErrorMessages.get_message(QRErrorCodes.INTERNAL_ERROR),
+                    'error_code': QRErrorCodes.INTERNAL_ERROR
+                },
                 status=500
             )
 
-class QrVcardView(BaseQrView):
+
+
+class QrUrlView(BaseQrView):
+    serializer_class = UrlQRSerializer
+    required_params = list_of_properties_of_serializer(UrlQRSerializer)
+    
+    @qr_swagger_decorator(
+        "URL QR Code",
+        UrlQRSerializer
+    )
+    def post(self, request: Request):
+        return self.handle_qr_generation(request, generate_url_qr, self.required_params)
+
+class QrVcardView(BaseQrView): # TODO: URL 제외 모든 QR코드 생성에 대한 테스트 코드 작성
     serializer_class = VCardQRSerializer
     required_params = list_of_properties_of_serializer(VCardQRSerializer)
     
@@ -170,19 +167,6 @@ class QrVcardView(BaseQrView):
     )
     def post(self, request):
         return self.handle_qr_generation(request, generate_vcard_qr, self.required_params)
-
-
-class QrUrlView(BaseQrView):
-    serializer_class = URLQRSerializer
-    required_params = list_of_properties_of_serializer(URLQRSerializer)
-    
-    @qr_swagger_decorator(
-        "URL QR Code",
-        URLQRSerializer
-    )
-    def post(self, request: Request):
-        return self.handle_qr_generation(request, generate_url_qr, self.required_params)
-
 
 class QrEmailView(BaseQrView):
     serializer_class = EmailQRSerializer

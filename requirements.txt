@@ -1,36 +1,27 @@
-# Core
+# django apps
 django
+drf-yasg
+djangorestframework
+djangorestframework-simplejwt
+django-jazzmin
+django-ckeditor-5
+django-debug-toolbar
+django-configurations
+django-cors-headers
+whitenoise
+gunicorn
+
+# Third Party apps
+VerbalExpressions
 python-dotenv
 str2bool
 pycountry
 phonenumbers
-
-
-# Third Party apps
-drf-yasg
-djangorestframework
-djangorestframework-simplejwt
-whitenoise
-django-jazzmin
-django-ckeditor-5
-VerbalExpressions
-
-# Django
-django-admin-berry
-django_plotly_dash
-django-qr-code
-django-debug-toolbar
-django-configurations
-django-cors-headers
-
-# Deployment
-whitenoise
-gunicorn
-
-# packages
 qrcode[pil]
 Pillow
 seavoyage
+pydantic
+
 
 # Database
 dj-database-url
@@ -40,14 +31,5 @@ psycopg2-binary
 pytest
 pytest-django
 pytest-cov
-pytest-playwright
-playwright
 coverage
 coverage-badge
-selenium
-django_cypress
-
-# E2E Testing
-playwright==1.41.1
-pytest-playwright==0.4.3
-pytest-django==4.7.0

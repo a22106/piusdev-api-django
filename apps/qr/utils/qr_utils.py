@@ -30,7 +30,6 @@ from qrcode.image.styles.colormasks import (
     VerticalGradiantColorMask,
     ImageColorMask,
 )
-
 from apps.qr.serializers import BaseQRSerializer
 
 from ..constants import QRStyles, QRColorMasks, QREyeStyles
@@ -76,13 +75,9 @@ def _get_color_mask(mask_type: Type[QRColorMasks]):
 
 def _convert_color_to_rgb(color: str) -> tuple:
     """문자열 색상을 RGB 튜플로 변환. 색상명 ('red', 'blue')과 16진수 값 ('#FF0000')을 지원."""
-    try:
-        # ImageColor.getrgb는 'red', '#FF0000' 같은 색상명을 RGB 튜플로 변환
-        return ImageColor.getrgb(color)
-    except Exception as e:
-        logger.error(f"Error converting color {color}: {e}")
-        # 기본값으로 검정색 반환
-        return (0, 0, 0)
+    # ImageColor.getrgb는 'red', '#FF0000' 같은 색상명을 RGB 튜플로 변환
+
+    return ImageColor.getrgb(color)
 
 
 def create_qr_code(
@@ -109,6 +104,7 @@ def create_qr_code(
         # 색상을 RGB 튜플로 변환
         fill_rgb = _convert_color_to_rgb(fill_color)
         back_rgb = _convert_color_to_rgb(back_color)
+
         mask_class = _get_color_mask(color_mask)
 
         # Color Mask 인스턴스 생성 로직 수정
