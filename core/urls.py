@@ -27,7 +27,8 @@ urlpatterns = [
     path('api/v1/', include([
         path('qr/', include('apps.qr.urls', namespace='qr')),
         path('auth/', include('apps.accounts.urls', namespace='accounts')),
-    ])),    
+        path('seavoyage/', include('apps.seavoyage.urls', namespace='seavoyage')),
+    ])),
 
     # API Documentation
     path("api/docs/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),

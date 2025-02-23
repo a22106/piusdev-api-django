@@ -15,7 +15,6 @@ django-jazzmin
 django-ckeditor-5
 VerbalExpressions
 
-
 # Django
 django-admin-berry
 django_plotly_dash
@@ -31,6 +30,7 @@ gunicorn
 # packages
 qrcode[pil]
 Pillow
+seavoyage
 
 # Database
 dj-database-url

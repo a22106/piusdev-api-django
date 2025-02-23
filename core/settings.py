@@ -63,14 +63,15 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 ALLOWED_HOSTS = [
-    os.environ.get("HEROKU_URL"),
-    os.environ.get("HOST_URL"),
-    "qrcode.piusdev.com",
     "localhost",
     "127.0.0.1",
 ]
 if not DEBUG:
-    ALLOWED_HOSTS += os.environ.get("ALLOWED_HOSTS", "").split(",")
+    ALLOWED_HOSTS += [
+        os.environ.get("HEROKU_URL"),
+        os.environ.get("HOST_URL"),
+        "qrcode.piusdev.com",
+    ]
 
 # Email settings
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
@@ -89,15 +90,8 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.qr",
     "apps.home",
-    
-    # Django apps
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-    
+    "apps.seavoyage",
+
     # Third Party apps
     "jazzmin",
     "drf_yasg",
@@ -107,6 +101,15 @@ INSTALLED_APPS = [
     "debug_toolbar",
     "django_cypress",
     "django_ckeditor_5",
+    
+    # Django apps
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+
 ]
 
 AUTHENTICATION_BACKENDS = [
