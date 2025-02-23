@@ -3,6 +3,7 @@ venv/
 .pytest_cache/
 config/*.py
 staticfiles/
+.mypy_cache/
 
 *.ipynb
 tests/*.png

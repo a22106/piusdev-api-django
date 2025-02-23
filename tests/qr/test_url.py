@@ -4,6 +4,9 @@ from io import BytesIO
 import pytest
 from unittest.mock import patch, Mock
 
+from apps.qr.constants.enums import QRColorMasks, QRStyles
+from apps.qr.constants.error_codes import QRErrorCodes, QRErrorMessages
+
 @pytest.fixture
 def common_params():
     return {
@@ -50,18 +53,18 @@ class TestQRUrlEndpoint(QrTestBase):
         response = client.post(url, data={})
         
         assert response.status_code == 400
-        assert response.json()['detail'] == 'Missing required parameters: url'
-        assert response.json()['error_code'] == 'MISSING_PARAMETERS'
+        assert 'url' in response.json()['detail'].keys()
+        assert response.json()['error_code'] == QRErrorCodes.INVALID_PARAMETERS
 
     def test_url_qr_invalid_parameters(self, client, mock_qr_url_request):
         """잘못된 파라미터 테스트"""
         url = reverse(self.view_name)
-        mock_qr_url_request['embedded_image_ratio'] = 2.0  # 허용 범위 초과
+        mock_qr_url_request['url'] = 'invalid-url'
         
         response = client.post(url, data=mock_qr_url_request)
         assert response.status_code == 400
-        assert 'embedded_image_ratio' in response.json()['detail']
-        assert response.json()['error_code'] == 'INVALID_PARAMETERS'
+        assert 'url' in response.json()['detail'].keys()
+        assert response.json()['error_code'] == QRErrorCodes.INVALID_PARAMETERS
 
     def test_url_qr_invalid_style(self, client, mock_qr_url_request):
         """잘못된 스타일 파라미터 테스트"""
@@ -69,7 +72,8 @@ class TestQRUrlEndpoint(QrTestBase):
         mock_qr_url_request['style'] = 'INVALID_STYLE'
         response = client.post(url, data=mock_qr_url_request)
         assert response.status_code == 400
-        assert 'style' in response.json()
+        assert 'style' in response.json()['detail'].keys()
+        assert response.json()['error_code'] == QRErrorCodes.INVALID_PARAMETERS
 
     def test_url_qr_invalid_color_mask(self, client, mock_qr_url_request):
         """잘못된 컬러 마스크 테스트"""
@@ -77,7 +81,8 @@ class TestQRUrlEndpoint(QrTestBase):
         mock_qr_url_request['color_mask'] = 'INVALID_MASK'
         response = client.post(url, data=mock_qr_url_request)
         assert response.status_code == 400
-        assert 'color_mask' in response.json()
+        assert 'color_mask' in response.json()['detail'].keys()
+        assert response.json()['error_code'] == QRErrorCodes.INVALID_PARAMETERS
 
     def test_url_qr_invalid_image_ratio(self, client, mock_qr_url_request):
         """잘못된 이미지 비율 테스트"""
@@ -85,19 +90,13 @@ class TestQRUrlEndpoint(QrTestBase):
         mock_qr_url_request['embedded_image_ratio'] = 0.6  # 허용 범위 초과
         response = client.post(url, data=mock_qr_url_request)
         assert response.status_code == 400
-        assert 'embedded_image_ratio' in response.json()
+        assert 'embedded_image_ratio' in response.json()['detail'].keys()
+        assert response.json()['error_code'] == QRErrorCodes.INVALID_PARAMETERS
 
     def test_url_qr_with_different_styles(self, client, mock_qr_url_request):
         """다양한 스타일 테스트"""
         url = reverse(self.view_name)
-        styles = [
-            "SQUARE_MODULE",
-            "GAPPED_SQUARE_MODULE",
-            "CIRCLE_MODULE",
-            "ROUNDED_MODULE",
-            "HORIZONTAL_BARS",
-            "VERTICAL_BARS"
-        ]
+        styles = QRStyles.get_all_styles()
         
         for style in styles:
             mock_qr_url_request['style'] = style
@@ -118,16 +117,19 @@ class TestQRUrlEndpoint(QrTestBase):
             response = client.post(url, data=mock_qr_url_request)
             self._validate_qr_response(response)
 
+    def test_url_qr_invalid_color(self, client, mock_qr_url_request):
+        """잘못된 색상 테스트"""
+        url = reverse(self.view_name)
+        mock_qr_url_request['fill_color'] = 'invalid-color'
+        response = client.post(url, data=mock_qr_url_request)
+        assert response.status_code == 400
+        assert 'fill_color' in response.json()['detail'].keys()
+        assert response.json()['error_code'] == QRErrorCodes.INVALID_PARAMETERS
+    
     def test_url_qr_with_different_masks(self, client, mock_qr_url_request):
         """다양한 컬러 마스크 테스트"""
         url = reverse(self.view_name)
-        masks = [
-            "SOLID_FILL",
-            "RADIAL_GRADIANT",
-            "SQUARE_GRADIANT",
-            "HORIZONTAL_GRADIANT",
-            "VERTICAL_GRADIANT"
-        ]
+        masks = QRColorMasks.get_all_color_masks()
         
         for mask in masks:
             mock_qr_url_request['color_mask'] = mask
@@ -155,5 +157,5 @@ class TestQRUrlEndpoint(QrTestBase):
         response = client.post(url, data=mock_qr_url_request)
         
         assert response.status_code == 500
-        assert response.json()['detail'] == 'An unexpected error occurred while generating the QR Code.'
-        assert response.json()['error_code'] == 'INTERNAL_SERVER_ERROR'
+        assert response.json()['detail'] == QRErrorMessages.get_message(QRErrorCodes.INTERNAL_ERROR)
+        assert response.json()['error_code'] == QRErrorCodes.INTERNAL_ERROR
