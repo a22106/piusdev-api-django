@@ -21,9 +21,34 @@ class BaseQRSerializer(serializers.Serializer):
         max_value=0.5
     )
 
-class URLQRSerializer(BaseQRSerializer):
+class UrlQRSerializer(BaseQRSerializer):
     """URL QR 코드 생성을 위한 Serializer"""
-    url = serializers.URLField()
+    url = serializers.CharField()  # URLField 대신 CharField 사용
+
+    def validate_url(self, value):
+        """URL 형식 검증
+        - http://, https:// 로 시작하는 URL 허용
+        - example.com 같은 도메인 형식도 허용
+        """
+        # 프로토콜이 없는 경우 'https://'를 기본값으로 추가
+        if not value.startswith(('http://', 'https://')):
+            value = f'https://{value}'
+            
+        # 최소한의 도메인 형식 검증 (예: xxx.xxx)
+        parts = value.split('://')[-1].split('.')
+        if len(parts) < 2 or not all(parts):
+            raise serializers.ValidationError("Invalid URL format. Please provide a valid domain (e.g., example.com)")
+            
+        return value
+
+class QrResponseSerializer(serializers.Serializer):
+    """URL QR 코드 생성 응답을 위한 Serializer"""
+    qr_code = serializers.ImageField()
+
+class QrErrorResponseSerializer(serializers.Serializer):
+    """QR 코드 생성 실패 응답을 위한 Serializer"""
+    detail = serializers.CharField()
+    error_code = serializers.CharField(required=False)
 
 class EmailQRSerializer(BaseQRSerializer):
     """이메일 QR 코드 생성을 위한 Serializer"""
