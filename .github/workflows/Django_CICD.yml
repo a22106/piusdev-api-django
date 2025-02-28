@@ -7,18 +7,14 @@ on:
     branches: [ "main", "test/*" ]
   workflow_dispatch:
 
+permissions:
+    contents: write
+    pages: write
+    id-token: write
+    
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    env:
-      DB_ENGINE: django.db.backends.postgresql
-      DB_NAME: ${{ secrets.DB_NAME }}
-      DB_USER: ${{ secrets.DB_USER }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      DB_HOST: localhost
-      DB_PORT: 5432
-      DJANGO_SETTINGS_MODULE: core.settings
 
     services:
       postgres:
@@ -36,9 +32,9 @@ jobs:
           --health-retries 5
 
     strategy:
-      max-parallel: 4
-      matrix:
-        python-version: [3.12]
+        max-parallel: 4
+        matrix:
+          python-version: [3.12]
 
     steps:
     - uses: actions/checkout@v4
@@ -53,16 +49,17 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Run Migrations
-      run: |
-        python manage.py migrate
-
-    - name: Start Django Server
-      run: |
-        python manage.py runserver &
-        sleep 5  # 서버가 완전히 시작될 때까지 대기
-
     - name: Run Tests
+      env:
+        DB_ENGINE: django.db.backends.postgresql
+        DB_NAME: ${{ secrets.DB_NAME }}
+        DB_USER: ${{ secrets.DB_USER }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        DB_HOST: ${{ secrets.DB_HOST }}
+        DB_PORT: 5432
+        DEBUG: "True"
+        DJANGO_SETTINGS_MODULE: core.settings
+
       run: |
         python -m pytest
 
