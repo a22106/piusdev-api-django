@@ -328,6 +328,10 @@ if 'pytest' in sys.argv[0]:
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
     STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
     
+    # 테스트 시 미디어 파일 설정
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    
     # 테스트 시 보안 설정 완화
     PASSWORD_HASHERS = [
         'django.contrib.auth.hashers.MD5PasswordHasher',
@@ -494,5 +498,3 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
-
-APPEND_SLASH = False
