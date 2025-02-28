@@ -132,9 +132,6 @@ def create_qr_code(
                 center_color=fill_rgb,
                 edge_color=back_rgb
             )
-
-
-
         # QR 코드 이미지 생성
         module_drawer = _get_module_drawer(style)
         eye_style = _get_eye_style(eye_style)
@@ -142,8 +139,8 @@ def create_qr_code(
             image_factory=StyledPilImage,
             module_drawer=module_drawer,
             color_mask=color_mask_instance,
-            embeded_image=embedded_image,
-            embeded_image_ratio=embedded_image_ratio if embedded_image else 0,
+            embedded_image=embedded_image,
+            embedded_image_ratio=embedded_image_ratio if embedded_image else 0,
         )
 
         # 이미지를 바이트로 변환

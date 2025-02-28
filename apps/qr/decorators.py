@@ -4,8 +4,18 @@ from rest_framework import serializers
 
 from apps.qr.constants.enums import QRStyles, QRColorMasks
 
-def qr_swagger_decorator(operation_id, serializer_class, tags=["QR Code"]):
+def qr_swagger_decorator(operation_id, serializer_class, tags=["QR Code"], description=None):
     """QR코드 생성 엔드포인트에 사용되는 Swagger 데코레이터"""
+    if description is None:
+        description = ""
+    description += f"""
+    style: {QRStyles.get_all_styles()}
+    color_mask: {QRColorMasks.get_all_color_masks()}
+    fill_color: #000000 or black or rgb(0,0,0)
+    back_color: #FFFFFF or white or rgb(255,255,255)
+    embedded_image: Image file
+    embedded_image_ratio: 0.2
+    """
     def decorator(func):
         # 시리얼라이저의 필드들을 스키마로 변환
         serializer_fields = {}
@@ -76,6 +86,7 @@ def qr_swagger_decorator(operation_id, serializer_class, tags=["QR Code"]):
 
         return swagger_auto_schema(
             operation_id=operation_id,
+            description=description,
             request_body=openapi.Schema(
                 type=openapi.TYPE_OBJECT,
                 properties={**serializer_fields, **common_properties},

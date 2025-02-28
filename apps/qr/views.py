@@ -105,7 +105,7 @@ class BaseQrView(CreateAPIView):
                 )
 
             # 요청 파라미터 준비
-            generator_params = {k: request.data.get(k) for k in required_params}
+            generator_params = request.data
             generator_params['embedded_image'] = embedded_image
 
             # 파라미터 로깅
