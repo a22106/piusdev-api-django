@@ -1,3 +1,4 @@
+# tests/qr/test_qr_generation.py
 from django.urls import reverse
 from PIL import Image
 from io import BytesIO
