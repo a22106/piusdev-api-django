@@ -115,9 +115,9 @@ class BaseQrView(CreateAPIView):
             qr_image = generator_func(**generator_params)
 
             if not qr_image:
-                raise Response(
+                return Response(
                     {
-                        'detail': "Failed to generate QR code",
+                        'detail': QRErrorMessages.get_message(QRErrorCodes.GENERATION_FAILED),
                         'error_code': QRErrorCodes.GENERATION_FAILED
                     },
                     status=500
