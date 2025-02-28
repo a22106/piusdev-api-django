@@ -156,7 +156,8 @@ class QrUrlView(BaseQrView):
     
     @qr_swagger_decorator(
         "URL QR Code",
-        UrlQRSerializer
+        UrlQRSerializer,
+        description="Convert URL to QR code. Generate a QR code for a website address, which can be scanned to navigate to the website."
     )
     def post(self, request: Request):
         return self.handle_qr_generation(request, generate_url_qr, self.required_params)
@@ -167,7 +168,8 @@ class QrVcardView(BaseQrView): # TODO: URL 제외 모든 QR코드 생성에 대�
     
     @qr_swagger_decorator(
         "VCard QR Code",
-        VCardQRSerializer
+        VCardQRSerializer,
+        description="Convert contact information to VCard format QR code. Include name, phone number, email, etc. to automatically save contact information when scanned."
     )
     def post(self, request):
         return self.handle_qr_generation(request, generate_vcard_qr, self.required_params)
@@ -178,7 +180,8 @@ class QrEmailView(BaseQrView):
     
     @qr_swagger_decorator(
         "Email QR Code",
-        EmailQRSerializer
+        EmailQRSerializer,
+        description="Generate a QR code for an email address, subject, and body. When scanned, an email client opens and you can write an email with the specified recipient, subject, and body."
     )
     def post(self, request):
         return self.handle_qr_generation(request, generate_email_qr, self.required_params)
@@ -190,7 +193,8 @@ class QrTextView(BaseQrView):
     
     @qr_swagger_decorator(
         "Text QR Code",
-        TextQRSerializer
+        TextQRSerializer,
+        description="Convert general text to QR code. Encode text, memo, message, etc. to QR code, and display text when scanned."
     )
     def post(self, request):
         return self.handle_qr_generation(request, generate_text_qr, self.required_params)
@@ -202,7 +206,8 @@ class QrPhoneNumberView(BaseQrView):
     
     @qr_swagger_decorator(
         "Phone Number QR Code",
-        PhoneQRSerializer
+        PhoneQRSerializer,
+        description="Convert phone number to QR code. When scanned, you can call the specified phone number directly."
     )
     def post(self, request):
         return self.handle_qr_generation(request, generate_phone_qr, self.required_params)
@@ -214,7 +219,8 @@ class QrWifiView(BaseQrView):
     
     @qr_swagger_decorator(
         "WiFi QR Code",
-        WiFiQRSerializer
+        WiFiQRSerializer,
+        description="Convert WiFi network information to QR code. Include SSID, password, encryption method, etc. to automatically connect to WiFi when scanned."
     )
     def post(self, request):
         return self.handle_qr_generation(request, generate_wifi_qr, self.required_params)
@@ -226,7 +232,8 @@ class QrSmsView(BaseQrView):
     
     @qr_swagger_decorator(
         "SMS QR Code",
-        SMSQRSerializer
+        SMSQRSerializer,
+        description="Convert SMS message to QR code. Include phone number and message content to send a message to the specified number when scanned."
     )
     def post(self, request):
         return self.handle_qr_generation(request, generate_sms_qr, self.required_params)
@@ -238,7 +245,8 @@ class QrGeoView(BaseQrView):
     
     @qr_swagger_decorator(
         "Geolocation QR Code",
-        GeoQRSerializer
+        GeoQRSerializer,
+        description="Convert geolocation information to QR code. Include latitude, longitude, zoom level, etc. to display the location on a map app when scanned."
     )
     def post(self, request):
         return self.handle_qr_generation(request, generate_geo_qr, self.required_params)
@@ -250,7 +258,8 @@ class QrEventView(BaseQrView):
     
     @qr_swagger_decorator(
         "Event QR Code",
-        EventQRSerializer
+        EventQRSerializer,
+        description="Convert event information to QR code. Include title, start/end time, location, description, etc. to add an event to a calendar app when scanned."
     )
     def post(self, request):
         return self.handle_qr_generation(request, generate_event_qr, self.required_params)
@@ -262,7 +271,8 @@ class QrMeCardView(BaseQrView):
     
     @qr_swagger_decorator(
         "MECARD QR Code",
-        MeCardQRSerializer
+        MeCardQRSerializer,
+        description="Convert contact information to MECARD format QR code. Include name, phone number, email, address, etc. to automatically save contact information when scanned."
     )
     def post(self, request):
         return self.handle_qr_generation(request, generate_mecard_qr, self.required_params)
@@ -274,7 +284,8 @@ class QrWhatsAppView(BaseQrView):
     
     @qr_swagger_decorator(
         "WhatsApp QR Code",
-        WhatsAppQRSerializer
+        WhatsAppQRSerializer,
+        description="Convert WhatsApp message to QR code. Include phone number and message content to send a message to the specified number when scanned."
     )
     def post(self, request):
         return self.handle_qr_generation(request, generate_whatsapp_qr, self.required_params)
@@ -286,7 +297,8 @@ class QrBitcoinView(BaseQrView):
     
     @qr_swagger_decorator(
         "Bitcoin Payment QR Code",
-        BitcoinQRSerializer
+        BitcoinQRSerializer,
+        description="Convert Bitcoin payment information to QR code. Include Bitcoin address, amount, label, message, etc. to proceed with payment in a Bitcoin wallet app when scanned."
     )
     def post(self, request):
         return self.handle_qr_generation(request, generate_bitcoin_qr, self.required_params)

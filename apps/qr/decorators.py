@@ -9,12 +9,12 @@ def qr_swagger_decorator(operation_id, serializer_class, tags=["QR Code"], descr
     if description is None:
         description = ""
     description += f"""
-    style: {QRStyles.get_all_styles()}
-    color_mask: {QRColorMasks.get_all_color_masks()}
-    fill_color: #000000 or black or rgb(0,0,0)
-    back_color: #FFFFFF or white or rgb(255,255,255)
-    embedded_image: Image file
-    embedded_image_ratio: 0.2
+    - `style`: {QRStyles.get_all_styles()}
+    - `color_mask`: {QRColorMasks.get_all_color_masks()}
+    - `fill_color`: #000000 or black or rgb(0,0,0)
+    - `back_color`: #FFFFFF or white or rgb(255,255,255)
+    - `embedded_image`: Image file
+    - `embedded_image_ratio`: 0.2 (0.1-0.5)
     """
     def decorator(func):
         # 시리얼라이저의 필드들을 스키마로 변환
@@ -86,7 +86,7 @@ def qr_swagger_decorator(operation_id, serializer_class, tags=["QR Code"], descr
 
         return swagger_auto_schema(
             operation_id=operation_id,
-            description=description,
+            operation_description=description,
             request_body=openapi.Schema(
                 type=openapi.TYPE_OBJECT,
                 properties={**serializer_fields, **common_properties},
