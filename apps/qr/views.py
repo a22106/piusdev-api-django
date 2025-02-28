@@ -105,7 +105,11 @@ class BaseQrView(CreateAPIView):
                 )
 
             # 요청 파라미터 준비
-            generator_params = {k: request.data.get(k) for k in required_params}
+            generator_params = {}
+            for key, value in request.data.items():
+                # QueryDict에서 각 값의 첫 번째 항목만 사용
+                generator_params[key] = value[0] if isinstance(value, list) else value
+            
             generator_params['embedded_image'] = embedded_image
 
             # 파라미터 로깅

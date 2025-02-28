@@ -1,3 +1,4 @@
+# apps/qr/urls.py
 from django.conf import settings
 from django.urls import path
 from .views import (
@@ -14,8 +15,6 @@ from .views import (
     QrWhatsAppView,
     QrBitcoinView,
 )
-
-
 
 app_name = "qr"
 

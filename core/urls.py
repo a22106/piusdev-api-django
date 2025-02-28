@@ -1,3 +1,4 @@
+# core/urls.py
 from core import settings
 from django.contrib import admin
 from django.urls import path, include, re_path
@@ -9,9 +10,9 @@ from django.conf.urls.static import static
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="QR Code Generator API",
+        title="PiusDev API",
         default_version="v0.0.1",
-        description="A simple QR Code generator API",
+        description="A simple API documentation for PiusDev Projects",
         contact=openapi.Contact(email="piushwang@piusdev.com"),
         license=openapi.License(name="BSD License"),
     ),

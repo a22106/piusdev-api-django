@@ -1,3 +1,4 @@
+# core/settings.py
 from datetime import timedelta
 import os
 import random
@@ -326,6 +327,10 @@ if 'pytest' in sys.argv[0]:
     STATIC_URL = '/static/'
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
     STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+    
+    # 테스트 시 미디어 파일 설정
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
     
     # 테스트 시 보안 설정 완화
     PASSWORD_HASHERS = [
