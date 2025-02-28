@@ -77,6 +77,7 @@ def _convert_color_to_rgb(color: str) -> tuple:
     """문자열 색상을 RGB 튜플로 변환. 색상명 ('red', 'blue')과 16진수 값 ('#FF0000')을 지원."""
     # ImageColor.getrgb는 'red', '#FF0000' 같은 색상명을 RGB 튜플로 변환
 
+    logger.debug(f"Converting color: {color} to RGB")
     return ImageColor.getrgb(color)
 
 
