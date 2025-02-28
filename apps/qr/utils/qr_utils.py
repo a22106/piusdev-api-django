@@ -89,13 +89,13 @@ def create_qr_code(
     back_color: str = "white",
     style: Type[QRStyles] = QRStyles.SQUARE_MODULE,
     color_mask: Type[QRColorMasks] = QRColorMasks.SOLID_FILL,
-    embedded_image: Image = None,
-    embedded_image_ratio: float = 0.25
+    embeded_image: Image = None,
+    embeded_image_ratio: float = 0.25
 ) -> bytes:
     try:
         qr = QRCode(
             version=version,
-            error_correction=ERROR_CORRECT_H if embedded_image else error_correction,
+            error_correction=ERROR_CORRECT_H if embeded_image else error_correction,
             box_size=10,
             border=4,
         )
@@ -140,8 +140,8 @@ def create_qr_code(
             image_factory=StyledPilImage,
             module_drawer=module_drawer,
             color_mask=color_mask_instance,
-            embedded_image=embedded_image,
-            embedded_image_ratio=embedded_image_ratio if embedded_image else 0,
+            embeded_image=embeded_image,
+            embeded_image_ratio=float(embeded_image_ratio) if embeded_image else 0,
         )
 
         # 이미지를 바이트로 변환
@@ -179,8 +179,8 @@ def generate_url_qr(
         fill_color=fill_color,
         back_color=back_color,
         color_mask=color_mask,
-        embedded_image=embedded_image,
-        embedded_image_ratio=embedded_image_ratio
+        embeded_image=embedded_image,
+        embeded_image_ratio=embedded_image_ratio
     )
 
 
@@ -219,8 +219,8 @@ def generate_email_qr(
         fill_color=fill_color,
         back_color=back_color,
         color_mask=color_mask,
-        embedded_image=embedded_image,
-        embedded_image_ratio=embedded_image_ratio
+        embeded_image=embedded_image,
+        embeded_image_ratio=embedded_image_ratio
     )
 
 
@@ -258,8 +258,8 @@ def generate_text_qr(
         back_color=back_color,
         color_mask=color_mask,
         error_correction=ERROR_CORRECT_H if embedded_image else ERROR_CORRECT_L,
-        embedded_image=embedded_image,
-        embedded_image_ratio=embedded_image_ratio
+        embeded_image=embedded_image,
+        embeded_image_ratio=embedded_image_ratio
     )
 
 
@@ -287,8 +287,8 @@ def generate_phone_qr(
         fill_color=fill_color,
         back_color=back_color,
         color_mask=color_mask,
-        embedded_image=embedded_image,
-        embedded_image_ratio=embedded_image_ratio
+        embeded_image=embedded_image,
+        embeded_image_ratio=embedded_image_ratio
     )
 
 
@@ -362,8 +362,8 @@ def generate_vcard_qr(
             fill_color=fill_color,
             back_color=back_color,
             color_mask=color_mask,
-            embedded_image=embedded_image,
-            embedded_image_ratio=embedded_image_ratio
+            embeded_image=embedded_image,
+            embeded_image_ratio=embedded_image_ratio
         )
     except Exception as e:
         logger.error(f"Error creating VCard QR Code: {e}")
@@ -433,8 +433,8 @@ def generate_wifi_qr(
             fill_color=fill_color,
             back_color=back_color,
             color_mask=color_mask,
-            embedded_image=embedded_image,
-            embedded_image_ratio=embedded_image_ratio
+            embeded_image=embedded_image,
+            embeded_image_ratio=embedded_image_ratio
         )
     except Exception as e:
         logger.error(f"Error creating WiFi QR Code: {e}")
@@ -481,8 +481,8 @@ def generate_sms_qr(
             fill_color=fill_color,
             back_color=back_color,
             color_mask=color_mask,
-            embedded_image=embedded_image,
-            embedded_image_ratio=embedded_image_ratio
+            embeded_image=embedded_image,
+            embeded_image_ratio=embedded_image_ratio
         )
     except Exception as e:
         logger.error(f"Error creating SMS QR Code: {e}")
@@ -527,8 +527,8 @@ def generate_geo_qr(
             fill_color=fill_color,
             back_color=back_color,
             color_mask=color_mask,
-            embedded_image=embedded_image,
-            embedded_image_ratio=embedded_image_ratio
+            embeded_image=embedded_image,
+            embeded_image_ratio=embedded_image_ratio
         )
     except Exception as e:
         logger.error(f"Error creating Geo QR Code: {e}")
@@ -573,8 +573,8 @@ def generate_event_qr(
             fill_color=fill_color,
             back_color=back_color,
             color_mask=color_mask,
-            embedded_image=embedded_image,
-            embedded_image_ratio=embedded_image_ratio
+            embeded_image=embedded_image,
+            embeded_image_ratio=embedded_image_ratio
         )
     except Exception as e:
         logger.error(f"Error creating Event QR Code: {e}")
@@ -626,8 +626,8 @@ def generate_mecard_qr(
             fill_color=fill_color,
             back_color=back_color,
             color_mask=color_mask,
-            embedded_image=embedded_image,
-            embedded_image_ratio=embedded_image_ratio
+            embeded_image=embedded_image,
+            embeded_image_ratio=embedded_image_ratio
         )
     except Exception as e:
         logger.error(f"Error creating MECARD QR Code: {e}")
@@ -663,8 +663,8 @@ def generate_whatsapp_qr(phone_number: str, message: str = "",
             fill_color=fill_color,
             back_color=back_color,
             color_mask=color_mask,
-            embedded_image=embedded_image,
-            embedded_image_ratio=embedded_image_ratio
+            embeded_image=embedded_image,
+            embeded_image_ratio=embedded_image_ratio
         )
     except Exception as e:
         logger.error(f"Error creating WhatsApp QR Code: {e}")
@@ -708,8 +708,8 @@ def generate_bitcoin_qr(
             fill_color=fill_color,
             back_color=back_color,
             color_mask=color_mask,
-            embedded_image=embedded_image,
-            embedded_image_ratio=embedded_image_ratio
+            embeded_image=embedded_image,
+            embeded_image_ratio=embedded_image_ratio
         )
     except Exception as e:
         logger.error(f"Error creating Bitcoin QR Code: {e}")
