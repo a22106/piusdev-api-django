@@ -1,3 +1,4 @@
+# core/settings.py
 from datetime import timedelta
 import os
 import random
@@ -493,3 +494,5 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
+
+APPEND_SLASH = False
